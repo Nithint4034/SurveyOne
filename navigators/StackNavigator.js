@@ -19,6 +19,7 @@ function StackNavigator() {
       <Stack.Screen 
         name="MapDetails" 
         component={MapDetailsScreen} 
+        options={{ title: 'Enter Plot Details' }}
       />
     </Stack.Navigator>
   );

@@ -1,13 +1,363 @@
-// screens/MapDetailsScreen.js
-import React from 'react';
-import { View, Text } from 'react-native';
+// // screens/MapDetailsScreen.js
+// import React from 'react';
+// import { View, Text } from 'react-native';
 
-function MapDetailsScreen() {
+// function MapDetailsScreen() {
+//   return (
+//     <View>
+//       <Text>Map Details Screen</Text>
+//     </View>
+//   );
+// }
+
+// export default MapDetailsScreen;
+
+
+
+// import React from 'react';
+// import { View, Text, StyleSheet } from 'react-native';
+
+// export default function MapDetailsScreen({ route }) {
+//   const { latitude, longitude } = route.params;  // Get latitude and longitude from route params
+
+//   return (
+//     <View style={styles.container}>
+//       <Text>Latitude: {latitude}</Text>
+//       <Text>Longitude: {longitude}</Text>
+//     </View>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+// });
+
+
+
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+
+const MapDetailsScreen = ({ route, navigation }) => {
+  const { latitude, longitude } = route.params || {};
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [currentDropdownField, setCurrentDropdownField] = useState(null);
+  const [dropdownOptions, setDropdownOptions] = useState([]);
+  const [dropdownCallback, setDropdownCallback] = useState(null);
+
+  // Form data state
+  const [formData, setFormData] = useState({
+    uid: '',
+    district: '',
+    tehsil: '',
+    villageName: '',
+    sector: '',
+    khasraNo: '',
+    acquiredArea: '',
+    landOwner: '',
+    compensationAmount: '',
+    compensationDate: '',
+    leaseBackStatus: '',
+    leaseBackArea: '',
+    plotNo: '',
+    plotSize: '',
+    allotmentStatus: '',
+    allotteeName: '',
+    landUse: '',
+    physicalCondition: '',
+    encroachmentStatus: '',
+    latitude: '',
+    longitude: '',
+    photo: '',
+    remarks: '',
+  });
+
+  const handleInputChange = (fieldName, value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [fieldName]: value,
+    }));
+  };
+
+  const handleDropdownSelect = (field, options, callback) => {
+    setCurrentDropdownField(field);
+    setDropdownOptions(options);
+    setDropdownCallback(() => callback);
+    setDropdownVisible(true); // Show dropdown modal
+  };
+
+  const handleOptionSelect = (value) => {
+    if (dropdownCallback) {
+      dropdownCallback(value);
+    }
+    setDropdownVisible(false); // Close dropdown modal
+  };
+
+  const handleSubmit = () => {
+    console.log('Form Data Submitted:', formData);
+    alert('Form submitted successfully!'); // Add a success message
+  };
+
   return (
-    <View>
-      <Text>Map Details Screen</Text>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.formContainer}>
+        {/* General Info */}
+        <TextInput
+          style={styles.input}
+          placeholder="UID No."
+          value={formData.uid}
+          onChangeText={(value) => handleInputChange('uid', value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="District"
+          value={formData.district}
+          onChangeText={(value) => handleInputChange('district', value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Tehsil"
+          value={formData.tehsil}
+          onChangeText={(value) => handleInputChange('tehsil', value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Village Name"
+          value={formData.villageName}
+          onChangeText={(value) => handleInputChange('villageName', value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Sector"
+          value={formData.sector}
+          onChangeText={(value) => handleInputChange('sector', value)}
+        />
+
+        {/* Land Details */}
+        <Text style={styles.sectionTitle}>Land Details</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Khasra No"
+          value={formData.khasraNo}
+          onChangeText={(value) => handleInputChange('khasraNo', value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Acquired Area In Hectare"
+          value={formData.acquiredArea}
+          onChangeText={(value) => handleInputChange('acquiredArea', value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Name of Land Owner"
+          value={formData.landOwner}
+          onChangeText={(value) => handleInputChange('landOwner', value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Compensation Amount"
+          value={formData.compensationAmount}
+          onChangeText={(value) => handleInputChange('compensationAmount', value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Compensation Date"
+          value={formData.compensationDate}
+          onChangeText={(value) => handleInputChange('compensationDate', value)}
+        />
+
+        {/* Lease Back */}
+        <Text style={styles.sectionTitle}>Lease Back</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Lease Back Status"
+          value={formData.leaseBackStatus}
+          onChangeText={(value) => handleInputChange('leaseBackStatus', value)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Lease Back Area"
+          value={formData.leaseBackArea}
+          onChangeText={(value) => handleInputChange('leaseBackArea', value)}
+        />
+
+        {/* Planning Details */}
+        <Text style={styles.sectionTitle}>Planning Details</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Plot No"
+          value={formData.plotNo}
+          onChangeText={(value) => handleInputChange('plotNo', value)}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Plot Size SQM"
+          value={formData.plotSize}
+          onChangeText={(value) => handleInputChange('plotSize', value)}
+        />
+
+        <TouchableOpacity
+          style={styles.dropdownInput}
+          onPress={() =>
+            handleDropdownSelect(
+              'Alotment Status',
+              ['Yes', 'No'],
+              (value) => handleInputChange('allotmentStatus', value)
+            )
+          }
+        >
+          <Text>{formData.allotmentStatus || 'Select Alotment Status [ Yes / No ]'}</Text>
+        </TouchableOpacity>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Allotee Name"
+          value={formData.allotteeName}
+          onChangeText={(value) => handleInputChange('allotteeName', value)}
+        />
+
+        {/* Dropdown for Physical Condition */}
+        <TouchableOpacity
+          style={styles.dropdownInput}
+          onPress={() =>
+            handleDropdownSelect(
+              'Physical Condition',
+              ['Builtup', 'Vacant'],
+              (value) => handleInputChange('physicalCondition', value)
+            )
+          }
+        >
+          <Text>{formData.physicalCondition || 'Select [ Builtup / Vacant ]'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.dropdownInput}
+          onPress={() =>
+            handleDropdownSelect(
+              'Encroachment Status',
+              ['Encroachment', 'Vacant', 'Unplanned'],
+              (value) => handleInputChange('encroachmentStatus', value)
+            )
+          }
+        >
+          <Text>{formData.encroachmentStatus || 'Select [ Encroachment / Vacant / Unplanned ]'}</Text>
+        </TouchableOpacity>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Latitude"
+          value={`Latitude: ${formData.latitude}`}  // Display autofilled latitude
+          editable={false}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Longitude"
+          value={`Longitude: ${formData.longitude}`}  // Display autofilled longitude
+          editable={false}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Photography of Plot"
+          value={formData.photo}
+          onChangeText={(value) => handleInputChange('photo', value)}
+        />
+
+        {/* Remarks */}
+        <TextInput
+          style={styles.input}
+          placeholder="Remarks"
+          value={formData.remarks}
+          onChangeText={(value) => handleInputChange('remarks', value)}
+        />
+
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>Submit</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* Dropdown Modal */}
+      {dropdownVisible && (
+        <View style={styles.dropdownContainer}>
+          <View style={styles.dropdownModal}>
+            {dropdownOptions.map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.optionButton}
+                onPress={() => handleOptionSelect(option)}
+              >
+                <Text>{option}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
     </View>
   );
-}
+};
+
+const styles = {
+  container: {
+    flex: 1,
+    padding: 10,
+  },
+  formContainer: {
+    paddingBottom: 20,
+  },
+  input: {
+    height: 50,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingLeft: 10,
+    borderRadius: 5,
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  dropdownInput: {
+    height: 50,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingLeft: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
+  },
+  submitButton: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    alignItems: 'center',
+    borderRadius: 5,
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  dropdownContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownModal: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 5,
+  },
+  optionButton: {
+    padding: 10,
+  },
+};
 
 export default MapDetailsScreen;
