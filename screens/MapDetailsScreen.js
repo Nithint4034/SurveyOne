@@ -39,7 +39,11 @@
 
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+
+
 
 const MapDetailsScreen = ({ route, navigation }) => {
   const { latitude, longitude } = route.params || {};
@@ -47,6 +51,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
   const [currentDropdownField, setCurrentDropdownField] = useState(null);
   const [dropdownOptions, setDropdownOptions] = useState([]);
   const [dropdownCallback, setDropdownCallback] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   // Form data state
   const [formData, setFormData] = useState({
@@ -69,8 +74,8 @@ const MapDetailsScreen = ({ route, navigation }) => {
     landUse: '',
     physicalCondition: '',
     encroachmentStatus: '',
-    latitude: '',
-    longitude: '',
+    latitude: latitude || '',
+    longitude: longitude || '',
     photo: '',
     remarks: '',
   });
@@ -99,6 +104,44 @@ const MapDetailsScreen = ({ route, navigation }) => {
   const handleSubmit = () => {
     console.log('Form Data Submitted:', formData);
     alert('Form submitted successfully!'); // Add a success message
+  };
+
+  const launchCamera = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert('Permission Required', 'Camera access is needed to take photos.');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [3, 4],
+      quality: 1,
+    });
+
+    console.log('Camera result:', result); // Debugging the result
+
+    if (!result.canceled) {
+      const uri = result.assets && result.assets[0]?.uri; // Safely access the URI
+      console.log('Image URI:', uri);
+      setSelectedImage(uri); // Store the image URI
+    } else {
+      console.log('Camera was canceled');
+    }
+  };
+
+
+  // Confirm and delete the photo
+  const confirmDeletePhoto = () => {
+    Alert.alert(
+      'Delete Photo',
+      'Are you sure you want to delete this photo?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => setSelectedImage(null) },
+      ]
+    );
   };
 
   return (
@@ -258,13 +301,23 @@ const MapDetailsScreen = ({ route, navigation }) => {
           value={`Longitude: ${formData.longitude}`}  // Display autofilled longitude
           editable={false}
         />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Photography of Plot"
-          value={formData.photo}
-          onChangeText={(value) => handleInputChange('photo', value)}
-        />
+        <Text style={styles.sectionTitle}>Add Pgotograph of Plot</Text>
+        <View style={styles.container}>
+          {/* Image Preview */}
+          {selectedImage ? (
+            <View style={styles.imageContainer}>
+              <Image source={{ uri: selectedImage }} style={styles.image} />
+              <TouchableOpacity style={styles.deleteButton} onPress={confirmDeletePhoto}>
+                <Ionicons name="trash" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            // Plus Button to Launch Camera
+            <TouchableOpacity style={styles.addButton} onPress={launchCamera}>
+              <Ionicons name="add" size={36} color="#fff" />
+            </TouchableOpacity>
+          )}
+        </View>
 
         {/* Remarks */}
         <TextInput
@@ -357,6 +410,33 @@ const styles = {
   },
   optionButton: {
     padding: 10,
+  },
+  imageContainer: {
+    position: 'relative',
+    width: 100,
+    height: 166, // 3:4 Aspect Ratio
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 0, 0, 0.7)',
+    padding: 8,
+    borderRadius: 20,
+  },
+  addButton: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#007BFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    elevation: 3,
   },
 };
 

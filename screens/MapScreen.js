@@ -19,7 +19,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker,PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 
 export default function MapScreen({ navigation }) {
@@ -49,6 +49,7 @@ export default function MapScreen({ navigation }) {
       {location && (
         <MapView
           style={styles.map}
+          provider={PROVIDER_GOOGLE}
           region={{
             latitude: location.latitude,
             longitude: location.longitude,

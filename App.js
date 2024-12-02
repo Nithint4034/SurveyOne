@@ -30,6 +30,7 @@ export default function App() {
   };
 
   return (
+    
       <NavigationContainer>
         <StatusBar backgroundColor="#074173" barStyle="light-content" />
         <StackNavigator />
