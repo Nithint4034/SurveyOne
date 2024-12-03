@@ -223,7 +223,7 @@ const MapDetailsScreen = ({ route }) => {
           value={`Longitude: ${formData.longitude}`}  // Display autofilled longitude
           editable={false}
         />
-        <Text style={styles.sectionTitle}>Add Pgotograph of Plot</Text>
+        <Text style={styles.sectionTitle}>Add Photograph of Plot</Text>
         <View style={styles.container}>
           {/* Image Preview */}
           {selectedImage ? (
@@ -339,7 +339,7 @@ const styles = {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#007BFF',
+    backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5, // Subtle shadow
@@ -347,6 +347,8 @@ const styles = {
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
+    marginBottom:18,
+    marginTop:-10
   },
 };
 

@@ -8,6 +8,7 @@ import {
     View,
     TouchableOpacity,
     StatusBar,
+    Image,
 } from 'react-native';
 import { useLogin } from '../context/LoginProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -76,14 +77,25 @@ const Signin = () => {
 
     return (
         <ImageBackground
-            source={require('../assets/UILand.png')} // Replace with your actual image path
+            source={require('../assets/UILand.png')} 
             style={styles.root}
             resizeMode="cover"
         >
-            <StatusBar backgroundColor="transparent" />
+            <StatusBar backgroundColor="transparent" barStyle="dark-content" translucent />
             {showComponent === 'register' && <Register setShowComponent={setShowComponent} />}
             {!showComponent && (
                 <View style={styles.container}>
+                    {/* Add a container for the icons */}
+                    <View style={styles.iconsContainer}>
+                        <View style={styles.iconView}>
+                            <Image source={require('../assets/Log1.png')} style={styles.icon1} />
+                        </View>
+                        <View style={styles.iconView}>
+                            <Image source={require('../assets/Log2.png')} style={styles.icon2} />
+                        </View>
+                    </View>
+
+                    <Text style={styles.title}>Application for Unallotted Plot D2D Survey</Text>
                     <TextInput
                         style={styles.input}
                         placeholder="Email"
@@ -120,7 +132,27 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: StatusBar.currentHeight, 
+        paddingTop: StatusBar.currentHeight,
+    },
+    iconsContainer: {
+        flexDirection: 'row', // Align views side by side
+        justifyContent: 'space-between', // Distribute space between the icons
+        alignItems: 'center', // Align vertically
+        marginBottom: 20, // Add spacing between icons and title
+        width: '80%', // Limit width to 80% to avoid overflow
+    },
+    iconView: {
+        flex: 1, // Make each icon view take equal width
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    icon1: {
+        width: 115, // Set icon width
+        height: 80, // Set icon height
+    },
+    icon2: {
+        width: 75, // Set icon width
+        height: 80, // Set icon height
     },
     input: {
         width: '80%',
@@ -129,7 +161,7 @@ const styles = StyleSheet.create({
         borderWidth: 1.2,
         borderColor: 'black',
         borderRadius: 8,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)', 
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
     },
     error: {
         color: 'red',
@@ -144,6 +176,13 @@ const styles = StyleSheet.create({
     link: {
         color: 'blue',
         textDecorationLine: 'underline',
+    },
+    title: {
+        marginBottom: 18,
+        fontSize: 19,
+        fontWeight: 'bold',
+        color: '#074173',
+        textAlign: 'center',
     },
 });
 

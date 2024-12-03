@@ -8,6 +8,7 @@ import {
     TextInput,
     TouchableOpacity,
     StatusBar,
+    Image,
 } from 'react-native';
 import axios from 'axios';
 
@@ -78,8 +79,19 @@ const Register = ({ setShowComponent }) => {
             style={styles.root}
             resizeMode="cover"
         >
-            <StatusBar translucent backgroundColor="transparent" />
+            <StatusBar backgroundColor="transparent" barStyle="dark-content" translucent />
             <View style={styles.container}>
+                {/* Icons Container */}
+                <View style={styles.iconsContainer}>
+                    <View style={styles.iconView}>
+                        <Image source={require('../assets/Log1.png')} style={styles.icon1} />
+                    </View>
+                    <View style={styles.iconView}>
+                        <Image source={require('../assets/Log2.png')} style={styles.icon2} />
+                    </View>
+                </View>
+
+                <Text style={styles.title}>Application for Unallotted Plot D2D Survey</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="User Name"
@@ -140,8 +152,28 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: StatusBar.currentHeight, 
+        paddingTop: StatusBar.currentHeight,
     },
+    iconsContainer: {
+        flexDirection: 'row', // Align icons side by side
+        justifyContent: 'space-between', // Space between icons
+        alignItems: 'center', // Vertically align icons
+        marginBottom: 20, // Space between icons and the form
+        width: '80%', // Limit width of the icon container
+    },
+    iconView: {
+        flex: 1, // Equal space for both icons
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    icon1: {
+        width: 115, // Set icon width
+        height: 80, // Set icon height
+    },
+    icon2: {
+        width: 75, // Set icon width
+        height: 80, // Set icon height
+    },  
     input: {
         width: '80%',
         marginBottom: 10,
@@ -149,7 +181,7 @@ const styles = StyleSheet.create({
         borderWidth: 1.2,
         borderColor: 'black',
         borderRadius: 8,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)', 
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
     },
     error: {
         color: 'red',
@@ -164,6 +196,13 @@ const styles = StyleSheet.create({
     link: {
         color: 'blue',
         textDecorationLine: 'underline',
+    },
+    title: {
+        marginBottom: 18,
+        fontSize: 19,
+        fontWeight: 'bold',
+        color: '#074173',
+        textAlign: 'center',
     },
 });
 

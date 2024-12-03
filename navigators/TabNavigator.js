@@ -20,7 +20,7 @@ function TabNavigator() {
           ),
         }} 
       />
-      {/* <Tab.Screen 
+      <Tab.Screen 
         name="Dashboard" 
         component={DashboardScreen} 
         options={{
@@ -28,7 +28,7 @@ function TabNavigator() {
             <Icon name="stats-chart-outline" color={color} size={size} />  // Icon for dashboard
           ),
         }} 
-      /> */}
+      />
       <Tab.Screen 
         name="Profile" 
         component={ProfileScreen} 
