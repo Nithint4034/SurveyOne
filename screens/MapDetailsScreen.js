@@ -1,56 +1,10 @@
-// // screens/MapDetailsScreen.js
-// import React from 'react';
-// import { View, Text } from 'react-native';
-
-// function MapDetailsScreen() {
-//   return (
-//     <View>
-//       <Text>Map Details Screen</Text>
-//     </View>
-//   );
-// }
-
-// export default MapDetailsScreen;
-
-
-
-// import React from 'react';
-// import { View, Text, StyleSheet } from 'react-native';
-
-// export default function MapDetailsScreen({ route }) {
-//   const { latitude, longitude } = route.params;  // Get latitude and longitude from route params
-
-//   return (
-//     <View style={styles.container}>
-//       <Text>Latitude: {latitude}</Text>
-//       <Text>Longitude: {longitude}</Text>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-// });
-
-
-
 import React, { useState } from 'react';
 import { View, Text, Image, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
-
-
-const MapDetailsScreen = ({ route, navigation }) => {
+const MapDetailsScreen = ({ route }) => {
   const { latitude, longitude } = route.params || {};
-  const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [currentDropdownField, setCurrentDropdownField] = useState(null);
-  const [dropdownOptions, setDropdownOptions] = useState([]);
-  const [dropdownCallback, setDropdownCallback] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
 
   // Form data state
@@ -85,20 +39,6 @@ const MapDetailsScreen = ({ route, navigation }) => {
       ...prevData,
       [fieldName]: value,
     }));
-  };
-
-  const handleDropdownSelect = (field, options, callback) => {
-    setCurrentDropdownField(field);
-    setDropdownOptions(options);
-    setDropdownCallback(() => callback);
-    setDropdownVisible(true); // Show dropdown modal
-  };
-
-  const handleOptionSelect = (value) => {
-    if (dropdownCallback) {
-      dropdownCallback(value);
-    }
-    setDropdownVisible(false); // Close dropdown modal
   };
 
   const handleSubmit = () => {
@@ -243,18 +183,12 @@ const MapDetailsScreen = ({ route, navigation }) => {
           onChangeText={(value) => handleInputChange('plotSize', value)}
         />
 
-        <TouchableOpacity
-          style={styles.dropdownInput}
-          onPress={() =>
-            handleDropdownSelect(
-              'Alotment Status',
-              ['Yes', 'No'],
-              (value) => handleInputChange('allotmentStatus', value)
-            )
-          }
-        >
-          <Text>{formData.allotmentStatus || 'Select Alotment Status [ Yes / No ]'}</Text>
-        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Alotment Status : Yes / No"
+          value={formData.plotSize}
+          onChangeText={(value) => handleInputChange('allotmentStatus', value)}
+        />
 
         <TextInput
           style={styles.input}
@@ -263,40 +197,35 @@ const MapDetailsScreen = ({ route, navigation }) => {
           onChangeText={(value) => handleInputChange('allotteeName', value)}
         />
 
-        {/* Dropdown for Physical Condition */}
-        <TouchableOpacity
-          style={styles.dropdownInput}
-          onPress={() =>
-            handleDropdownSelect(
-              'Physical Condition',
-              ['Builtup', 'Vacant'],
-              (value) => handleInputChange('physicalCondition', value)
-            )
-          }
-        >
-          <Text>{formData.physicalCondition || 'Select [ Builtup / Vacant ]'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.dropdownInput}
-          onPress={() =>
-            handleDropdownSelect(
-              'Encroachment Status',
-              ['Encroachment', 'Vacant', 'Unplanned'],
-              (value) => handleInputChange('encroachmentStatus', value)
-            )
-          }
-        >
-          <Text>{formData.encroachmentStatus || 'Select [ Encroachment / Vacant / Unplanned ]'}</Text>
-        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Landuse (Plot Type)"
+          value={formData.allotteeName}
+          onChangeText={(value) => handleInputChange('landuse', value)}
+        />
+        <Text style={styles.sectionTitle}>Physical Condition</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Builtup / Vacant"
+          value={formData.allotteeName}
+          onChangeText={(value) => handleInputChange('physicalCondition', value)}
+        />
 
         <TextInput
           style={styles.input}
+          placeholder="Encroachment / Vacant / Unplanned"
+          value={formData.allotteeName}
+          onChangeText={(value) => handleInputChange('encroachmentStatus', value)}
+        />
+
+        <TextInput
+          style={[styles.input, { color: 'gray' }]}
           placeholder="Latitude"
           value={`Latitude: ${formData.latitude}`}  // Display autofilled latitude
           editable={false}
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, { color: 'gray' }]}
           placeholder="Longitude"
           value={`Longitude: ${formData.longitude}`}  // Display autofilled longitude
           editable={false}
@@ -332,22 +261,6 @@ const MapDetailsScreen = ({ route, navigation }) => {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Dropdown Modal */}
-      {dropdownVisible && (
-        <View style={styles.dropdownContainer}>
-          <View style={styles.dropdownModal}>
-            {dropdownOptions.map((option, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.optionButton}
-                onPress={() => handleOptionSelect(option)}
-              >
-                <Text>{option}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      )}
     </View>
   );
 };
@@ -432,11 +345,15 @@ const styles = {
   addButton: {
     width: 40,
     height: 40,
+    borderRadius: 20,
     backgroundColor: '#007BFF',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 20,
-    elevation: 3,
+    elevation: 5, // Subtle shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
   },
 };
 

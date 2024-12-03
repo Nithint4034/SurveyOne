@@ -1,53 +1,46 @@
-// App.js
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import StackNavigator from './navigators/StackNavigator';
 import { StatusBar } from 'expo-status-bar';
-import { View, StyleSheet, Image } from 'react-native';
+import { StyleSheet, ImageBackground } from 'react-native';
+import LoginProvider from './context/LoginProvider';
+import AppNavigator from './navigators/AppNavigator';
 
 export default function App() {
   const [splash, setSplash] = useState(true);
 
   useEffect(() => {
-    // Simulating a delay for splash screen
     const timer = setTimeout(() => {
       setSplash(false);
-    }, 3000); // Adjust the duration as needed
+    }, 3000); 
     return () => clearTimeout(timer);
   }, []);
 
   if (splash) {
     return (
-      <View style={styles.container}>
-        <StatusBar backgroundColor="#074173" barStyle="light-content" />
-        <Image
-          source={require("./assets/splash-icon.png")}
-          style={styles.splashImage}
-          resizeMode="contain"
-        />
-      </View>
+      <ImageBackground
+        source={require('./assets/UISplash.png')}
+        style={styles.splashBackground}
+        resizeMode="cover"
+      >
+        <StatusBar backgroundColor="transparent" />
+      </ImageBackground>
     );
-  };
+  }
 
   return (
-    
+    <LoginProvider>
       <NavigationContainer>
-        <StatusBar backgroundColor="#074173" barStyle="light-content" />
-        <StackNavigator />
+        <StatusBar backgroundColor="transparent" />
+        <AppNavigator />
       </NavigationContainer>
+    </LoginProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  splashBackground: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  splashImage: {
-    width: "100%",
-    height: "200%",
-    marginTop: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
