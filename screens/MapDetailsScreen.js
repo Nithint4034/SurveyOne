@@ -9,7 +9,6 @@ const MapDetailsScreen = ({ route }) => {
 
   // Form data state
   const [formData, setFormData] = useState({
-    uid: '',
     district: '',
     tehsil: '',
     villageName: '',
@@ -88,12 +87,6 @@ const MapDetailsScreen = ({ route }) => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.formContainer}>
         {/* General Info */}
-        <TextInput
-          style={styles.input}
-          placeholder="UID No."
-          value={formData.uid}
-          onChangeText={(value) => handleInputChange('uid', value)}
-        />
         <TextInput
           style={styles.input}
           placeholder="District"

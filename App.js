@@ -6,6 +6,7 @@ import LoginProvider from './context/LoginProvider';
 import AppNavigator from './navigators/AppNavigator';
 
 export default function App() {
+
   const [splash, setSplash] = useState(true);
 
   useEffect(() => {
