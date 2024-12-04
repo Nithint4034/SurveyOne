@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, Image, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 const MapDetailsScreen = ({ route }) => {
   const { latitude, longitude } = route.params || {};
@@ -33,6 +35,9 @@ const MapDetailsScreen = ({ route }) => {
     remarks: '',
   });
 
+  console.log('form data', formData);
+  
+
   const handleInputChange = (fieldName, value) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -40,11 +45,38 @@ const MapDetailsScreen = ({ route }) => {
     }));
   };
 
-  const handleSubmit = () => {
-    console.log('Form Data Submitted:', formData);
-    alert('Form submitted successfully!'); // Add a success message
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post('https://nithint.pythonanywhere.com/land/nithin/', {
+        username: 'nithin',  // Assuming 'nithin' is a static value
+        District: formData.district,
+        Tehsil: formData.tehsil,
+        Village: formData.villageName,
+        Sector: formData.sector,
+        Khasra: formData.khasraNo,
+        Area: formData.acquiredArea,
+        Compensation: formData.compensationAmount,
+        CompensationDate: formData.compensationDate,
+        LeaseArea: formData.leaseBackArea,
+        LeaseStatus: formData.leaseBackStatus,
+        PlotNo: formData.plotNo,
+        PlotSize: formData.plotSize,
+        Allotee: formData.allotteeName,
+        BuiltUp: formData.landUse,
+        Encroachment: formData.encroachmentStatus,
+        Latitude: formData.latitude,
+        Longitude: formData.longitude,
+        Photo:formData.photo,
+        Remarks: formData.remarks,
+      });
+      alert('SuccessFully sent')
+      console.log('Response:', response.data); // Handle the response from the API here
+    } catch (error) {
+      console.error('Error submitting data:', error);
+    }
   };
 
+ // Launch camera to take a photo
   const launchCamera = async () => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -54,9 +86,9 @@ const MapDetailsScreen = ({ route }) => {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [3, 4],
-      quality: 1,
+      // Removed allowsEditing to prevent cropping
+      aspect: [3, 4], // Aspect ratio for the camera
+      quality: 1, // Set to 1 for high quality
     });
 
     console.log('Camera result:', result); // Debugging the result
@@ -64,7 +96,20 @@ const MapDetailsScreen = ({ route }) => {
     if (!result.canceled) {
       const uri = result.assets && result.assets[0]?.uri; // Safely access the URI
       console.log('Image URI:', uri);
-      setSelectedImage(uri); // Store the image URI
+
+      // Convert the image to JPG format
+      const manipResult = await ImageManipulator.manipulateAsync(
+        uri, 
+        [],
+        { format: ImageManipulator.SaveFormat.JPEG } // Convert to JPG
+      );
+
+      console.log('Manipulated Image URI:', manipResult.uri);
+      setSelectedImage(manipResult.uri); // Store the converted image URI
+      setFormData((prevData) => ({
+        ...prevData,
+        photo: manipResult.uri, // Update formData with the selected JPG image URI
+      }));
     } else {
       console.log('Camera was canceled');
     }
@@ -179,7 +224,7 @@ const MapDetailsScreen = ({ route }) => {
         <TextInput
           style={styles.input}
           placeholder="Alotment Status : Yes / No"
-          value={formData.plotSize}
+          value={formData.allotmentStatus}
           onChangeText={(value) => handleInputChange('allotmentStatus', value)}
         />
 
@@ -193,21 +238,21 @@ const MapDetailsScreen = ({ route }) => {
         <TextInput
           style={styles.input}
           placeholder="Landuse (Plot Type)"
-          value={formData.allotteeName}
+          value={formData.landuse}
           onChangeText={(value) => handleInputChange('landuse', value)}
         />
         <Text style={styles.sectionTitle}>Physical Condition</Text>
         <TextInput
           style={styles.input}
           placeholder="Builtup / Vacant"
-          value={formData.allotteeName}
+          value={formData.physicalCondition}
           onChangeText={(value) => handleInputChange('physicalCondition', value)}
         />
 
         <TextInput
           style={styles.input}
           placeholder="Encroachment / Vacant / Unplanned"
-          value={formData.allotteeName}
+          value={formData.encroachmentStatus}
           onChangeText={(value) => handleInputChange('encroachmentStatus', value)}
         />
 
@@ -268,7 +313,7 @@ const styles = {
   },
   input: {
     height: 50,
-    borderColor: '#ccc',
+    borderColor: '#4A4947',
     borderWidth: 1,
     marginBottom: 10,
     paddingLeft: 10,
@@ -278,6 +323,8 @@ const styles = {
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
+    color:"#4A4947",
+    fontSize:20
   },
   dropdownInput: {
     height: 50,
@@ -290,7 +337,7 @@ const styles = {
     borderRadius: 5,
   },
   submitButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#4A4947',
     padding: 10,
     alignItems: 'center',
     borderRadius: 5,
@@ -339,10 +386,10 @@ const styles = {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'black',
+    backgroundColor: '#4A4947',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5, // Subtle shadow
+    elevation: 2, 
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,

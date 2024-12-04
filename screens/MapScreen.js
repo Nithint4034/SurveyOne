@@ -7,6 +7,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';  // Import MaterialI
 export default function MapScreen({ navigation }) {
   const [location, setLocation] = useState(null);
   const [markerCoordinate, setMarkerCoordinate] = useState(null);  // Initialize with null
+  const [mapType, setMapType] = useState('standard'); // State for map type
 
   useEffect(() => {
     (async () => {
@@ -30,6 +31,14 @@ export default function MapScreen({ navigation }) {
     setMarkerCoordinate({ latitude, longitude });
   };
 
+  const handleRefresh = () => {
+    setMarkerCoordinate(null);
+  };
+
+  const buttonStyle = {
+    backgroundColor: mapType === 'satellite' ? '#B17457' : '#4A4947',
+  };
+
   return (
     <View style={styles.container}>
       {location && (
@@ -45,6 +54,7 @@ export default function MapScreen({ navigation }) {
             longitudeDelta: 0.0022,
           }}
           onPress={handleMapPress}  // This listens for tap on map
+          mapType={mapType} // Set the map type based on state
         >
           {/* Only render marker if markerCoordinate is set */}
           {markerCoordinate && (
@@ -65,7 +75,7 @@ export default function MapScreen({ navigation }) {
 
       {/* Plus icon to add marker */}
       <TouchableOpacity 
-        style={styles.plusButton} 
+        style={[styles.plusButton, buttonStyle]} 
         onPress={() => {
           // This will create the marker at the user's current location
           if (location) {
@@ -75,6 +85,33 @@ export default function MapScreen({ navigation }) {
       >
         <Icon
           name="add" // Plus icon
+          size={30}   // Icon size
+          color="white" // Icon color
+        />
+      </TouchableOpacity>
+
+      {/* Layer toggle button with conditional background color */}
+      <TouchableOpacity 
+        style={[styles.layerButton, buttonStyle]} 
+        onPress={() => {
+          // Toggle between standard and satellite map layers
+          setMapType((prevType) => (prevType === 'standard' ? 'satellite' : 'standard'));
+        }}
+      >
+        <Icon
+          name="layers" // Layers icon
+          size={30}   // Icon size
+          color="white" // Icon color
+        />
+      </TouchableOpacity>
+
+      {/* Refresh button to reset marker */}
+      <TouchableOpacity 
+        style={[styles.refreshButton, buttonStyle]} 
+        onPress={handleRefresh}  // Reset marker when refresh button is pressed
+      >
+        <Icon
+          name="refresh" // Refresh icon
           size={30}   // Icon size
           color="white" // Icon color
         />
@@ -95,9 +132,26 @@ const styles = StyleSheet.create({
   },
   plusButton: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 70,
     right: 25,
-    backgroundColor: '#000',
+    borderRadius: 50,
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  layerButton: {
+    position: 'absolute',
+    bottom: 140, // Adjust the position below the plus button
+    right: 25,
+    borderRadius: 50,
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  refreshButton: {
+    position: 'absolute',
+    bottom: 210, // Adjust the position below the layer button
+    right: 25,
     borderRadius: 50,
     padding: 10,
     justifyContent: 'center',

@@ -23,7 +23,7 @@ export default function App() {
         style={styles.splashBackground}
         resizeMode="cover"
       >
-        <StatusBar backgroundColor="transparent" />
+        <StatusBar backgroundColor="transparent" barStyle="dark-content" translucent />
       </ImageBackground>
     );
   }
@@ -31,7 +31,7 @@ export default function App() {
   return (
     <LoginProvider>
       <NavigationContainer>
-        <StatusBar backgroundColor="transparent" />
+      <StatusBar backgroundColor="#C1BAA1" barStyle="dark-content" translucent />
         <AppNavigator />
       </NavigationContainer>
     </LoginProvider>

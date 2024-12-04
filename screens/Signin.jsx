@@ -77,7 +77,7 @@ const Signin = () => {
 
     return (
         <ImageBackground
-            source={require('../assets/UILand.png')} 
+            source={require('../assets/UILand.png')}
             style={styles.root}
             resizeMode="cover"
         >
@@ -110,10 +110,15 @@ const Signin = () => {
                         onChangeText={(text) => setPassword(text)}
                     />
                     {error && <Text style={styles.error}>{error}</Text>}
-                    <Button title="Login" onPress={handleLogin} />
+
+
+                    <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+                        <Text style={styles.loginButtonText}>Login</Text>
+                    </TouchableOpacity>
+
                     <View style={styles.linksContainer}>
-                        <TouchableOpacity onPress={handleRegisterPress}>
-                            <Text style={styles.link}>Register</Text>
+                        <TouchableOpacity onPress={handleRegisterPress} style={styles.backToRegisterButton}>
+                            <Text style={styles.backToRegisterText}>Register</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -147,12 +152,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     icon1: {
-        width: 115, // Set icon width
-        height: 80, // Set icon height
+        width: 90, // Set icon width
+        height: 65, // Set icon height
     },
     icon2: {
-        width: 75, // Set icon width
-        height: 80, // Set icon height
+        width: 65, // Set icon width
+        height: 70, // Set icon height
     },
     input: {
         width: '80%',
@@ -181,8 +186,32 @@ const styles = StyleSheet.create({
         marginBottom: 18,
         fontSize: 19,
         fontWeight: 'bold',
-        color: '#074173',
+        color: '#4A4947',
         textAlign: 'center',
+    },
+    loginButton: {
+        width: '80%',
+        padding: 12,
+        backgroundColor: '#4A4947',
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    loginButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    backToRegisterButton: {
+        // marginTop: 5,
+        padding: 8,
+        alignItems: 'center',
+    },
+    backToRegisterText: {
+        color: '#4A4947',
+        fontSize: 16,
+        fontWeight: 'bold',
+        textDecorationLine: 'underline',
     },
 });
 

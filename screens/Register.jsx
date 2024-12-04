@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
     View,
     Text,
-    Button,
+
     StyleSheet,
     ImageBackground,
     TextInput,
@@ -131,10 +131,13 @@ const Register = ({ setShowComponent }) => {
                     secureTextEntry
                 />
                 {error && <Text style={styles.error}>{error}</Text>}
-                <Button title="Register" onPress={handleRegister} />
+                <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+                    <Text style={styles.registerButtonText}>Register</Text>
+                </TouchableOpacity>
+
                 <View style={styles.linksContainer}>
-                    <TouchableOpacity onPress={handleRegisterPress}>
-                        <Text style={styles.link}>Back to Login</Text>
+                    <TouchableOpacity onPress={handleRegisterPress} style={styles.backToLoginButton}>
+                        <Text style={styles.backToLoginText}>Back to Login</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -167,13 +170,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     icon1: {
-        width: 115, // Set icon width
-        height: 80, // Set icon height
+        width: 90, // Set icon width
+        height: 65, // Set icon height
     },
     icon2: {
-        width: 75, // Set icon width
-        height: 80, // Set icon height
-    },  
+        width: 65, // Set icon width
+        height: 70, // Set icon height
+    },
     input: {
         width: '80%',
         marginBottom: 10,
@@ -201,8 +204,32 @@ const styles = StyleSheet.create({
         marginBottom: 18,
         fontSize: 19,
         fontWeight: 'bold',
-        color: '#074173',
+        color: '#4A4947',
         textAlign: 'center',
+    },
+    registerButton: {
+        width: '80%',
+        padding: 12,
+        backgroundColor: '#4A4947',
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    registerButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    backToLoginButton: {
+        // marginTop: 5,
+        padding: 8,
+        alignItems: 'center',
+    },
+    backToLoginText: {
+        color: '#4A4947',
+        fontSize: 16,
+        fontWeight: 'bold',
+        textDecorationLine: 'underline',
     },
 });
 
