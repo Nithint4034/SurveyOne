@@ -3,7 +3,6 @@ import { View, Text, Image, TextInput, TouchableOpacity, ScrollView, Alert, Butt
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
-import * as ImageManipulator from 'expo-image-manipulator';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MapDetailsScreen = ({ route }) => {
@@ -12,7 +11,7 @@ const MapDetailsScreen = ({ route }) => {
   const [photo, setPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const [formDatas, setFormDatas] = useState({
     district: '',
     tehsil: '',
     villageName: '',
@@ -37,10 +36,10 @@ const MapDetailsScreen = ({ route }) => {
     remarks: '',
   });
 
-  console.log('form data', formData);
+  console.log('form data', formDatas);
 
   const handleInputChange = (fieldName, value) => {
-    setFormData((prevData) => ({
+    setFormDatas((prevData) => ({
       ...prevData,
       [fieldName]: value,
     }));
@@ -64,24 +63,24 @@ const MapDetailsScreen = ({ route }) => {
       // Append all fields
       formData.append("username", username);
       formData.append("Date", "2024-12-05");
-      formData.append("District", "tumakur");
-      formData.append("Tehsil", "pava");
-      formData.append("Village", "dvdsv");
-      formData.append("Sector", "ddxf");
-      formData.append("Khasra", "non");
-      formData.append("Area", "100sqft");
-      formData.append("Compensation", "1522");
-      formData.append("CompensationDate", "2024-12-02");
-      formData.append("LeaseArea", "250sqft");
-      formData.append("LeaseStatus", "done");
-      formData.append("PlotNo", "151");
-      formData.append("PlotSize", "122");
-      formData.append("Allotee", "nithin");
-      formData.append("BuiltUp", "yes");
-      formData.append("Encroachment", "no");
-      formData.append("Latitude", "12.888");
-      formData.append("Longitude", "21.555");
-      formData.append("Remarks", "done");
+      formData.append("District", formDatas.district);
+      formData.append("Tehsil", formDatas.tehsil);
+      formData.append("Village", formDatas.villageName);
+      formData.append("Sector", formDatas.sector);
+      formData.append("Khasra",  formDatas.khasraNo);
+      formData.append("Area",  formDatas.acquiredArea);
+      formData.append("Compensation",  formDatas.compensationAmount);
+      formData.append("CompensationDate", formDatas.compensationDate);
+      formData.append("LeaseArea", formDatas.leaseBackArea);
+      formData.append("LeaseStatus", formDatas.leaseBackStatus);
+      formData.append("PlotNo", formDatas.plotNo);
+      formData.append("PlotSize", formDatas.plotSize);
+      formData.append("Allotee", formDatas.allotteeName);
+      formData.append("BuiltUp", formDatas.physicalCondition);
+      formData.append("Encroachment", formDatas.encroachmentStatus);
+      formData.append("Latitude", `${latitude}`);
+      formData.append("Longitude", `${longitude}`);
+      formData.append("Remarks", formDatas.remarks);
 
       // Append the photo file
       formData.append("Photo", {
@@ -206,25 +205,25 @@ const MapDetailsScreen = ({ route }) => {
         <TextInput
           style={styles.input}
           placeholder="District"
-          value={formData.district}
+          value={formDatas.district}
           onChangeText={(value) => handleInputChange('district', value)}
         />
         <TextInput
           style={styles.input}
           placeholder="Tehsil"
-          value={formData.tehsil}
+          value={formDatas.tehsil}
           onChangeText={(value) => handleInputChange('tehsil', value)}
         />
         <TextInput
           style={styles.input}
           placeholder="Village Name"
-          value={formData.villageName}
+          value={formDatas.villageName}
           onChangeText={(value) => handleInputChange('villageName', value)}
         />
         <TextInput
           style={styles.input}
           placeholder="Sector"
-          value={formData.sector}
+          value={formDatas.sector}
           onChangeText={(value) => handleInputChange('sector', value)}
         />
 
@@ -233,31 +232,31 @@ const MapDetailsScreen = ({ route }) => {
         <TextInput
           style={styles.input}
           placeholder="Khasra No"
-          value={formData.khasraNo}
+          value={formDatas.khasraNo}
           onChangeText={(value) => handleInputChange('khasraNo', value)}
         />
         <TextInput
           style={styles.input}
           placeholder="Acquired Area In Hectare"
-          value={formData.acquiredArea}
+          value={formDatas.acquiredArea}
           onChangeText={(value) => handleInputChange('acquiredArea', value)}
         />
         <TextInput
           style={styles.input}
           placeholder="Name of Land Owner"
-          value={formData.landOwner}
+          value={formDatas.landOwner}
           onChangeText={(value) => handleInputChange('landOwner', value)}
         />
         <TextInput
           style={styles.input}
           placeholder="Compensation Amount"
-          value={formData.compensationAmount}
+          value={formDatas.compensationAmount}
           onChangeText={(value) => handleInputChange('compensationAmount', value)}
         />
         <TextInput
           style={styles.input}
           placeholder="Compensation Date"
-          value={formData.compensationDate}
+          value={formDatas.compensationDate}
           onChangeText={(value) => handleInputChange('compensationDate', value)}
         />
 
@@ -266,13 +265,13 @@ const MapDetailsScreen = ({ route }) => {
         <TextInput
           style={styles.input}
           placeholder="Lease Back Status"
-          value={formData.leaseBackStatus}
+          value={formDatas.leaseBackStatus}
           onChangeText={(value) => handleInputChange('leaseBackStatus', value)}
         />
         <TextInput
           style={styles.input}
           placeholder="Lease Back Area"
-          value={formData.leaseBackArea}
+          value={formDatas.leaseBackArea}
           onChangeText={(value) => handleInputChange('leaseBackArea', value)}
         />
 
@@ -281,62 +280,62 @@ const MapDetailsScreen = ({ route }) => {
         <TextInput
           style={styles.input}
           placeholder="Plot No"
-          value={formData.plotNo}
+          value={formDatas.plotNo}
           onChangeText={(value) => handleInputChange('plotNo', value)}
         />
 
         <TextInput
           style={styles.input}
           placeholder="Plot Size SQM"
-          value={formData.plotSize}
+          value={formDatas.plotSize}
           onChangeText={(value) => handleInputChange('plotSize', value)}
         />
 
         <TextInput
           style={styles.input}
           placeholder="Alotment Status : Yes / No"
-          value={formData.allotmentStatus}
+          value={formDatas.allotmentStatus}
           onChangeText={(value) => handleInputChange('allotmentStatus', value)}
         />
 
         <TextInput
           style={styles.input}
           placeholder="Allotee Name"
-          value={formData.allotteeName}
+          value={formDatas.allotteeName}
           onChangeText={(value) => handleInputChange('allotteeName', value)}
         />
 
         <TextInput
           style={styles.input}
           placeholder="Landuse (Plot Type)"
-          value={formData.landuse}
+          value={formDatas.landuse}
           onChangeText={(value) => handleInputChange('landuse', value)}
         />
         <Text style={styles.sectionTitle}>Physical Condition</Text>
         <TextInput
           style={styles.input}
           placeholder="Builtup / Vacant"
-          value={formData.physicalCondition}
+          value={formDatas.physicalCondition}
           onChangeText={(value) => handleInputChange('physicalCondition', value)}
         />
 
         <TextInput
           style={styles.input}
           placeholder="Encroachment / Vacant / Unplanned"
-          value={formData.encroachmentStatus}
+          value={formDatas.encroachmentStatus}
           onChangeText={(value) => handleInputChange('encroachmentStatus', value)}
         />
 
         <TextInput
           style={[styles.input, { color: 'gray' }]}
           placeholder="Latitude"
-          value={`Latitude: ${formData.latitude}`}  // Display autofilled latitude
+          value={`Latitude: ${formDatas.latitude}`}  // Display autofilled latitude
           editable={false}
         />
         <TextInput
           style={[styles.input, { color: 'gray' }]}
           placeholder="Longitude"
-          value={`Longitude: ${formData.longitude}`}  // Display autofilled longitude
+          value={`Longitude: ${formDatas.longitude}`}  // Display autofilled longitude
           editable={false}
         />
         <Text style={styles.sectionTitle}>Add Photograph of Plot</Text>
@@ -360,7 +359,7 @@ const MapDetailsScreen = ({ route }) => {
         <TextInput
           style={styles.input}
           placeholder="Remarks"
-          value={formData.remarks}
+          value={formDatas.remarks}
           onChangeText={(value) => handleInputChange('remarks', value)}
         />
         {/* <Button title="Capture Photo" onPress={launchCamera} color="#6200EE" /> */}
