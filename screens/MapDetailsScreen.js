@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, ScrollView, Alert, Button } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, Alert, Button } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { TextInput } from 'react-native-paper';
+
 
 const MapDetailsScreen = ({ route }) => {
   const { latitude, longitude } = route.params || {};
@@ -51,13 +53,13 @@ const MapDetailsScreen = ({ route }) => {
       return;
     }
 
-    setLoading(true); 
+    setLoading(true);
     try {
       const username = await AsyncStorage.getItem("userName");
-        if (!username) {
-          Alert.alert("Error", "Username not found in storage.");
-          return;
-        }
+      if (!username) {
+        Alert.alert("Error", "Username not found in storage.");
+        return;
+      }
       const formData = new FormData();
 
       formData.append("username", username);
@@ -65,9 +67,9 @@ const MapDetailsScreen = ({ route }) => {
       formData.append("Tehsil", formDatas.tehsil);
       formData.append("Village", formDatas.villageName);
       formData.append("Sector", formDatas.sector);
-      formData.append("Khasra",  formDatas.khasraNo);
-      formData.append("Area",  formDatas.acquiredArea);
-      formData.append("Compensation",  formDatas.compensationAmount);
+      formData.append("Khasra", formDatas.khasraNo);
+      formData.append("Area", formDatas.acquiredArea);
+      formData.append("Compensation", formDatas.compensationAmount);
       formData.append("CompensationDate", formDatas.compensationDate);
       formData.append("LeaseArea", formDatas.leaseBackArea);
       formData.append("LeaseStatus", formDatas.leaseBackStatus);
@@ -116,7 +118,7 @@ const MapDetailsScreen = ({ route }) => {
         console.error("Unexpected Error:", error.message);
       }
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -135,7 +137,7 @@ const MapDetailsScreen = ({ route }) => {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0]); 
+      setPhoto(result.assets[0]);
       setSelectedImage(result.assets[0].uri);
     } else {
       Alert.alert("No photo captured!");
@@ -158,55 +160,113 @@ const MapDetailsScreen = ({ route }) => {
       <ScrollView contentContainerStyle={styles.formContainer}>
 
         <TextInput
-          style={styles.input}
-          placeholder="District"
+          label="District"
           value={formDatas.district}
           onChangeText={(value) => handleInputChange('district', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
         <TextInput
-          style={styles.input}
-          placeholder="Tehsil"
+          label="Tehsil"
           value={formDatas.tehsil}
           onChangeText={(value) => handleInputChange('tehsil', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
         <TextInput
-          style={styles.input}
-          placeholder="Village Name"
+          label="Village Name"
           value={formDatas.villageName}
           onChangeText={(value) => handleInputChange('villageName', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
         <TextInput
-          style={styles.input}
-          placeholder="Sector"
+          label="Sector"
           value={formDatas.sector}
           onChangeText={(value) => handleInputChange('sector', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
+
 
         <Text style={styles.sectionTitle}>Land Details</Text>
         <TextInput
-          style={styles.input}
-          placeholder="Khasra No"
+          label="Khasra No"
           value={formDatas.khasraNo}
           onChangeText={(value) => handleInputChange('khasraNo', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
         <TextInput
-          style={styles.input}
-          placeholder="Acquired Area In Hectare"
+          label="Acquired Area In Hectare"
           value={formDatas.acquiredArea}
           onChangeText={(value) => handleInputChange('acquiredArea', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
         <TextInput
-          style={styles.input}
-          placeholder="Name of Land Owner"
+          label="Name of Land Owner"
           value={formDatas.landOwner}
           onChangeText={(value) => handleInputChange('landOwner', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
         <TextInput
-          style={styles.input}
-          placeholder="Compensation Amount"
+          label="Compensation Amount"
           value={formDatas.compensationAmount}
           onChangeText={(value) => handleInputChange('compensationAmount', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
+
         <TextInput
           style={styles.input}
           placeholder="Compensation Date"
@@ -216,32 +276,61 @@ const MapDetailsScreen = ({ route }) => {
 
         <Text style={styles.sectionTitle}>Lease Back</Text>
         <TextInput
-          style={styles.input}
-          placeholder="Lease Back Status"
+          label="Lease Back Status"
           value={formDatas.leaseBackStatus}
           onChangeText={(value) => handleInputChange('leaseBackStatus', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
         <TextInput
-          style={styles.input}
-          placeholder="Lease Back Area"
+          label="Lease Back Area"
           value={formDatas.leaseBackArea}
           onChangeText={(value) => handleInputChange('leaseBackArea', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
+
 
         <Text style={styles.sectionTitle}>Planning Details</Text>
         <TextInput
-          style={styles.input}
-          placeholder="Plot No"
+          label="Plot No"
           value={formDatas.plotNo}
           onChangeText={(value) => handleInputChange('plotNo', value)}
-        />
-
-        <TextInput
+          mode="outlined"
           style={styles.input}
-          placeholder="Plot Size SQM"
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
+        />
+        <TextInput
+          label="Plot Size SQM"
           value={formDatas.plotSize}
           onChangeText={(value) => handleInputChange('plotSize', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
+
 
         <TextInput
           style={styles.input}
@@ -251,18 +340,20 @@ const MapDetailsScreen = ({ route }) => {
         />
 
         <TextInput
-          style={styles.input}
-          placeholder="Allotee Name"
+          label="Allottee Name"
           value={formDatas.allotteeName}
           onChangeText={(value) => handleInputChange('allotteeName', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Landuse (Plot Type)"
-          value={formDatas.landuse}
-          onChangeText={(value) => handleInputChange('landuse', value)}
-        />
+
         <Text style={styles.sectionTitle}>Physical Condition</Text>
         <TextInput
           style={styles.input}
@@ -279,17 +370,32 @@ const MapDetailsScreen = ({ route }) => {
         />
 
         <TextInput
-          style={[styles.input, { color: 'gray' }]}
-          placeholder="Latitude"
-          value={`Latitude: ${formDatas.latitude}`}  // Display autofilled latitude
+          label="Latitude"
+          value={`${formDatas.latitude}`}  // Display autofilled latitude
           editable={false}
+          mode="outlined"
+          style={[styles.input, { color: 'gray' }]}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
         <TextInput
-          style={[styles.input, { color: 'gray' }]}
-          placeholder="Longitude"
-          value={`Longitude: ${formDatas.longitude}`}  // Display autofilled longitude
+          label="Longitude"
+          value={`${formDatas.longitude}`}  // Display autofilled longitude
           editable={false}
+          mode="outlined"
+          style={[styles.input, { color: 'gray' }]}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
+
         <Text style={styles.sectionTitle}>Add Photograph of Plot</Text>
         <View style={styles.container}>
 
@@ -308,19 +414,26 @@ const MapDetailsScreen = ({ route }) => {
         </View>
 
         <TextInput
-          style={styles.input}
-          placeholder="Remarks"
+          label="Remarks"
           value={formDatas.remarks}
           onChangeText={(value) => handleInputChange('remarks', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
         />
 
         <TouchableOpacity
           style={[
             styles.submitButton,
-            (loading || !photo) && styles.disabledButton, 
+            (loading || !photo) && styles.disabledButton,
           ]}
           onPress={handleSubmit}
-          disabled={loading || !photo} 
+          disabled={loading || !photo}
         >
           <Text style={styles.submitButtonText}>
             {loading ? "Sending..." : "Submit"}
@@ -341,13 +454,14 @@ const styles = {
   formContainer: {
     paddingBottom: 20,
   },
+  containerInput: {
+    flex: 1,
+    padding: 15,
+    justifyContent: 'center',
+  },
   input: {
-    height: 50,
-    borderColor: '#4A4947',
-    borderWidth: 1,
     marginBottom: 10,
-    paddingLeft: 10,
-    borderRadius: 5,
+    backgroundColor: '#fff',
   },
   sectionTitle: {
     fontWeight: 'bold',
@@ -397,7 +511,7 @@ const styles = {
   imageContainer: {
     position: 'relative',
     width: 100,
-    height: 166, 
+    height: 166,
   },
   image: {
     width: '100%',
@@ -433,7 +547,7 @@ const styles = {
     fontWeight: "bold",
   },
   disabledButton: {
-    backgroundColor: "#A9A9A9", 
+    backgroundColor: "#A9A9A9",
   },
 };
 
