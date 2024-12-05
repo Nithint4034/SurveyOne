@@ -51,7 +51,7 @@ const MapDetailsScreen = ({ route }) => {
       return;
     }
 
-    setLoading(true); // Start loading
+    setLoading(true); 
     try {
       const username = await AsyncStorage.getItem("userName");
         if (!username) {
@@ -60,7 +60,6 @@ const MapDetailsScreen = ({ route }) => {
         }
       const formData = new FormData();
 
-      // Append all fields
       formData.append("username", username);
       formData.append("District", formDatas.district);
       formData.append("Tehsil", formDatas.tehsil);
@@ -81,7 +80,6 @@ const MapDetailsScreen = ({ route }) => {
       formData.append("Longitude", `${longitude}`);
       formData.append("Remarks", formDatas.remarks);
 
-      // Append the photo file
       formData.append("Photo", {
         uri: photo.uri,
         name: "photo.jpg",
@@ -122,7 +120,6 @@ const MapDetailsScreen = ({ route }) => {
     }
   };
 
-
   const launchCamera = async () => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -138,53 +135,12 @@ const MapDetailsScreen = ({ route }) => {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0]); // Store the captured photo
+      setPhoto(result.assets[0]); 
       setSelectedImage(result.assets[0].uri);
     } else {
       Alert.alert("No photo captured!");
     }
   };
-
-
-  // const launchCamerass = async () => {
-  //   const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-
-  //   if (!permissionResult.granted) {
-  //     Alert.alert('Permission Required', 'Camera access is needed to take photos.');
-  //     return;
-  //   }
-
-  //   const result = await ImagePicker.launchCameraAsync({
-  //     // Removed allowsEditing to prevent cropping
-  //     aspect: [3, 4], // Aspect ratio for the camera
-  //     quality: 1, // Set to 1 for high quality
-  //   });
-
-  //   console.log('Camera result:', result); // Debugging the result
-
-  //   if (!result.canceled) {
-  //     const uri = result.assets && result.assets[0]?.uri; // Safely access the URI
-  //     console.log('Image URI:', uri);
-
-  //     // Convert the image to JPG format
-  //     const manipResult = await ImageManipulator.manipulateAsync(
-  //       uri, 
-  //       [],
-  //       { format: ImageManipulator.SaveFormat.JPEG } // Convert to JPG
-  //     );
-
-  //     console.log('Manipulated Image URI:', manipResult.uri);
-  //     setSelectedImage(manipResult.uri); // Store the converted image URI
-  //     setFormData((prevData) => ({
-  //       ...prevData,
-  //       photo: manipResult.uri, // Update formData with the selected JPG image URI
-  //     }));
-  //   } else {
-  //     console.log('Camera was canceled');
-  //   }
-  // };
-
-
 
   const confirmDeletePhoto = () => {
     Alert.alert(
@@ -200,7 +156,7 @@ const MapDetailsScreen = ({ route }) => {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.formContainer}>
-        {/* General Info */}
+
         <TextInput
           style={styles.input}
           placeholder="District"
@@ -226,7 +182,6 @@ const MapDetailsScreen = ({ route }) => {
           onChangeText={(value) => handleInputChange('sector', value)}
         />
 
-        {/* Land Details */}
         <Text style={styles.sectionTitle}>Land Details</Text>
         <TextInput
           style={styles.input}
@@ -259,7 +214,6 @@ const MapDetailsScreen = ({ route }) => {
           onChangeText={(value) => handleInputChange('compensationDate', value)}
         />
 
-        {/* Lease Back */}
         <Text style={styles.sectionTitle}>Lease Back</Text>
         <TextInput
           style={styles.input}
@@ -274,7 +228,6 @@ const MapDetailsScreen = ({ route }) => {
           onChangeText={(value) => handleInputChange('leaseBackArea', value)}
         />
 
-        {/* Planning Details */}
         <Text style={styles.sectionTitle}>Planning Details</Text>
         <TextInput
           style={styles.input}
@@ -339,7 +292,7 @@ const MapDetailsScreen = ({ route }) => {
         />
         <Text style={styles.sectionTitle}>Add Photograph of Plot</Text>
         <View style={styles.container}>
-          {/* Image Preview */}
+
           {selectedImage ? (
             <View style={styles.imageContainer}>
               <Image source={{ uri: selectedImage }} style={styles.image} />
@@ -348,7 +301,6 @@ const MapDetailsScreen = ({ route }) => {
               </TouchableOpacity>
             </View>
           ) : (
-            // Plus Button to Launch Camera
             <TouchableOpacity style={styles.addButton} onPress={launchCamera}>
               <Ionicons name="add" size={36} color="#fff" />
             </TouchableOpacity>
@@ -361,15 +313,14 @@ const MapDetailsScreen = ({ route }) => {
           value={formDatas.remarks}
           onChangeText={(value) => handleInputChange('remarks', value)}
         />
-        {/* <Button title="Capture Photo" onPress={launchCamera} color="#6200EE" /> */}
 
         <TouchableOpacity
           style={[
             styles.submitButton,
-            (loading || !photo) && styles.disabledButton, // Apply disabled styling
+            (loading || !photo) && styles.disabledButton, 
           ]}
           onPress={handleSubmit}
-          disabled={loading || !photo} // Disable button when loading or photo is not selected
+          disabled={loading || !photo} 
         >
           <Text style={styles.submitButtonText}>
             {loading ? "Sending..." : "Submit"}
@@ -446,7 +397,7 @@ const styles = {
   imageContainer: {
     position: 'relative',
     width: 100,
-    height: 166, // 3:4 Aspect Ratio
+    height: 166, 
   },
   image: {
     width: '100%',
