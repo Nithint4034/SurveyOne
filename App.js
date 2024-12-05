@@ -12,7 +12,7 @@ export default function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setSplash(false);
-    }, 3000); 
+    }, 3000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -23,7 +23,7 @@ export default function App() {
         style={styles.splashBackground}
         resizeMode="cover"
       >
-        <StatusBar backgroundColor="transparent" barStyle="dark-content" translucent />
+        <StatusBar backgroundColor="#C1BAA1" barStyle="dark-content" />
       </ImageBackground>
     );
   }
@@ -31,7 +31,7 @@ export default function App() {
   return (
     <LoginProvider>
       <NavigationContainer>
-      <StatusBar backgroundColor="#C1BAA1" barStyle="dark-content" translucent />
+        <StatusBar backgroundColor="#C1BAA1" barStyle="dark-content" />
         <AppNavigator />
       </NavigationContainer>
     </LoginProvider>
@@ -44,4 +44,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+
 });

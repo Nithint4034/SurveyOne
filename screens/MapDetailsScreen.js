@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, ScrollView, Alert, Button } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import * as ImageManipulator from 'expo-image-manipulator';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MapDetailsScreen = ({ route }) => {
   const { latitude, longitude } = route.params || {};
   const [selectedImage, setSelectedImage] = useState(null);
+  const [photo, setPhoto] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // Form data state
   const [formData, setFormData] = useState({
     district: '',
     tehsil: '',
@@ -36,7 +38,6 @@ const MapDetailsScreen = ({ route }) => {
   });
 
   console.log('form data', formData);
-  
 
   const handleInputChange = (fieldName, value) => {
     setFormData((prevData) => ({
@@ -46,77 +47,147 @@ const MapDetailsScreen = ({ route }) => {
   };
 
   const handleSubmit = async () => {
+    if (!photo) {
+      Alert.alert("Error", "Please capture a photo first.");
+      return;
+    }
+
+    setLoading(true); // Start loading
     try {
-      const response = await axios.post('https://nithint.pythonanywhere.com/land/nithin/', {
-        username: 'nithin',  // Assuming 'nithin' is a static value
-        District: formData.district,
-        Tehsil: formData.tehsil,
-        Village: formData.villageName,
-        Sector: formData.sector,
-        Khasra: formData.khasraNo,
-        Area: formData.acquiredArea,
-        Compensation: formData.compensationAmount,
-        CompensationDate: formData.compensationDate,
-        LeaseArea: formData.leaseBackArea,
-        LeaseStatus: formData.leaseBackStatus,
-        PlotNo: formData.plotNo,
-        PlotSize: formData.plotSize,
-        Allotee: formData.allotteeName,
-        BuiltUp: formData.landUse,
-        Encroachment: formData.encroachmentStatus,
-        Latitude: formData.latitude,
-        Longitude: formData.longitude,
-        Photo:formData.photo,
-        Remarks: formData.remarks,
+      const username = await AsyncStorage.getItem("userName");
+        if (!username) {
+          Alert.alert("Error", "Username not found in storage.");
+          return;
+        }
+      const formData = new FormData();
+
+      // Append all fields
+      formData.append("username", username);
+      formData.append("Date", "2024-12-05");
+      formData.append("District", "tumakur");
+      formData.append("Tehsil", "pava");
+      formData.append("Village", "dvdsv");
+      formData.append("Sector", "ddxf");
+      formData.append("Khasra", "non");
+      formData.append("Area", "100sqft");
+      formData.append("Compensation", "1522");
+      formData.append("CompensationDate", "2024-12-02");
+      formData.append("LeaseArea", "250sqft");
+      formData.append("LeaseStatus", "done");
+      formData.append("PlotNo", "151");
+      formData.append("PlotSize", "122");
+      formData.append("Allotee", "nithin");
+      formData.append("BuiltUp", "yes");
+      formData.append("Encroachment", "no");
+      formData.append("Latitude", "12.888");
+      formData.append("Longitude", "21.555");
+      formData.append("Remarks", "done");
+
+      // Append the photo file
+      formData.append("Photo", {
+        uri: photo.uri,
+        name: "photo.jpg",
+        type: "image/jpeg",
       });
-      alert('SuccessFully sent')
-      console.log('Response:', response.data); // Handle the response from the API here
+
+      const response = await axios.post(
+        `https://nithint.pythonanywhere.com/land/${username}/`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status >= 200 && response.status < 300) {
+        Alert.alert("Success", "Data sent successfully!");
+        setSelectedImage(null)
+        console.log("Response:", response.data);
+      } else {
+        Alert.alert("Warning", "Unexpected response received!");
+        console.warn("Unexpected Response:", response.data);
+      }
     } catch (error) {
-      console.error('Error submitting data:', error);
+      if (error.response) {
+        Alert.alert("Error", `Server Error: ${error.response.status}`);
+        console.error("Server Error Response:", error.response.data);
+      } else if (error.request) {
+        Alert.alert("Error", "No response received from the server.");
+        console.error("No Response:", error.request);
+      } else {
+        Alert.alert("Error", `Unexpected error: ${error.message}`);
+        console.error("Unexpected Error:", error.message);
+      }
+    } finally {
+      setLoading(false); 
     }
   };
 
- // Launch camera to take a photo
+
   const launchCamera = async () => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
-    if (!permissionResult.granted) {
-      Alert.alert('Permission Required', 'Camera access is needed to take photos.');
+    if (permissionResult.granted === false) {
+      Alert.alert("Camera permission is required to use this feature.");
       return;
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      // Removed allowsEditing to prevent cropping
-      aspect: [3, 4], // Aspect ratio for the camera
-      quality: 1, // Set to 1 for high quality
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
 
-    console.log('Camera result:', result); // Debugging the result
-
     if (!result.canceled) {
-      const uri = result.assets && result.assets[0]?.uri; // Safely access the URI
-      console.log('Image URI:', uri);
-
-      // Convert the image to JPG format
-      const manipResult = await ImageManipulator.manipulateAsync(
-        uri, 
-        [],
-        { format: ImageManipulator.SaveFormat.JPEG } // Convert to JPG
-      );
-
-      console.log('Manipulated Image URI:', manipResult.uri);
-      setSelectedImage(manipResult.uri); // Store the converted image URI
-      setFormData((prevData) => ({
-        ...prevData,
-        photo: manipResult.uri, // Update formData with the selected JPG image URI
-      }));
+      setPhoto(result.assets[0]); // Store the captured photo
+      setSelectedImage(result.assets[0].uri);
     } else {
-      console.log('Camera was canceled');
+      Alert.alert("No photo captured!");
     }
   };
 
 
-  // Confirm and delete the photo
+  // const launchCamerass = async () => {
+  //   const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+  //   if (!permissionResult.granted) {
+  //     Alert.alert('Permission Required', 'Camera access is needed to take photos.');
+  //     return;
+  //   }
+
+  //   const result = await ImagePicker.launchCameraAsync({
+  //     // Removed allowsEditing to prevent cropping
+  //     aspect: [3, 4], // Aspect ratio for the camera
+  //     quality: 1, // Set to 1 for high quality
+  //   });
+
+  //   console.log('Camera result:', result); // Debugging the result
+
+  //   if (!result.canceled) {
+  //     const uri = result.assets && result.assets[0]?.uri; // Safely access the URI
+  //     console.log('Image URI:', uri);
+
+  //     // Convert the image to JPG format
+  //     const manipResult = await ImageManipulator.manipulateAsync(
+  //       uri, 
+  //       [],
+  //       { format: ImageManipulator.SaveFormat.JPEG } // Convert to JPG
+  //     );
+
+  //     console.log('Manipulated Image URI:', manipResult.uri);
+  //     setSelectedImage(manipResult.uri); // Store the converted image URI
+  //     setFormData((prevData) => ({
+  //       ...prevData,
+  //       photo: manipResult.uri, // Update formData with the selected JPG image URI
+  //     }));
+  //   } else {
+  //     console.log('Camera was canceled');
+  //   }
+  // };
+
+
+
   const confirmDeletePhoto = () => {
     Alert.alert(
       'Delete Photo',
@@ -286,17 +357,27 @@ const MapDetailsScreen = ({ route }) => {
           )}
         </View>
 
-        {/* Remarks */}
         <TextInput
           style={styles.input}
           placeholder="Remarks"
           value={formData.remarks}
           onChangeText={(value) => handleInputChange('remarks', value)}
         />
+        {/* <Button title="Capture Photo" onPress={launchCamera} color="#6200EE" /> */}
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Submit</Text>
+        <TouchableOpacity
+          style={[
+            styles.submitButton,
+            (loading || !photo) && styles.disabledButton, // Apply disabled styling
+          ]}
+          onPress={handleSubmit}
+          disabled={loading || !photo} // Disable button when loading or photo is not selected
+        >
+          <Text style={styles.submitButtonText}>
+            {loading ? "Sending..." : "Submit"}
+          </Text>
         </TouchableOpacity>
+
       </ScrollView>
 
     </View>
@@ -323,8 +404,8 @@ const styles = {
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
-    color:"#4A4947",
-    fontSize:20
+    color: "#4A4947",
+    fontSize: 20
   },
   dropdownInput: {
     height: 50,
@@ -389,13 +470,21 @@ const styles = {
     backgroundColor: '#4A4947',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2, 
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
-    marginBottom:18,
-    marginTop:-10
+    marginBottom: 18,
+    marginTop: -10
+  },
+  submitButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  disabledButton: {
+    backgroundColor: "#A9A9A9", 
   },
 };
 

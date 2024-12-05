@@ -5,24 +5,25 @@ import MapScreen from '../screens/MapScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Demo from '../screens/Demo';
 
 const Tab = createBottomTabNavigator();
 
 const CustomHeaderTitlePro = () => (
   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
     <View style={{ flexDirection: 'col', alignItems: 'center' }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center',marginLeft: 15 }}>
         <Image
           source={require('../assets/Log1.png')}
           style={{ width: 65, height: 45 }}
         />
         <Image
           source={require('../assets/Log2.png')}
-          style={{ width: 42, height: 42, marginLeft: 10 }}
+          style={{ width: 42, height: 42, marginLeft: 20 }}
         />
       </View>
     </View>
-    <View style={{ marginLeft: 55, alignItems: 'center' }}>
+    <View style={{ marginLeft: 35, alignItems: 'center' }}>
       <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#4A4947' }}>Plot D2D Survey</Text>
       <Text style={{ fontSize: 14, color: 'gray' }}>Version - 0.0.1</Text>
     </View>
@@ -78,6 +79,17 @@ function TabNavigator() {
             <Icon name="person-outline" color={color} size={size} />
           ),
           tabBarLabel: 'Profile',
+          headerTitle: () => <CustomHeaderTitlePro />,
+        }}
+      />
+      <Tab.Screen
+        name="Demo"
+        component={Demo}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="person-outline" color={color} size={size} />
+          ),
+          tabBarLabel: 'Demo',
           headerTitle: () => <CustomHeaderTitlePro />,
         }}
       />
