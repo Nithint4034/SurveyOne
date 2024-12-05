@@ -62,7 +62,6 @@ const MapDetailsScreen = ({ route }) => {
 
       // Append all fields
       formData.append("username", username);
-      formData.append("Date", "2024-12-05");
       formData.append("District", formDatas.district);
       formData.append("Tehsil", formDatas.tehsil);
       formData.append("Village", formDatas.villageName);
