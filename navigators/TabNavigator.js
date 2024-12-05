@@ -82,7 +82,7 @@ function TabNavigator() {
           headerTitle: () => <CustomHeaderTitlePro />,
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Demo"
         component={Demo}
         options={{
@@ -92,7 +92,7 @@ function TabNavigator() {
           tabBarLabel: 'Demo',
           headerTitle: () => <CustomHeaderTitlePro />,
         }}
-      />
+      /> */}
     </Tab.Navigator>
   );
 }

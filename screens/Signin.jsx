@@ -81,7 +81,7 @@ const Signin = () => {
             style={styles.root}
             resizeMode="cover"
         >
-            <StatusBar backgroundColor="transparent" barStyle="dark-content" translucent />
+            <StatusBar backgroundColor="#4A4947" barStyle="light-content" />
             {showComponent === 'register' && <Register setShowComponent={setShowComponent} />}
             {!showComponent && (
                 <View style={styles.container}>

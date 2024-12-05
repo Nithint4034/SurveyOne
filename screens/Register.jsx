@@ -79,7 +79,7 @@ const Register = ({ setShowComponent }) => {
             style={styles.root}
             resizeMode="cover"
         >
-            <StatusBar backgroundColor="transparent" barStyle="dark-content" translucent />
+            <StatusBar backgroundColor="#4A4947" barStyle="light-content" />
             <View style={styles.container}>
                 {/* Icons Container */}
                 <View style={styles.iconsContainer}>
