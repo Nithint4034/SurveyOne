@@ -4,12 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TextInput } from 'react-native-paper';
+import { Modal, TextInput } from 'react-native-paper';
 import { FontAwesome } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { Picker } from '@react-native-picker/picker';
 
-
-const MapDetailsScreen = ({ route }) => {
+const MapDetailsScreen = ({ route, navigation }) => {
   const { latitude, longitude } = route.params || {};
   const [selectedImage, setSelectedImage] = useState(null);
   const [photo, setPhoto] = useState(null);
@@ -17,9 +17,13 @@ const MapDetailsScreen = ({ route }) => {
   const [displayDate, setDisplayDate] = useState(''); // State for displayed date
   const [apiDate, setApiDate] = useState(''); // State for raw date to send to API
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-
   const showDatePicker = () => setDatePickerVisibility(true);
   const hideDatePicker = () => setDatePickerVisibility(false);
+  const [selectedOption] = useState('');
+  const [selectedOption1, setSelectedOption1] = useState('');
+  const [selectedOption2, setSelectedOption2] = useState('');
+  const [selectedOption3, setSelectedOption3] = useState('');
+  const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
 
   const [formDatas, setFormDatas] = useState({
     district: '',
@@ -30,7 +34,6 @@ const MapDetailsScreen = ({ route }) => {
     acquiredArea: '',
     landOwner: '',
     compensationAmount: '',
-    compensationDate: '',
     leaseBackStatus: '',
     leaseBackArea: '',
     plotNo: '',
@@ -46,7 +49,21 @@ const MapDetailsScreen = ({ route }) => {
     remarks: '',
   });
 
-  console.log('form data', formDatas);
+  const pickerOptions1 = [
+    { label: 'Yes', value: 'Yes' },
+    { label: 'No', value: 'No' },
+  ];
+
+  const pickerOptions2 = [
+    { label: 'Built', value: 'Built' },
+    { label: 'Vacant', value: 'Vacant' },
+  ];
+
+  const pickerOptions3 = [
+    { label: 'Enchrochment', value: 'Enchrochment' },
+    { label: 'Vacant', value: 'Vacant' },
+    { label: 'Unplanned', value: 'Unplanned' },
+  ];
 
   const handleInputChange = (fieldName, value) => {
     setFormDatas((prevData) => ({
@@ -56,12 +73,11 @@ const MapDetailsScreen = ({ route }) => {
   };
 
   const handleConfirm = (selectedDate) => {
-    const rawDate = selectedDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-    setApiDate(rawDate); // Set the raw date for the API
-    setDisplayDate(`Compensation Date: ${rawDate}`); // Set the formatted date for display
+    const rawDate = selectedDate.toISOString().split('T')[0];
+    setApiDate(rawDate);
+    setDisplayDate(`Compensation Date: ${rawDate}`);
     hideDatePicker();
   };
-
 
   const handleSubmit = async () => {
     if (!photo) {
@@ -92,8 +108,8 @@ const MapDetailsScreen = ({ route }) => {
       formData.append("PlotNo", formDatas.plotNo);
       formData.append("PlotSize", formDatas.plotSize);
       formData.append("Allotee", formDatas.allotteeName);
-      formData.append("BuiltUp", formDatas.physicalCondition);
-      formData.append("Encroachment", formDatas.encroachmentStatus);
+      formData.append("BuiltUp", selectedOption2);
+      formData.append("Encroachment", selectedOption3);
       formData.append("Latitude", `${latitude}`);
       formData.append("Longitude", `${longitude}`);
       formData.append("Remarks", formDatas.remarks);
@@ -115,9 +131,13 @@ const MapDetailsScreen = ({ route }) => {
       );
 
       if (response.status >= 200 && response.status < 300) {
-        Alert.alert("Success", "Data sent successfully!");
         setSelectedImage(null)
-        console.log("Response:", response.data);
+        setSuccessModalVisible(true);
+        setFormDatas('')
+        setTimeout(() => {
+          setSuccessModalVisible(false); // Close the success modal after 2 seconds
+        navigation.navigate('MapMain');
+        }, 2000);
       } else {
         Alert.alert("Warning", "Unexpected response received!");
         console.warn("Unexpected Response:", response.data);
@@ -231,7 +251,7 @@ const MapDetailsScreen = ({ route }) => {
 
         <Text style={styles.sectionTitle}>Land Details</Text>
         <TextInput
-          label="Khasra No"
+          label="Khsra No"
           value={formDatas.khasraNo}
           onChangeText={(value) => handleInputChange('khasraNo', value)}
           mode="outlined"
@@ -285,26 +305,24 @@ const MapDetailsScreen = ({ route }) => {
 
 
 
-      <View style={styles.inputContainerCal}>
-        <TextInput
-          style={styles.inputCal}
-          value={displayDate}
-          placeholder="Compensation Date"
-          editable={false}
+        <View style={styles.inputContainerCal}>
+          <TextInput
+            style={styles.inputCal}
+            value={displayDate}
+            placeholder="Compensation Date"
+            editable={false}
+          />
+          <TouchableOpacity onPress={showDatePicker}>
+            <FontAwesome name="calendar" size={24} color="gray" />
+          </TouchableOpacity>
+        </View>
+
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
         />
-        <TouchableOpacity onPress={showDatePicker}>
-          <FontAwesome name="calendar" size={24} color="gray" />
-        </TouchableOpacity>
-      </View>
-
-      <DateTimePickerModal
-        isVisible={isDatePickerVisible}
-        mode="date"
-        onConfirm={handleConfirm}
-        onCancel={hideDatePicker}
-      />
-   
-
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
           mode="date"
@@ -340,7 +358,6 @@ const MapDetailsScreen = ({ route }) => {
           }}
         />
 
-
         <Text style={styles.sectionTitle}>Planning Details</Text>
         <TextInput
           label="Plot No"
@@ -369,13 +386,20 @@ const MapDetailsScreen = ({ route }) => {
           }}
         />
 
-
-        <TextInput
-          style={styles.input}
-          placeholder="Alotment Status : Yes / No"
-          value={formDatas.allotmentStatus}
-          onChangeText={(value) => handleInputChange('allotmentStatus', value)}
-        />
+        {/* Dropdown Selector Section */}
+        <View style={styles.dropdownContainerDrop}>
+          <Picker
+            selectedValue={selectedOption1}
+            onValueChange={(itemValue) => setSelectedOption1(itemValue)}
+            mode="dropdown"
+            style={styles.picker}
+          >
+            <Picker.Item label="Alotment Status" value="" />
+            {pickerOptions1.map((option, index) => (
+              <Picker.Item key={index} label={option.label} value={option.value} />
+            ))}
+          </Picker>
+        </View>
 
         <TextInput
           label="Allottee Name"
@@ -391,21 +415,34 @@ const MapDetailsScreen = ({ route }) => {
           }}
         />
 
-
         <Text style={styles.sectionTitle}>Physical Condition</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Builtup / Vacant"
-          value={formDatas.physicalCondition}
-          onChangeText={(value) => handleInputChange('physicalCondition', value)}
-        />
+        <View style={styles.dropdownContainerDrop}>
+          <Picker
+            selectedValue={selectedOption}
+            onValueChange={(itemValue) => setSelectedOption2(itemValue)}
+            mode="dropdown"
+            style={styles.picker}
+          >
+            <Picker.Item label="Built/Vacant" value="" />
+            {pickerOptions2.map((option, index) => (
+              <Picker.Item key={index} label={option.label} value={option.value} />
+            ))}
+          </Picker>
+        </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Encroachment / Vacant / Unplanned"
-          value={formDatas.encroachmentStatus}
-          onChangeText={(value) => handleInputChange('encroachmentStatus', value)}
-        />
+        <View style={styles.dropdownContainerDrop}>
+          <Picker
+            selectedValue={selectedOption}
+            onValueChange={(itemValue) => setSelectedOption3(itemValue)}
+            mode="dropdown"
+            style={styles.picker}
+          >
+            <Picker.Item label="Encroachment/Vacant/Unplanned" value="" />
+            {pickerOptions3.map((option, index) => (
+              <Picker.Item key={index} label={option.label} value={option.value} />
+            ))}
+          </Picker>
+        </View>
 
         <TextInput
           label="Latitude"
@@ -468,10 +505,10 @@ const MapDetailsScreen = ({ route }) => {
         <TouchableOpacity
           style={[
             styles.submitButton,
-            (loading || !photo) && styles.disabledButton,
+            // (loading || !photo) && styles.disabledButton,
           ]}
           onPress={handleSubmit}
-          disabled={loading || !photo}
+        // disabled={loading || !photo}
         >
           <Text style={styles.submitButtonText}>
             {loading ? "Sending..." : "Submit"}
@@ -479,6 +516,21 @@ const MapDetailsScreen = ({ route }) => {
         </TouchableOpacity>
 
       </ScrollView>
+
+      {/* Success Modal */}
+      <Modal
+        transparent={true}
+        visible={isSuccessModalVisible}
+        animationType="fade"
+        onRequestClose={() => setSuccessModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <FontAwesome name="check-circle" size={50} color="green" />
+            <Text style={styles.successMessage}>Sent Successfully!</Text>
+          </View>
+        </View>
+      </Modal>
 
     </View>
   );
@@ -603,7 +655,7 @@ const styles = {
     paddingVertical: 5,
     height: 52,
     backgroundColor: '#fff',
-    marginTop:8
+    marginTop: 8
   },
   inputCal: {
     flex: 1,
@@ -611,6 +663,41 @@ const styles = {
     paddingHorizontal: 5,
     backgroundColor: 'transparent',
     height: 52,
+  },
+  dropdownContainerDrop: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 5,
+    paddingHorizontal: 0,
+    paddingVertical: 5,
+    marginBottom: 10,
+    height: 52,
+    backgroundColor: '#fff',
+  },
+  picker: {
+    marginTop: -8
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: 250,
+    height: 150,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  successMessage: {
+    marginTop: 10,
+    fontSize: 18,
+    color: 'green',
+    fontWeight: 'bold',
   },
 };
 

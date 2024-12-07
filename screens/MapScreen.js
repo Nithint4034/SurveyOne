@@ -1,23 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Alert, Modal, ActivityIndicator } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
-import Icon from 'react-native-vector-icons/MaterialIcons';  // Import MaterialIcons
+import Icon from 'react-native-vector-icons/MaterialIcons'; // Import MaterialIcons
 
 export default function MapScreen({ navigation }) {
   const [location, setLocation] = useState(null);
-  const [markerCoordinate, setMarkerCoordinate] = useState(null);  // Initialize with null
+  const [markerCoordinate, setMarkerCoordinate] = useState(null); // Initialize with null
   const [mapType, setMapType] = useState('standard'); // State for map type
+  const [loading, setLoading] = useState(true); // State for loader visibility
 
   useEffect(() => {
     (async () => {
+      setLoading(true); // Show loader
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
+        setLoading(false); // Hide loader if permission is not granted
         return;
       }
 
       let currentLocation = await Location.getCurrentPositionAsync({});
       setLocation(currentLocation.coords);
+      setLoading(false); // Hide loader once location is fetched
     })();
   }, []);
 
@@ -41,6 +45,18 @@ export default function MapScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* Loader Modal */}
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={loading}
+        onRequestClose={() => {}}
+      >
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#ffffff" />
+        </View>
+      </Modal>
+
       {location && (
         <MapView
           style={styles.map}
@@ -53,7 +69,7 @@ export default function MapScreen({ navigation }) {
             latitudeDelta: 0.0022,
             longitudeDelta: 0.0022,
           }}
-          onPress={handleMapPress}  // This listens for tap on map
+          onPress={handleMapPress} // This listens for tap on map
           mapType={mapType} // Set the map type based on state
         >
           {/* Only render marker if markerCoordinate is set */}
@@ -74,10 +90,18 @@ export default function MapScreen({ navigation }) {
       )}
 
       {/* Plus icon to add marker */}
-      <TouchableOpacity 
-        style={[styles.plusButton, buttonStyle]} 
-        onPress={() => {
-          // This will create the marker at the user's current location
+      <TouchableOpacity
+        style={[styles.plusButton, buttonStyle]}
+        onPress={async () => {
+          const isLocationEnabled = await Location.hasServicesEnabledAsync();
+          if (!isLocationEnabled) {
+            Alert.alert(
+              'Location Disabled',
+              'Turn on device location to add a marker at your current location.'
+            );
+            return;
+          }
+
           if (location) {
             setMarkerCoordinate(location); // Set marker on press of the plus icon
           }
@@ -91,8 +115,8 @@ export default function MapScreen({ navigation }) {
       </TouchableOpacity>
 
       {/* Layer toggle button with conditional background color */}
-      <TouchableOpacity 
-        style={[styles.layerButton, buttonStyle]} 
+      <TouchableOpacity
+        style={[styles.layerButton, buttonStyle]}
         onPress={() => {
           // Toggle between standard and satellite map layers
           setMapType((prevType) => (prevType === 'standard' ? 'satellite' : 'standard'));
@@ -106,8 +130,8 @@ export default function MapScreen({ navigation }) {
       </TouchableOpacity>
 
       {/* Refresh button to reset marker */}
-      <TouchableOpacity 
-        style={[styles.refreshButton, buttonStyle]} 
+      <TouchableOpacity
+        style={[styles.refreshButton, buttonStyle]}
         onPress={handleRefresh}  // Reset marker when refresh button is pressed
       >
         <Icon
@@ -156,5 +180,11 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
   },
 });
