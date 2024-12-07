@@ -8,6 +8,7 @@ import { Modal, TextInput } from 'react-native-paper';
 import { FontAwesome } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Picker } from '@react-native-picker/picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 const MapDetailsScreen = ({ route, navigation }) => {
   const { latitude, longitude } = route.params || {};
@@ -79,6 +80,8 @@ const MapDetailsScreen = ({ route, navigation }) => {
     hideDatePicker();
   };
 
+
+
   const handleSubmit = async () => {
     if (!photo) {
       Alert.alert("Error", "Please capture a photo first.");
@@ -131,13 +134,9 @@ const MapDetailsScreen = ({ route, navigation }) => {
       );
 
       if (response.status >= 200 && response.status < 300) {
-        setSelectedImage(null)
         setSuccessModalVisible(true);
         setFormDatas('')
-        setTimeout(() => {
-          setSuccessModalVisible(false); // Close the success modal after 2 seconds
-        navigation.navigate('MapMain');
-        }, 2000);
+        setSelectedImage(null)
       } else {
         Alert.alert("Warning", "Unexpected response received!");
         console.warn("Unexpected Response:", response.data);
@@ -154,27 +153,45 @@ const MapDetailsScreen = ({ route, navigation }) => {
         console.error("Unexpected Error:", error.message);
       }
     } finally {
+      setTimeout(() => {
+        setSuccessModalVisible(false); // Close the success modal after 2 seconds
+        navigation.navigate('MapMain'); 
+      }, 3000);
       setLoading(false);
     }
   };
 
+
   const launchCamera = async () => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-
+  
     if (permissionResult.granted === false) {
       Alert.alert("Camera permission is required to use this feature.");
       return;
     }
-
+  
     const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
+      allowsEditing: false, // Disable cropping
+      quality: 0.5, // Capture the photo at full quality
     });
-
+  
     if (!result.canceled) {
-      setPhoto(result.assets[0]);
-      setSelectedImage(result.assets[0].uri);
+      const uri = result.assets[0].uri;
+  
+      try {
+        // Compress the image further
+        const compressedResult = await ImageManipulator.manipulateAsync(
+          uri,
+          [{ resize: { width: 600 } }], // Resize to a width of 600px
+          { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG } // Compress to 20% quality
+        );
+  
+        // Update states with the original and compressed image URIs
+        setPhoto(result.assets[0]); // Store the full photo object
+        setSelectedImage(compressedResult.uri); // Store the compressed URI
+      } catch (error) {
+        Alert.alert("Error processing the image: " + error.message);
+      }
     } else {
       Alert.alert("No photo captured!");
     }
@@ -302,8 +319,6 @@ const MapDetailsScreen = ({ route, navigation }) => {
             },
           }}
         />
-
-
 
         <View style={styles.inputContainerCal}>
           <TextInput

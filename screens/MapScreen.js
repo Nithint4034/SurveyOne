@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity, Alert, Modal, ActivityIndicator } f
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Import MaterialIcons
+import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
 
 export default function MapScreen({ navigation }) {
   const [location, setLocation] = useState(null);
@@ -24,6 +25,13 @@ export default function MapScreen({ navigation }) {
       setLoading(false); // Hide loader once location is fetched
     })();
   }, []);
+
+  // Reset markerCoordinate when the screen gains focus
+  useFocusEffect(
+    React.useCallback(() => {
+      setMarkerCoordinate(null); // Reset markerCoordinate
+    }, [])
+  );
 
   const handleMarkerDragEnd = (e) => {
     const { latitude, longitude } = e.nativeEvent.coordinate;

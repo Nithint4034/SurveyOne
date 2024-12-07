@@ -1,127 +1,87 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet } from 'react-native';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { FontAwesome } from '@expo/vector-icons';
+import { View, Button, Image, Alert, Text, StyleSheet } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { FileSystem } from 'expo-file-system';
 
-export default function App() {
-  const [date, setDate] = useState('');
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const [isSuccessModalVisible, setSuccessModalVisible] = useState(false); // State for success modal
+const ImagePickerComponent = () => {
+  const [image, setImage] = useState(null);  // State to store the selected image URI
+  const [imageSize, setImageSize] = useState(null);  // State to store the image file size
 
-  // Functions to handle date picker
-  const showDatePicker = () => setDatePickerVisibility(true);
-  const hideDatePicker = () => setDatePickerVisibility(false);
+  const launchCamera = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
-  const handleConfirm = (selectedDate) => {
-    const formattedDate = selectedDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-    setDate(formattedDate);
-    hideDatePicker();
-  };
+    if (permissionResult.granted === false) {
+      Alert.alert("Camera permission is required to use this feature.");
+      return;
+    }
 
-  const showSuccessModal = () => {
-    setSuccessModalVisible(true);
-    setTimeout(() => {
-      setSuccessModalVisible(false); // Close the success modal after 2 seconds
-    }, 2000);
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: false,  // Disable cropping or editing
+      quality: 1,  // Highest quality
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+
+      // Compress the image
+      const compressedResult = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 800 } }],  // Resize to a width of 800px
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } // Compress image to 70% quality
+      );
+
+      // Set the compressed image URI
+      setImage(compressedResult.uri);
+
+      // Get the file size of the compressed image
+      const fileInfo = await FileSystem.getInfoAsync(compressedResult.uri);
+      setImageSize(fileInfo.size);  // Store the file size in bytes
+    } else {
+      Alert.alert("No photo captured!");
+    }
   };
 
   return (
     <View style={styles.container}>
-      {/* Input and Date Picker */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={date}
-          placeholder="Compensation Date"
-          editable={false}
-        />
-        <TouchableOpacity onPress={showDatePicker}>
-          <FontAwesome name="calendar" size={24} color="gray" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Button to trigger Success Modal */}
-      <TouchableOpacity style={styles.successButton} onPress={showSuccessModal}>
-        <Text style={styles.buttonText}>Show Success</Text>
-      </TouchableOpacity>
-
-      {/* Date Picker Modal */}
-      <DateTimePickerModal
-        isVisible={isDatePickerVisible}
-        mode="date"
-        onConfirm={handleConfirm}
-        onCancel={hideDatePicker}
-      />
-
-      {/* Success Modal */}
-      <Modal
-        transparent={true}
-        visible={isSuccessModalVisible}
-        animationType="fade"
-        onRequestClose={() => setSuccessModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <FontAwesome name="check-circle" size={50} color="green" />
-            <Text style={styles.successMessage}>Success!</Text>
-          </View>
+      <Button title="Launch Camera" onPress={launchCamera} />
+      
+      {image && (
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: image }} style={styles.image} />
+          <Text style={styles.imageSize}>Size: {(imageSize / 1024).toFixed(2)} KB</Text>
         </View>
-      </Modal>
+      )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  inputContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
   },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    paddingHorizontal: 5,
-  },
-  successButton: {
+  imageContainer: {
     marginTop: 20,
-    backgroundColor: 'green',
-    padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: 250,
-    height: 150,
-    backgroundColor: 'white',
+    width: 300,  // Adjust width as needed
+    height: 400,  // Adjust height as needed
     borderRadius: 10,
-    justifyContent: 'center',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#ccc',
     alignItems: 'center',
-    padding: 20,
   },
-  successMessage: {
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  imageSize: {
     marginTop: 10,
-    fontSize: 18,
-    color: 'green',
-    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#555',
   },
 });
+
+export default ImagePickerComponent;

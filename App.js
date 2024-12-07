@@ -4,6 +4,9 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, ImageBackground } from 'react-native';
 import LoginProvider from './context/LoginProvider';
 import AppNavigator from './navigators/AppNavigator';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs(true);
 
 export default function App() {
 
