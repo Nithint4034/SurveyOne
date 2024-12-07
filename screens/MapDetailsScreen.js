@@ -50,6 +50,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
     remarks: '',
   });
 
+
   const pickerOptions1 = [
     { label: 'Yes', value: 'Yes' },
     { label: 'No', value: 'No' },
@@ -104,14 +105,18 @@ const MapDetailsScreen = ({ route, navigation }) => {
       formData.append("Sector", formDatas.sector);
       formData.append("Khasra", formDatas.khasraNo);
       formData.append("Area", formDatas.acquiredArea);
+      formData.append("OwnerName", formDatas.landOwner);
+      formData.append("CompensationStatus", formDatas.compensationAmount);
       formData.append("Compensation", formDatas.compensationAmount);
       formData.append("CompensationDate", apiDate);
       formData.append("LeaseArea", formDatas.leaseBackArea);
       formData.append("LeaseStatus", formDatas.leaseBackStatus);
       formData.append("PlotNo", formDatas.plotNo);
+      formData.append("AlloteeStatus", selectedOption1);
       formData.append("PlotSize", formDatas.plotSize);
       formData.append("Allotee", formDatas.allotteeName);
       formData.append("BuiltUp", selectedOption2);
+      formData.append("LandUse", formDatas.landUse);
       formData.append("Encroachment", selectedOption3);
       formData.append("Latitude", `${latitude}`);
       formData.append("Longitude", `${longitude}`);
@@ -154,8 +159,8 @@ const MapDetailsScreen = ({ route, navigation }) => {
       }
     } finally {
       setTimeout(() => {
-        setSuccessModalVisible(false); // Close the success modal after 2 seconds
-        navigation.navigate('MapMain'); 
+        setSuccessModalVisible(false); 
+        navigation.navigate('MapMain');
       }, 3000);
       setLoading(false);
     }
@@ -164,20 +169,20 @@ const MapDetailsScreen = ({ route, navigation }) => {
 
   const launchCamera = async () => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-  
+
     if (permissionResult.granted === false) {
       Alert.alert("Camera permission is required to use this feature.");
       return;
     }
-  
+
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: false, // Disable cropping
       quality: 0.5, // Capture the photo at full quality
     });
-  
+
     if (!result.canceled) {
       const uri = result.assets[0].uri;
-  
+
       try {
         // Compress the image further
         const compressedResult = await ImageManipulator.manipulateAsync(
@@ -185,7 +190,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
           [{ resize: { width: 600 } }], // Resize to a width of 600px
           { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG } // Compress to 20% quality
         );
-  
+
         // Update states with the original and compressed image URIs
         setPhoto(result.assets[0]); // Store the full photo object
         setSelectedImage(compressedResult.uri); // Store the compressed URI
@@ -420,6 +425,20 @@ const MapDetailsScreen = ({ route, navigation }) => {
           label="Allottee Name"
           value={formDatas.allotteeName}
           onChangeText={(value) => handleInputChange('allotteeName', value)}
+          mode="outlined"
+          style={styles.input}
+          theme={{
+            colors: {
+              primary: '#4A4947',
+              placeholder: '#888',
+            },
+          }}
+        />
+
+        <TextInput
+          label="Land Use"
+          value={formDatas.landUse}
+          onChangeText={(value) => handleInputChange('landUse', value)}
           mode="outlined"
           style={styles.input}
           theme={{
