@@ -5,6 +5,8 @@ import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TextInput } from 'react-native-paper';
+import { FontAwesome } from '@expo/vector-icons';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 
 const MapDetailsScreen = ({ route }) => {
@@ -12,6 +14,12 @@ const MapDetailsScreen = ({ route }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [displayDate, setDisplayDate] = useState(''); // State for displayed date
+  const [apiDate, setApiDate] = useState(''); // State for raw date to send to API
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const showDatePicker = () => setDatePickerVisibility(true);
+  const hideDatePicker = () => setDatePickerVisibility(false);
 
   const [formDatas, setFormDatas] = useState({
     district: '',
@@ -47,6 +55,14 @@ const MapDetailsScreen = ({ route }) => {
     }));
   };
 
+  const handleConfirm = (selectedDate) => {
+    const rawDate = selectedDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    setApiDate(rawDate); // Set the raw date for the API
+    setDisplayDate(`Compensation Date: ${rawDate}`); // Set the formatted date for display
+    hideDatePicker();
+  };
+
+
   const handleSubmit = async () => {
     if (!photo) {
       Alert.alert("Error", "Please capture a photo first.");
@@ -70,7 +86,7 @@ const MapDetailsScreen = ({ route }) => {
       formData.append("Khasra", formDatas.khasraNo);
       formData.append("Area", formDatas.acquiredArea);
       formData.append("Compensation", formDatas.compensationAmount);
-      formData.append("CompensationDate", formDatas.compensationDate);
+      formData.append("CompensationDate", apiDate);
       formData.append("LeaseArea", formDatas.leaseBackArea);
       formData.append("LeaseStatus", formDatas.leaseBackStatus);
       formData.append("PlotNo", formDatas.plotNo);
@@ -267,11 +283,33 @@ const MapDetailsScreen = ({ route }) => {
           }}
         />
 
+
+
+      <View style={styles.inputContainerCal}>
         <TextInput
-          style={styles.input}
+          style={styles.inputCal}
+          value={displayDate}
           placeholder="Compensation Date"
-          value={formDatas.compensationDate}
-          onChangeText={(value) => handleInputChange('compensationDate', value)}
+          editable={false}
+        />
+        <TouchableOpacity onPress={showDatePicker}>
+          <FontAwesome name="calendar" size={24} color="gray" />
+        </TouchableOpacity>
+      </View>
+
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+      />
+   
+
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
         />
 
         <Text style={styles.sectionTitle}>Lease Back</Text>
@@ -548,6 +586,31 @@ const styles = {
   },
   disabledButton: {
     backgroundColor: "#A9A9A9",
+  },
+  containerCal: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  inputContainerCal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    height: 52,
+    backgroundColor: '#fff',
+    marginTop:8
+  },
+  inputCal: {
+    flex: 1,
+    fontSize: 16,
+    paddingHorizontal: 5,
+    backgroundColor: 'transparent',
+    height: 52,
   },
 };
 

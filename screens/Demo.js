@@ -1,53 +1,65 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import { Picker } from '@react-native-picker/picker'; // Correct import
+import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { FontAwesome } from '@expo/vector-icons';
 
-const Demo = () => {
-  const [selectedState, setSelectedState] = useState('');
+export default function App() {
+  const [date, setDate] = useState('');
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-  const states = ['California', 'Texas', 'Florida', 'New York', 'Illinois'];
+  // Functions to handle date picker
+  const showDatePicker = () => setDatePickerVisibility(true);
+  const hideDatePicker = () => setDatePickerVisibility(false);
+
+  const handleConfirm = (selectedDate) => {
+    const formattedDate = selectedDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    setDate(formattedDate);
+    hideDatePicker();
+  };
 
   return (
-    <View style={styles.container}>
-      
-      <Picker
-        selectedValue={selectedState}
-        onValueChange={(itemValue) => setSelectedState(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Select State" value="" />
-        {states.map((state, index) => (
-          <Picker.Item key={index} label={state} value={state} />
-        ))}
-      </Picker>
+    <View style={styles.containerCal}>
+      <View style={styles.inputContainerCal}>
+        <TextInput
+          style={styles.inputCal}
+          value={date}
+          placeholder="Compensation Date"
+          editable={false}
+        />
+        <TouchableOpacity onPress={showDatePicker}>
+          <FontAwesome name="calendar" size={24} color="gray" />
+        </TouchableOpacity>
+      </View>
 
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+      />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
+  containerCal: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f4f4f9',
     padding: 20,
+    backgroundColor: '#fff',
   },
-  picker: {
-    height: 50,
-    width: 350,
-    borderColor: '#888',  // Adding a border color
-    borderWidth: 2,        // Setting the border width
-    borderRadius: 50,      // Round corners for the borde
-    marginBottom: 20,
-    backgroundColor: '#fff', // Giving a white background for the picker
-    paddingHorizontal: 10,    // Optional padding inside the picker
+  inputContainerCal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
-  selectedText: {
+  inputCal: {
+    flex: 1,
     fontSize: 16,
-    marginTop: 20,
-    color: '#333',  // Setting the color of the text
+    paddingHorizontal: 5,
   },
 });
-
-export default Demo;
