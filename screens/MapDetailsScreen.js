@@ -81,14 +81,12 @@ const MapDetailsScreen = ({ route, navigation }) => {
     hideDatePicker();
   };
 
-
-
   const handleSubmit = async () => {
     if (!photo) {
       Alert.alert("Error", "Please capture a photo first.");
       return;
     }
-
+  
     setLoading(true);
     try {
       const username = await AsyncStorage.getItem("userName");
@@ -96,38 +94,44 @@ const MapDetailsScreen = ({ route, navigation }) => {
         Alert.alert("Error", "Username not found in storage.");
         return;
       }
+  
+      // Preprocess formDatas to replace empty fields with NaN
+      const processedFormDatas = Object.keys(formDatas).reduce((acc, key) => {
+        acc[key] = formDatas[key] === "" || formDatas[key] === null ? NaN : formDatas[key];
+        return acc;
+      }, {});
+  
       const formData = new FormData();
-
       formData.append("username", username);
-      formData.append("District", formDatas.district);
-      formData.append("Tehsil", formDatas.tehsil);
-      formData.append("Village", formDatas.villageName);
-      formData.append("Sector", formDatas.sector);
-      formData.append("Khasra", formDatas.khasraNo);
-      formData.append("Area", formDatas.acquiredArea);
-      formData.append("OwnerName", formDatas.landOwner);
-      formData.append("CompensationStatus", formDatas.compensationAmount);
-      formData.append("Compensation", formDatas.compensationAmount);
+      formData.append("District", processedFormDatas.district);
+      formData.append("Tehsil", processedFormDatas.tehsil);
+      formData.append("Village", processedFormDatas.villageName);
+      formData.append("Sector", processedFormDatas.sector);
+      formData.append("Khasra", processedFormDatas.khasraNo);
+      formData.append("Area", processedFormDatas.acquiredArea);
+      formData.append("OwnerName", processedFormDatas.landOwner);
+      formData.append("CompensationStatus", processedFormDatas.compensationStatus);
+      formData.append("Compensation", processedFormDatas.compensationAmount);
       formData.append("CompensationDate", apiDate);
-      formData.append("LeaseArea", formDatas.leaseBackArea);
-      formData.append("LeaseStatus", formDatas.leaseBackStatus);
-      formData.append("PlotNo", formDatas.plotNo);
+      formData.append("LeaseArea", processedFormDatas.leaseBackArea);
+      formData.append("LeaseStatus", processedFormDatas.leaseBackStatus);
+      formData.append("PlotNo", processedFormDatas.plotNo);
       formData.append("AlloteeStatus", selectedOption1);
-      formData.append("PlotSize", formDatas.plotSize);
-      formData.append("Allotee", formDatas.allotteeName);
+      formData.append("PlotSize", processedFormDatas.plotSize);
+      formData.append("Allotee", processedFormDatas.allotteeName);
       formData.append("BuiltUp", selectedOption2);
-      formData.append("LandUse", formDatas.landUse);
+      formData.append("LandUse", processedFormDatas.landUse);
       formData.append("Encroachment", selectedOption3);
       formData.append("Latitude", `${latitude}`);
       formData.append("Longitude", `${longitude}`);
-      formData.append("Remarks", formDatas.remarks);
-
+      formData.append("Remarks", processedFormDatas.remarks);
+  
       formData.append("Photo", {
         uri: photo.uri,
         name: "photo.jpg",
         type: "image/jpeg",
       });
-
+  
       const response = await axios.post(
         `https://nithint.pythonanywhere.com/land/${username}/`,
         formData,
@@ -137,18 +141,22 @@ const MapDetailsScreen = ({ route, navigation }) => {
           },
         }
       );
-
+  
       if (response.status >= 200 && response.status < 300) {
         setSuccessModalVisible(true);
-        setFormDatas('')
-        setSelectedImage(null)
+        setFormDatas('');
+        setSelectedImage(null);
+        setTimeout(() => {
+          setSuccessModalVisible(false);
+          navigation.navigate('MapMain');
+        }, 3000);
       } else {
         Alert.alert("Warning", "Unexpected response received!");
         console.warn("Unexpected Response:", response.data);
       }
     } catch (error) {
       if (error.response) {
-        Alert.alert("Error", `Server Error: ${error.response.status}`);
+        Alert.alert("Please enter all the fields and try again");
         console.error("Server Error Response:", error.response.data);
       } else if (error.request) {
         Alert.alert("Error", "No response received from the server.");
@@ -158,13 +166,10 @@ const MapDetailsScreen = ({ route, navigation }) => {
         console.error("Unexpected Error:", error.message);
       }
     } finally {
-      setTimeout(() => {
-        setSuccessModalVisible(false); 
-        navigation.navigate('MapMain');
-      }, 3000);
       setLoading(false);
     }
   };
+  
 
 
   const launchCamera = async () => {
