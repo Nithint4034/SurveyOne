@@ -15,15 +15,15 @@ const MapDetailsScreen = ({ route, navigation }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [displayDate, setDisplayDate] = useState(''); // State for displayed date
-  const [apiDate, setApiDate] = useState(''); // State for raw date to send to API
+  const [displayDate, setDisplayDate] = useState('');
+  const [apiDate, setApiDate] = useState('1950-01-01');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const showDatePicker = () => setDatePickerVisibility(true);
   const hideDatePicker = () => setDatePickerVisibility(false);
   const [selectedOption] = useState('');
-  const [selectedOption1, setSelectedOption1] = useState('');
-  const [selectedOption2, setSelectedOption2] = useState('');
-  const [selectedOption3, setSelectedOption3] = useState('');
+  const [selectedOption1, setSelectedOption1] = useState('none');
+  const [selectedOption2, setSelectedOption2] = useState('none');
+  const [selectedOption3, setSelectedOption3] = useState('none');
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
 
   const [formDatas, setFormDatas] = useState({
@@ -49,7 +49,6 @@ const MapDetailsScreen = ({ route, navigation }) => {
     photo: '',
     remarks: '',
   });
-
 
   const pickerOptions1 = [
     { label: 'Yes', value: 'Yes' },
@@ -86,7 +85,6 @@ const MapDetailsScreen = ({ route, navigation }) => {
       Alert.alert("Error", "Please capture a photo first.");
       return;
     }
-  
     setLoading(true);
     try {
       const username = await AsyncStorage.getItem("userName");
@@ -94,13 +92,12 @@ const MapDetailsScreen = ({ route, navigation }) => {
         Alert.alert("Error", "Username not found in storage.");
         return;
       }
-  
-      // Preprocess formDatas to replace empty fields with NaN
+
       const processedFormDatas = Object.keys(formDatas).reduce((acc, key) => {
-        acc[key] = formDatas[key] === "" || formDatas[key] === null ? NaN : formDatas[key];
+        acc[key] = formDatas[key] === "" || formDatas[key] === null ? "none" : formDatas[key];
         return acc;
       }, {});
-  
+
       const formData = new FormData();
       formData.append("username", username);
       formData.append("District", processedFormDatas.district);
@@ -125,13 +122,13 @@ const MapDetailsScreen = ({ route, navigation }) => {
       formData.append("Latitude", `${latitude}`);
       formData.append("Longitude", `${longitude}`);
       formData.append("Remarks", processedFormDatas.remarks);
-  
+
       formData.append("Photo", {
         uri: photo.uri,
         name: "photo.jpg",
         type: "image/jpeg",
       });
-  
+
       const response = await axios.post(
         `https://nithint.pythonanywhere.com/land/${username}/`,
         formData,
@@ -141,7 +138,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
           },
         }
       );
-  
+
       if (response.status >= 200 && response.status < 300) {
         setSuccessModalVisible(true);
         setFormDatas('');
@@ -156,21 +153,19 @@ const MapDetailsScreen = ({ route, navigation }) => {
       }
     } catch (error) {
       if (error.response) {
-        Alert.alert("Please enter all the fields and try again");
-        console.error("Server Error Response:", error.response.data);
+        Alert.alert("Please try again");
+        // console.error("Server Error Response:", error.response.data);
       } else if (error.request) {
         Alert.alert("Error", "No response received from the server.");
-        console.error("No Response:", error.request);
+        // console.error("No Response:", error.request);
       } else {
-        Alert.alert("Error", `Unexpected error: ${error.message}`);
-        console.error("Unexpected Error:", error.message);
+        Alert.alert("Error", `Unexpected error Try again`);
+        // console.error("Unexpected Error:", error.message);
       }
     } finally {
       setLoading(false);
     }
   };
-  
-
 
   const launchCamera = async () => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
@@ -181,24 +176,21 @@ const MapDetailsScreen = ({ route, navigation }) => {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: false, // Disable cropping
-      quality: 0.5, // Capture the photo at full quality
+      allowsEditing: false, 
+      quality: 0.5, 
     });
 
     if (!result.canceled) {
       const uri = result.assets[0].uri;
 
       try {
-        // Compress the image further
         const compressedResult = await ImageManipulator.manipulateAsync(
           uri,
-          [{ resize: { width: 600 } }], // Resize to a width of 600px
-          { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG } // Compress to 20% quality
+          [{ resize: { width: 600 } }],
+          { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG } 
         );
-
-        // Update states with the original and compressed image URIs
-        setPhoto(result.assets[0]); // Store the full photo object
-        setSelectedImage(compressedResult.uri); // Store the compressed URI
+        setPhoto(result.assets[0]); 
+        setSelectedImage(compressedResult.uri); 
       } catch (error) {
         Alert.alert("Error processing the image: " + error.message);
       }
@@ -235,6 +227,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
             },
           }}
         />
+
         <TextInput
           label="Tehsil"
           value={formDatas.tehsil}
@@ -248,6 +241,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
             },
           }}
         />
+
         <TextInput
           label="Village Name"
           value={formDatas.villageName}
@@ -261,6 +255,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
             },
           }}
         />
+
         <TextInput
           label="Sector"
           value={formDatas.sector}
@@ -274,7 +269,6 @@ const MapDetailsScreen = ({ route, navigation }) => {
             },
           }}
         />
-
 
         <Text style={styles.sectionTitle}>Land Details</Text>
         <TextInput
@@ -290,6 +284,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
             },
           }}
         />
+
         <TextInput
           label="Acquired Area In Hectare"
           value={formDatas.acquiredArea}
@@ -303,6 +298,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
             },
           }}
         />
+
         <TextInput
           label="Name of Land Owner"
           value={formDatas.landOwner}
@@ -316,6 +312,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
             },
           }}
         />
+
         <TextInput
           label="Compensation Amount"
           value={formDatas.compensationAmount}
@@ -348,6 +345,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
           onConfirm={handleConfirm}
           onCancel={hideDatePicker}
         />
+
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
           mode="date"
@@ -369,6 +367,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
             },
           }}
         />
+
         <TextInput
           label="Lease Back Area"
           value={formDatas.leaseBackArea}
@@ -397,6 +396,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
             },
           }}
         />
+
         <TextInput
           label="Plot Size SQM"
           value={formDatas.plotSize}
@@ -485,7 +485,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
 
         <TextInput
           label="Latitude"
-          value={`${formDatas.latitude}`}  // Display autofilled latitude
+          value={`${formDatas.latitude}`} 
           editable={false}
           mode="outlined"
           style={[styles.input, { color: 'gray' }]}
@@ -496,9 +496,10 @@ const MapDetailsScreen = ({ route, navigation }) => {
             },
           }}
         />
+
         <TextInput
           label="Longitude"
-          value={`${formDatas.longitude}`}  // Display autofilled longitude
+          value={`${formDatas.longitude}`}  
           editable={false}
           mode="outlined"
           style={[styles.input, { color: 'gray' }]}
@@ -544,10 +545,10 @@ const MapDetailsScreen = ({ route, navigation }) => {
         <TouchableOpacity
           style={[
             styles.submitButton,
-            // (loading || !photo) && styles.disabledButton,
+            loading && styles.greenButton, 
           ]}
           onPress={handleSubmit}
-        // disabled={loading || !photo}
+          disabled={loading || !photo} 
         >
           <Text style={styles.submitButtonText}>
             {loading ? "Sending..." : "Submit"}
@@ -597,7 +598,7 @@ const styles = {
     marginTop: 20,
     marginBottom: 10,
     color: "#4A4947",
-    fontSize: 20
+    fontSize: 20,
   },
   dropdownInput: {
     height: 50,
@@ -615,9 +616,13 @@ const styles = {
     alignItems: 'center',
     borderRadius: 5,
   },
+  greenButton: {
+    backgroundColor: 'green',
+  },
   submitButtonText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: 'bold',
   },
   dropdownContainer: {
     position: 'absolute',
@@ -668,12 +673,7 @@ const styles = {
     shadowOpacity: 0.2,
     shadowRadius: 6,
     marginBottom: 18,
-    marginTop: -10
-  },
-  submitButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "bold",
+    marginTop: -10,
   },
   disabledButton: {
     backgroundColor: "#A9A9A9",
@@ -694,7 +694,7 @@ const styles = {
     paddingVertical: 5,
     height: 52,
     backgroundColor: '#fff',
-    marginTop: 8
+    marginTop: 8,
   },
   inputCal: {
     flex: 1,
@@ -708,14 +708,13 @@ const styles = {
     borderWidth: 1,
     borderColor: 'gray',
     borderRadius: 5,
-    paddingHorizontal: 0,
     paddingVertical: 5,
     marginBottom: 10,
     height: 52,
     backgroundColor: '#fff',
   },
   picker: {
-    marginTop: -8
+    marginTop: -8,
   },
   modalOverlay: {
     flex: 1,
