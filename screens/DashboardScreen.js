@@ -109,7 +109,7 @@ const DashboardScreen = () => {
         )}
       </View>
       <LottieView
-        source={require('../assets/dash.json')}
+        source={require('../assets/dash3.json')}
         autoPlay
         loop
         style={styles.mapLoadingAnimation}
@@ -176,3 +176,4 @@ const styles = StyleSheet.create({
 });
 
 export default DashboardScreen;
+
