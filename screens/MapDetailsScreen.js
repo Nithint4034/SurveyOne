@@ -21,6 +21,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
   const showDatePicker = () => setDatePickerVisibility(true);
   const hideDatePicker = () => setDatePickerVisibility(false);
   const [selectedOption] = useState('');
+  const [selectedOption4, setSelectedOption4] = useState('none');
   const [selectedOption1, setSelectedOption1] = useState('none');
   const [selectedOption2, setSelectedOption2] = useState('none');
   const [selectedOption3, setSelectedOption3] = useState('none');
@@ -107,7 +108,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
       formData.append("Khasra", processedFormDatas.khasraNo);
       formData.append("Area", processedFormDatas.acquiredArea);
       formData.append("OwnerName", processedFormDatas.landOwner);
-      formData.append("CompensationStatus", processedFormDatas.compensationStatus);
+      formData.append("CompensationStatus", selectedOption4);
       formData.append("Compensation", processedFormDatas.compensationAmount);
       formData.append("CompensationDate", apiDate);
       formData.append("LeaseArea", processedFormDatas.leaseBackArea);
@@ -312,6 +313,21 @@ const MapDetailsScreen = ({ route, navigation }) => {
             },
           }}
         />
+
+          {/* Dropdown Selector Section */}
+          <View style={styles.dropdownContainerDrop}>
+          <Picker
+            selectedValue={selectedOption4}
+            onValueChange={(itemValue) => setSelectedOption4(itemValue)}
+            mode="dropdown"
+            style={styles.picker}
+          >
+            <Picker.Item label="Compensation Status" value="" />
+            {pickerOptions1.map((option, index) => (
+              <Picker.Item key={index} label={option.label} value={option.value} />
+            ))}
+          </Picker>
+        </View>
 
         <TextInput
           label="Compensation Amount"
@@ -548,7 +564,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
             loading && styles.greenButton, 
           ]}
           onPress={handleSubmit}
-          disabled={loading || !photo} 
+          // disabled={loading || !photo} 
         >
           <Text style={styles.submitButtonText}>
             {loading ? "Sending..." : "Submit"}
