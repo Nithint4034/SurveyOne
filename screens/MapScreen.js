@@ -16,6 +16,9 @@ export default function MapScreen({ navigation }) {
   const [watching, setWatching] = useState(false);
   const mapRef = useRef(null);
 
+  console.log('watching',watching);
+  
+
   // Check if the Plus button should be disabled
   const isMarkerVisible = markerCoordinate !== null;
 
@@ -31,17 +34,17 @@ export default function MapScreen({ navigation }) {
         const locationSubscription = await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.High,
-            timeInterval: 10000, // update every 10 seconds
-            distanceInterval: 10, // update when the user moves 10 meters
+            timeInterval: 10000, 
+            distanceInterval: 10, 
           },
           (newLocation) => {
             setLocation(newLocation.coords);
           }
         );
 
-        setWatching(locationSubscription); // Store the subscription to stop it later
+        setWatching(locationSubscription); 
 
-        return () => locationSubscription.remove(); // Cleanup on unmount
+        return () => locationSubscription.remove(); 
       })();
     }
   }, [watching]);
@@ -91,10 +94,30 @@ export default function MapScreen({ navigation }) {
     setMarkerCoordinate({ latitude, longitude });
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setMarkerCoordinate(null);
-    fetchMarkerLocation();
+    setLoading(true);
+  
+    try {
+      // Fetching location again when reload is pressed
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Location permission is required to fetch the location.');
+        return;
+      }
+  
+      const newLocation = await Location.getCurrentPositionAsync({});
+      setLocation(newLocation.coords); // Update the location state
+  
+      // Optionally, fetch the markers after refreshing the location
+      fetchMarkerLocation();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to fetch the location.');
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   const buttonStyle = {
     backgroundColor: mapType === 'satellite' ? '#B17457' : '#4A4947',
