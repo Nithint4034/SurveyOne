@@ -49,6 +49,9 @@ const Register = ({ setShowComponent }) => {
                 }
             );
 
+            console.log('res',response);
+            
+
             if (response.status === 201) {
                 alert('Registration successful!');
                 setShowComponent(false);
@@ -57,11 +60,12 @@ const Register = ({ setShowComponent }) => {
                 clearErrorAfterTimeout();
             }
         } catch (error) {
+            console.log('res',error);
             if (error.response && error.response.data.error) {
                 setError(error.response.data.error);
                 clearErrorAfterTimeout();
             } else {
-                setError('An error occurred. Please try again later.');
+                setError('Username or Email already exists');
                 clearErrorAfterTimeout();
             }
         }

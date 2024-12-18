@@ -16,7 +16,6 @@ export default function MapScreen({ navigation }) {
   const [watching, setWatching] = useState(false);
   const mapRef = useRef(null);
 
-  console.log('watching',watching);
   
 
   // Check if the Plus button should be disabled

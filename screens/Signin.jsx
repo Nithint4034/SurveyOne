@@ -56,7 +56,7 @@ const Signin = () => {
             alert('Login successful!');
         } catch (error) {
             console.error('Login error:', error);
-            handleError('An error occurred, please try again later');
+            handleError('Please check Email and Password');
         }
     };
 
