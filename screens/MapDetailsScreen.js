@@ -140,6 +140,8 @@ const MapDetailsScreen = ({ route, navigation }) => {
         }
       );
 
+      https://nithint.pythonanywhere.com/locations/
+
       if (response.status >= 200 && response.status < 300) {
         setSuccessModalVisible(true);
         setFormDatas('');
@@ -155,13 +157,13 @@ const MapDetailsScreen = ({ route, navigation }) => {
     } catch (error) {
       if (error.response) {
         Alert.alert("Please try again");
-        // console.error("Server Error Response:", error.response.data);
+        console.error("Server Error Response:", error.response.data);
       } else if (error.request) {
         Alert.alert("Error", "No response received from the server.");
-        // console.error("No Response:", error.request);
+        console.error("No Response:", error.request);
       } else {
         Alert.alert("Error", `Unexpected error Try again`);
-        // console.error("Unexpected Error:", error.message);
+        console.error("Unexpected Error:", error.message);
       }
     } finally {
       setLoading(false);

@@ -2,36 +2,72 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Alert, Modal, ActivityIndicator } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Import MaterialIcons
-import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useFocusEffect } from '@react-navigation/native';
+import axios from 'axios';
+import { FontAwesome6 } from '@expo/vector-icons';
+
 
 export default function MapScreen({ navigation }) {
   const [location, setLocation] = useState(null);
-  const [markerCoordinate, setMarkerCoordinate] = useState(null); // Initialize with null
-  const [mapType, setMapType] = useState('standard'); // State for map type
-  const [loading, setLoading] = useState(true); // State for loader visibility
+  const [markerCoordinate, setMarkerCoordinate] = useState(null);
+  const [mapType, setMapType] = useState('standard');
+  const [loading, setLoading] = useState(true);
+  const [markers, setMarkers] = useState([]);
 
   useEffect(() => {
     (async () => {
-      setLoading(true); // Show loader
+      setLoading(true);
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setLoading(false); // Hide loader if permission is not granted
+        setLoading(false);
         return;
       }
 
       let currentLocation = await Location.getCurrentPositionAsync({});
       setLocation(currentLocation.coords);
-      setLoading(false); // Hide loader once location is fetched
+      setLoading(false);
     })();
   }, []);
 
-  // Reset markerCoordinate when the screen gains focus
+
   useFocusEffect(
     React.useCallback(() => {
-      setMarkerCoordinate(null); // Reset markerCoordinate
+      setMarkerCoordinate(null);
+      
     }, [])
   );
+
+ const fetchMarkerLocation = async () => {
+  setLoading(true);
+  try {
+    const response = await axios.get('https://nithint.pythonanywhere.com/locations/');
+
+    if (response.status !== 200) {
+      throw new Error('Failed to fetch marker data.');
+    }
+
+    const data = response.data;
+
+    if (Array.isArray(data)) {
+      setMarkers(
+        data.map((item) => ({
+          latitude: parseFloat(item.Latitude),
+          longitude: parseFloat(item.Longitude),
+          title: item.OwnerName || 'Unknown',
+          description: item.PlotNo || 'No Plot Info',
+        }))
+      );
+    } else {
+      throw new Error('Invalid response format.');
+    }
+  } catch (error) {
+    Alert.alert('Error', error.message || 'An error occurred while fetching marker data.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleMarkerDragEnd = (e) => {
     const { latitude, longitude } = e.nativeEvent.coordinate;
@@ -45,6 +81,7 @@ export default function MapScreen({ navigation }) {
 
   const handleRefresh = () => {
     setMarkerCoordinate(null);
+    fetchMarkerLocation();
   };
 
   const buttonStyle = {
@@ -58,7 +95,7 @@ export default function MapScreen({ navigation }) {
         transparent={true}
         animationType="fade"
         visible={loading}
-        onRequestClose={() => {}}
+        onRequestClose={() => { }}
       >
         <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color="#ffffff" />
@@ -77,10 +114,10 @@ export default function MapScreen({ navigation }) {
             latitudeDelta: 0.0022,
             longitudeDelta: 0.0022,
           }}
-          onPress={handleMapPress} // This listens for tap on map
-          mapType={mapType} // Set the map type based on state
+          onPress={handleMapPress}
+          mapType={mapType}
         >
-          {/* Only render marker if markerCoordinate is set */}
+
           {markerCoordinate && (
             <Marker
               coordinate={markerCoordinate}
@@ -94,6 +131,24 @@ export default function MapScreen({ navigation }) {
               }
             />
           )}
+
+{markers.map((marker, index) => (
+  <Marker
+    key={index}
+    coordinate={{
+      latitude: marker.latitude,
+      longitude: marker.longitude,
+    }}
+    title={marker.title} // Display title
+    description={marker.description} // Display description
+  >
+    <View>
+      <FontAwesome6 name="location-dot" size={13} color="#C40C0C" />
+    </View>
+  </Marker>
+))}
+
+
         </MapView>
       )}
 
