@@ -580,7 +580,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
               loop
               style={styles.lottieStyle} 
             />
-            <Text style={styles.successMessage}>Data Saved Successfully!</Text>
+            <Text style={styles.successMessage}>Saved Successfully.!</Text>
           </View>
         </View>
       </Modal>
