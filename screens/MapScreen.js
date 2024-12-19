@@ -16,37 +16,41 @@ export default function MapScreen({ navigation }) {
   const [watching, setWatching] = useState(false);
   const mapRef = useRef(null);
 
-  
-
   // Check if the Plus button should be disabled
   const isMarkerVisible = markerCoordinate !== null;
 
   useEffect(() => {
-    if (!watching) {
-      (async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          setLoading(false);
-          return;
+    const setupLocationWatcher = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setLoading(false);
+        return;
+      }
+  
+      // Set up location subscription without timeInterval and distanceInterval
+      const locationSubscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+        },
+        (newLocation) => {
+          setLocation(newLocation.coords);
         }
-
-        const locationSubscription = await Location.watchPositionAsync(
-          {
-            accuracy: Location.Accuracy.High,
-            timeInterval: 10000, 
-            distanceInterval: 10, 
-          },
-          (newLocation) => {
-            setLocation(newLocation.coords);
-          }
-        );
-
-        setWatching(locationSubscription); 
-
-        return () => locationSubscription.remove(); 
-      })();
-    }
-  }, [watching]);
+      );
+  
+      // Store the subscription to clean up later if needed
+      setWatching(locationSubscription);
+    };
+  
+    setupLocationWatcher();
+  
+    // Cleanup function for when the component unmounts
+    return () => {
+      if (watching) {
+        watching.remove();
+      }
+    };
+  }, []); // Empty dependency array ensures this runs only on initial load
+  
 
   useEffect(() => {
     if (location) {
@@ -147,8 +151,8 @@ export default function MapScreen({ navigation }) {
           region={{
             latitude: location.latitude,
             longitude: location.longitude,
-            latitudeDelta: 0.001,
-            longitudeDelta: 0.001,
+            latitudeDelta: 0.002,
+            longitudeDelta: 0.002,
           }}
           mapType={mapType}
         >
