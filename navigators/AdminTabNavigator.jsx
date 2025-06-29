@@ -1,9 +1,8 @@
 import { View, Text, Image } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import DashboardScreen from '../screens/DashboardScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
-import QuestionsScreen from '../screens/QuestionsScreen';
+import AdminDownload from '../screens/AdminDownload';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,32 +17,32 @@ const CustomHeaderTitlePro = () => (
       </View>
     </View>
     <View style={{ marginLeft: 70, alignItems: 'center' }}>
-      <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#4A4947' }}>KMEA Survey User</Text>
+      <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#4A4947' }}>KMEA Survey Admin</Text>
       <Text style={{ fontSize: 14, color: 'gray' }}>Version - 0.0.1</Text>
     </View>
   </View>
 );
 
-function TabNavigator() {
+function AdminTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#B17457',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: '#B17457', 
+        tabBarInactiveTintColor: 'gray', 
         tabBarLabelStyle: {
-          fontSize: 14,
-          fontWeight: 'bold',
+          fontSize: 14, 
+          fontWeight: 'bold', 
         },
         tabBarStyle: {
-          backgroundColor: '#FAF7F0',
+          backgroundColor: '#FAF7F0', 
           height: 60,
         },
         headerStyle: {
-          backgroundColor: '#FAF7F0',
+          backgroundColor: '#FAF7F0', 
         },
       }}
     >
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Map"
         component={QuestionsScreen}
         options={{
@@ -53,10 +52,10 @@ function TabNavigator() {
           tabBarLabel: 'Map',
           headerTitle: () => <CustomHeaderTitlePro />,
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Dashboard"
-        component={DashboardScreen}
+        component={AdminDownload}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Icon name="stats-chart-outline" color={color} size={size} />
@@ -80,4 +79,4 @@ function TabNavigator() {
   );
 }
 
-export default TabNavigator;
+export default AdminTabNavigator;

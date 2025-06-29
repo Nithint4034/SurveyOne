@@ -11,15 +11,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen = () => {
     const { setIsLoggedIn } = useLogin();
-    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
     const [userName, setUserName] = useState("");
+    const [role, setRole] = useState("");
 
     const handleLogout = async () => {
         // Remove data from AsyncStorage
         try {
             await AsyncStorage.multiRemove([
-                "email",
-                "userName",
+                "phone",
+                "username",
+                "role",
+                "accessToken"
             ]); // Remove all keys you want to clear
             alert("Logout successful!");
             setIsLoggedIn(false);
@@ -33,7 +36,7 @@ const ProfileScreen = () => {
         const retrieveData = async () => {
             try {
                 // Define the keys you want to retrieve
-                const keys = ["email", "userName"]; // Add more keys as needed
+                const keys = ["phone", "username", "role"];
 
                 // Retrieve the values for the keys
                 const retrievedData = await AsyncStorage.multiGet(keys);
@@ -42,13 +45,15 @@ const ProfileScreen = () => {
                 retrievedData.forEach(([key, value]) => {
                     // Set the state or perform any other actions based on the key-value pairs
                     switch (key) {
-                        case "email":
-                            setEmail(value);
+                        case "phone":
+                            setPhone(value);
                             break;
-                        case "userName":
+                        case "username":
                             setUserName(value);
                             break;
-                        // Add cases for additional keys if needed
+                        case "role":
+                            setRole(value);
+                            break;
                         default:
                             break;
                     }
@@ -74,7 +79,10 @@ const ProfileScreen = () => {
                 <View style={{ marginTop: 15, alignItems: "center" }}>
                     <Text style={{ fontSize: 35, fontWeight: "bold" }}>{userName}</Text>
                     <Text style={{ fontSize: 18, fontWeight:'bold' }}>
-                        Email Id : <Text style={{ fontWeight: "400" }}>{email}</Text>
+                        Phone: <Text style={{ fontWeight: "400" }}>{phone}</Text>
+                    </Text>
+                    <Text style={{ fontSize: 18, fontWeight:'bold'}}>
+                        Role: <Text style={{ fontWeight: "400" }}>{role}</Text>
                     </Text>
                 </View>
                 <View style={{ width: 150, marginLeft: 1, marginTop: 20 }}>
@@ -104,4 +112,3 @@ const styles = StyleSheet.create({
 });
 
 export default ProfileScreen;
-

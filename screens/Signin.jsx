@@ -3,62 +3,87 @@ import {
     Text,
     ImageBackground,
     StyleSheet,
+    Image,
     TextInput,
-    Button,
     View,
     TouchableOpacity,
-    StatusBar,
-    Image,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { useLogin } from '../context/LoginProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Register from './Register';
 
 const Signin = () => {
-    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState('user');
     const [error, setError] = useState(null);
     const { setIsLoggedIn } = useLogin();
     const [showComponent, setShowComponent] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleLogin = async () => {
-        try {
-            const response = await axios.post(
-                'https://nithint.pythonanywhere.com/login',
-                { email, password },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                }
-            );
-            if (!response.data) {
-                throw new Error('Failed to authenticate');
+const handleLogin = async () => {
+    if (!phone || !password) {
+        setError('Phone and password are required');
+        clearErrorAfterTimeout();
+        return;
+    }
+
+    if (phone.length !== 10) {
+        setError('Phone number must be 10 digits');
+        clearErrorAfterTimeout();
+        return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+        const response = await axios.post(
+            'https://tomhudson.pythonanywhere.com/login',
+            { phone, password, role },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             }
-            const data = response.data;
+        );
 
-            alert('Login successful');
-            const keyValuePairs = [
-                { key: 'userName', value: data.userName },
-                { key: 'email', value: data.email },
-            ];
-            await Promise.all(
-                keyValuePairs.map(async (pair) => {
-                    try {
-                        await AsyncStorage.setItem(pair.key, pair.value);
-                    } catch (error) {
-                        console.error(`Error storing ${pair.key}:`, error);
-                    }
-                })
-            );
-            setIsLoggedIn(true);
-            alert('Login successful!');
-        } catch (error) {
-            console.error('Login error:', error);
-            handleError('Please check Email and Password');
+        if (!response.data) {
+            throw new Error('Failed to authenticate');
         }
-    };
+
+        const { user, refresh, access } = response.data;
+        alert('Login successful');
+        
+        // Store all authentication data
+        await AsyncStorage.multiSet([
+            ['phone', phone],
+            ['role', role],
+            ['accessToken', access],  // Store access token
+            // ['refreshToken', refresh],  // Store refresh token
+            // ['userId', user.id.toString()],
+            ['username', user.username],
+            ['isLoggedIn', 'true']  // Additional flag for quick login check
+        ]);
+
+        setIsLoggedIn(true);
+    } catch (error) {
+        console.error('Login error:', error);
+        let errorMessage = 'Login failed. Please check your credentials.';
+        
+        if (error.response) {
+            errorMessage = error.response.data?.message || errorMessage;
+        } else if (error.request) {
+            errorMessage = 'No response from server. Please check your connection.';
+        }
+        
+        setError(errorMessage);
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     const handleError = (errorMessage) => {
         setError(errorMessage);
@@ -75,33 +100,48 @@ const Signin = () => {
         setShowComponent('register');
     };
 
+    const handlePhoneChange = (text) => {
+        const cleanedText = text.replace(/[^\d]/g, '');
+        if (cleanedText.length <= 10) {
+            setPhone(cleanedText);
+        }
+    };
+
     return (
-        <ImageBackground
-            source={require('../assets/UILand.png')}
-            style={styles.root}
-            resizeMode="cover"
-        >
-            <StatusBar backgroundColor="#4A4947" barStyle="light-content" />
+        <View style={styles.root}>
             {showComponent === 'register' && <Register setShowComponent={setShowComponent} />}
             {!showComponent && (
-                <View style={styles.container}>
-                    {/* Add a container for the icons */}
-                    <View style={styles.iconsContainer}>
-                        <View style={styles.iconView}>
-                            <Image source={require('../assets/Log1.png')} style={styles.icon1} />
-                        </View>
-                        <View style={styles.iconView}>
-                            <Image source={require('../assets/Log2.png')} style={styles.icon2} />
-                        </View>
-                    </View>
+                <ImageBackground
+                    source={require('../assets/UILand.png')}
+                    style={styles.container}
+                >
+                    <Image
+                        source={require('../assets/icon.jpg')}
+                        style={styles.logo}
+                    />
 
-                    <Text style={styles.title}>Application for Unallotted Plot D2D Survey</Text>
+                    <Text style={styles.title}>KMEA Survey Login</Text>
+                    
                     <TextInput
                         style={styles.input}
-                        placeholder="Email"
-                        value={email}
-                        onChangeText={(text) => setEmail(text)}
+                        placeholder="Phone Number"
+                        value={phone}
+                        onChangeText={handlePhoneChange}
+                        keyboardType="phone-pad"
+                        maxLength={10}
                     />
+                    
+                    <View style={styles.pickerContainer}>
+                        <Picker
+                            selectedValue={role}
+                            onValueChange={(itemValue) => setRole(itemValue)}
+                            style={styles.picker}
+                        >
+                            <Picker.Item label="User" value="user" />
+                            <Picker.Item label="Admin" value="admin" />
+                        </Picker>
+                    </View>
+                    
                     <TextInput
                         style={styles.input}
                         placeholder="Password"
@@ -109,55 +149,38 @@ const Signin = () => {
                         value={password}
                         onChangeText={(text) => setPassword(text)}
                     />
+                    
                     {error && <Text style={styles.error}>{error}</Text>}
 
-
-                    <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-                        <Text style={styles.loginButtonText}>Login</Text>
+                    <TouchableOpacity 
+                        style={styles.loginButton} 
+                        onPress={handleLogin}
+                        disabled={isLoading}
+                    >
+                        <Text style={styles.loginButtonText}>
+                            {isLoading ? 'Logging in...' : 'Login'}
+                        </Text>
                     </TouchableOpacity>
 
-                    <View style={styles.linksContainer}>
-                        <TouchableOpacity onPress={handleRegisterPress} style={styles.backToRegisterButton}>
-                            <Text style={styles.backToRegisterText}>Register</Text>
+                    {/* <View style={styles.linksContainer}>
+                        <TouchableOpacity onPress={handleRegisterPress}>
+                            <Text style={styles.link}>Register</Text>
                         </TouchableOpacity>
-                    </View>
-                </View>
+                    </View> */}
+                </ImageBackground>
             )}
-        </ImageBackground>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     root: {
         flex: 1,
-        width: '100%',
-        height: '100%',
     },
     container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: StatusBar.currentHeight,
-    },
-    iconsContainer: {
-        flexDirection: 'row', // Align views side by side
-        justifyContent: 'space-between', // Distribute space between the icons
-        alignItems: 'center', // Align vertically
-        marginBottom: 20, // Add spacing between icons and title
-        width: '80%', // Limit width to 80% to avoid overflow
-    },
-    iconView: {
-        flex: 1, // Make each icon view take equal width
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    icon1: {
-        width: 90, // Set icon width
-        height: 65, // Set icon height
-    },
-    icon2: {
-        width: 65, // Set icon width
-        height: 70, // Set icon height
     },
     input: {
         width: '80%',
@@ -166,11 +189,36 @@ const styles = StyleSheet.create({
         borderWidth: 1.2,
         borderColor: 'black',
         borderRadius: 8,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        fontWeight: 'bold'
+    },
+    pickerContainer: {
+        width: '80%',
+        marginBottom: 10,
+        borderWidth: 1.2,
+        borderColor: 'black',
+        borderRadius: 8,
+        overflow: 'hidden',
+    },
+    picker: {
+        width: '100%',
+        height: 50,
     },
     error: {
         color: 'red',
         marginBottom: 10,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    logo: {
+        width: 100,
+        height: 100,
+        marginBottom: 5,
+    },
+    title: {
+        marginBottom: 18,
+        fontSize: 19,
+        fontWeight: 'bold',
+        color: '#4A4947',
     },
     linksContainer: {
         flexDirection: 'row',
@@ -179,15 +227,10 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     link: {
-        color: 'blue',
-        textDecorationLine: 'underline',
-    },
-    title: {
-        marginBottom: 18,
-        fontSize: 19,
+        color: '#074173',
+        fontSize: 16,
         fontWeight: 'bold',
-        color: '#4A4947',
-        textAlign: 'center',
+        textDecorationLine: 'underline',
     },
     loginButton: {
         width: '80%',
@@ -195,23 +238,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#4A4947',
         borderRadius: 8,
         alignItems: 'center',
-        marginTop: 10,
+        marginTop: 0,
     },
     loginButtonText: {
         color: '#FFFFFF',
         fontSize: 16,
         fontWeight: 'bold',
-    },
-    backToRegisterButton: {
-        // marginTop: 5,
-        padding: 8,
-        alignItems: 'center',
-    },
-    backToRegisterText: {
-        color: '#4A4947',
-        fontSize: 16,
-        fontWeight: 'bold',
-        textDecorationLine: 'underline',
     },
 });
 
