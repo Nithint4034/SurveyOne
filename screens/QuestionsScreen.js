@@ -14,6 +14,7 @@ import { Picker } from '@react-native-picker/picker';
 import questions from './questions';
 import PhotoCapture from './PhotoCapture';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function QuestionsScreen() {
   const [answers, setAnswers] = useState({});
@@ -42,10 +43,10 @@ export default function QuestionsScreen() {
   });
 
   // Add the submit button as the last item in the list
-  serializedData.push({ 
-    id: 'submit_button', 
+  serializedData.push({
+    id: 'submit_button',
     type: 'submit_button',
-    showSerial: false 
+    showSerial: false
   });
 
   const handleAnswerChange = (id, value) => {
@@ -54,45 +55,76 @@ export default function QuestionsScreen() {
     setAnswers((prev) => ({ ...prev, [id]: finalValue }));
   };
 
-  const handleSubmit = () => {
-    const payload = [];
+const submitSurveyData = async (surveyData) => {
+  try {
+    // Retrieve the access token from AsyncStorage
+    const accessToken = await AsyncStorage.getItem('accessToken');
     
+    if (!accessToken) {
+      throw new Error('No access token found');
+    }
+
+    const response = await axios.post(
+      'https://tomhudson.pythonanywhere.com/form',
+      {
+        survey_id: "SURV0012",
+        surveyor_name: "Rohith",
+        district: "Haridwar",
+        taluka: "Roorkee",
+        village: "Laksar",
+        ...surveyData
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+    
+  } catch (error) {
+    console.error('Error submitting survey:', error);
+    throw error;
+  }
+};
+
+  // Then modify your handleSubmit function in the component:
+  const handleSubmit = async () => {
+    const payload = {};
+
     serializedData.forEach((item) => {
       if (item.type === 'question') {
         // Handle main questions
         const answer = answers[item.id] || null;
         const otherAnswer = answers[`${item.id}_other`] || null;
-        
-        payload.push({
-          question_id: item.id,
-          answer_text: answer === 'Other(Specify)' ? otherAnswer : answer
-        });
+
+        payload[item.id] = answer === 'Other(Specify)' ? otherAnswer : answer;
 
         // Handle sub-questions if triggered
         if (item.subQuestions && answers[item.id] === item.subQuestions.triggerValue) {
           item.subQuestions.questions.forEach((subQ) => {
             if (subQ.text.includes('Before MI ₹')) {
-              payload.push({
-                question_id: `${subQ.id}_before`,
-                answer_text: answers[`${subQ.id}_before`] || null
-              });
-              payload.push({
-                question_id: `${subQ.id}_after`,
-                answer_text: answers[`${subQ.id}_after`] || null
-              });
+              payload[`${subQ.id}_before`] = answers[`${subQ.id}_before`] || null;
+              payload[`${subQ.id}_after`] = answers[`${subQ.id}_after`] || null;
             } else {
-              payload.push({
-                question_id: subQ.id,
-                answer_text: answers[subQ.id] || null
-              });
+              payload[subQ.id] = answers[subQ.id] || null;
             }
           });
         }
       }
     });
 
-    console.log('Submitted Answers:', payload);
-    Alert.alert('Success', 'Answers submitted successfully!');
+    try {
+      console.log('Submitting survey data:', payload);
+      const response = await submitSurveyData(payload);
+      console.log('Submission successful:', response);
+      Alert.alert('Success', 'Answers submitted successfully!');
+    } catch (error) {
+      console.error('Submission failed:', error);
+      Alert.alert('Error', 'Failed to submit answers. Please try again.');
+    }
   };
 
   const renderBeforeAfterInputs = (subQ) => {
@@ -170,8 +202,8 @@ export default function QuestionsScreen() {
 
     if (item.type === 'submit_button') {
       return (
-        <TouchableOpacity 
-          style={styles.button} 
+        <TouchableOpacity
+          style={styles.button}
           onPress={handleSubmit}
         >
           <Text style={styles.buttonText}>Submit Answers</Text>
@@ -260,8 +292,8 @@ export default function QuestionsScreen() {
             {item.showSerial ? `${item.serial}. ` : ''}
             {item.text}
           </Text>
-          <PhotoCapture 
-            onCapture={(uri) => handleAnswerChange(item.id, uri)} 
+          <PhotoCapture
+            onCapture={(uri) => handleAnswerChange(item.id, uri)}
             onClear={() => handleAnswerChange(item.id, null)}
           />
         </View>
@@ -279,7 +311,7 @@ export default function QuestionsScreen() {
           placeholder="Answer"
           value={answers[item.id] || ''}
           onChangeText={(text) => handleAnswerChange(item.id, text)}
-          keyboardType={['12', '8', '16','17','18'].includes(item.id) ? 'phone-pad' : 'default'}
+          keyboardType={['12', '8', '16', '17', '18'].includes(item.id) ? 'phone-pad' : 'default'}
         />
       </View>
     );
@@ -399,10 +431,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   picker: {
-    height: 55, 
+    height: 55,
     color: '#000',
-    marginTop: -10, 
-    marginBottom: -10, 
+    marginTop: -10,
+    marginBottom: -10,
   },
   beforeAfterContainer: {
     flexDirection: 'row',
