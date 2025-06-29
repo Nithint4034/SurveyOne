@@ -9,6 +9,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Picker } from '@react-native-picker/picker';
 import * as ImageManipulator from 'expo-image-manipulator';
+import LottieView from 'lottie-react-native';
 
 const MapDetailsScreen = ({ route, navigation }) => {
   const { latitude, longitude } = route.params || {};
@@ -167,8 +168,8 @@ const MapDetailsScreen = ({ route, navigation }) => {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: false, 
-      quality: 0.5, 
+      allowsEditing: false,
+      quality: 0.5,
     });
 
     if (!result.canceled) {
@@ -178,10 +179,10 @@ const MapDetailsScreen = ({ route, navigation }) => {
         const compressedResult = await ImageManipulator.manipulateAsync(
           uri,
           [{ resize: { width: 600 } }],
-          { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG } 
+          { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG }
         );
-        setPhoto(result.assets[0]); 
-        setSelectedImage(compressedResult.uri); 
+        setPhoto(result.assets[0]);
+        setSelectedImage(compressedResult.uri);
       } catch (error) {
         Alert.alert("Error processing the image: " + error.message);
       }
@@ -304,8 +305,8 @@ const MapDetailsScreen = ({ route, navigation }) => {
           }}
         />
 
-          {/* Dropdown Selector Section */}
-          <View style={styles.dropdownContainerDrop}>
+        {/* Dropdown Selector Section */}
+        <View style={styles.dropdownContainerDrop}>
           <Picker
             selectedValue={selectedOption4}
             onValueChange={(itemValue) => setSelectedOption4(itemValue)}
@@ -491,7 +492,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
 
         <TextInput
           label="Latitude"
-          value={`${formDatas.latitude}`} 
+          value={`${formDatas.latitude}`}
           editable={false}
           mode="outlined"
           style={[styles.input, { color: 'gray' }]}
@@ -505,7 +506,7 @@ const MapDetailsScreen = ({ route, navigation }) => {
 
         <TextInput
           label="Longitude"
-          value={`${formDatas.longitude}`}  
+          value={`${formDatas.longitude}`}
           editable={false}
           mode="outlined"
           style={[styles.input, { color: 'gray' }]}
@@ -551,10 +552,10 @@ const MapDetailsScreen = ({ route, navigation }) => {
         <TouchableOpacity
           style={[
             styles.submitButton,
-            loading && styles.greenButton, 
+            loading && styles.greenButton,
           ]}
           onPress={handleSubmit}
-          // disabled={loading || !photo} 
+        // disabled={loading || !photo} 
         >
           <Text style={styles.submitButtonText}>
             {loading ? "Sending..." : "Submit"}
@@ -568,16 +569,21 @@ const MapDetailsScreen = ({ route, navigation }) => {
         transparent={true}
         visible={isSuccessModalVisible}
         animationType="fade"
-        onRequestClose={() => setSuccessModalVisible(false)}
+        // onRequestClose={() => setSuccessModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <FontAwesome name="check-circle" size={50} color="green" />
-            <Text style={styles.successMessage}>Sent Successfully!</Text>
+          <View style={[styles.modalContent, { marginTop: -150 }]}>
+            {/* Lottie animation */}
+            <LottieView
+              source={require('../assets/alertTick.json')} 
+              autoPlay
+              loop
+              style={styles.lottieStyle} 
+            />
+            <Text style={styles.successMessage}>Saved Successfully.!</Text>
           </View>
         </View>
       </Modal>
-
     </View>
   );
 };
@@ -730,7 +736,7 @@ const styles = {
   },
   modalContent: {
     width: 250,
-    height: 150,
+    height: 200,
     backgroundColor: 'white',
     borderRadius: 10,
     justifyContent: 'center',
@@ -740,8 +746,12 @@ const styles = {
   successMessage: {
     marginTop: 10,
     fontSize: 18,
-    color: 'green',
+    color: 'black',
     fontWeight: 'bold',
+  },
+  lottieStyle: {
+    width: 120,
+    height: 120,
   },
 };
 
