@@ -22,7 +22,7 @@ export default function App() {
   if (splash) {
     return (
       <ImageBackground
-        source={require('./assets/UISplash.png')}
+        source={require('./assets/UILand.png')}
         style={styles.splashBackground}
         resizeMode="cover"
       >

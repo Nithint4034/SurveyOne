@@ -19,6 +19,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function QuestionsScreen() {
   const [answers, setAnswers] = useState({});
 
+  const surveyorName = answers.surveyor_name;
+  const village = answers.village;
+  console.log(village);
+  console.log(surveyorName);
+
   const serializedData = [];
   let headingCount = 0;
   let questionCount = 0;
@@ -55,40 +60,40 @@ export default function QuestionsScreen() {
     setAnswers((prev) => ({ ...prev, [id]: finalValue }));
   };
 
-const submitSurveyData = async (surveyData) => {
-  try {
-    // Retrieve the access token from AsyncStorage
-    const accessToken = await AsyncStorage.getItem('accessToken');
-    
-    if (!accessToken) {
-      throw new Error('No access token found');
-    }
+  const submitSurveyData = async (surveyData) => {
+    try {
+      // Retrieve the access token from AsyncStorage
+      const accessToken = await AsyncStorage.getItem('accessToken');
 
-    const response = await axios.post(
-      'https://tomhudson.pythonanywhere.com/form',
-      {
-        survey_id: "SURV0012",
-        surveyor_name: "Rohith",
-        district: "Haridwar",
-        taluka: "Roorkee",
-        village: "Laksar",
-        ...surveyData
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
+      if (!accessToken) {
+        throw new Error('No access token found');
       }
-    );
 
-    return response.data;
-    
-  } catch (error) {
-    console.error('Error submitting survey:', error);
-    throw error;
-  }
-};
+      const response = await axios.post(
+        'https://tomhudson.pythonanywhere.com/form',
+        {
+          survey_id: "SURV0012",
+          surveyor_name: surveyorName,
+          district: "Haridwar",
+          taluka: "Roorkee",
+          village: village,
+          ...surveyData
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      return response.data;
+
+    } catch (error) {
+      console.error('Error submitting survey:', error);
+      throw error;
+    }
+  };
 
   // Then modify your handleSubmit function in the component:
   const handleSubmit = async () => {
