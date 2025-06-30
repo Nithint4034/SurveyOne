@@ -19,10 +19,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function QuestionsScreen() {
   const [answers, setAnswers] = useState({});
 
-  const surveyorName = answers.surveyor_name;
-  const village = answers.village;
-  console.log(village);
-  console.log(surveyorName);
+const surveyorName = answers.surveyor_name;
+const village = answers["1"];  // Correct way to access key "1"
+console.log(village);         // "Vvh" (if exists)
+console.log(surveyorName); 
+
+  const extractSurveyMetadata = () => {
+  return {
+    surveyor_name: answers.surveyor_name,
+    village: answers.village,
+    district: answers.district, 
+    taluka: answers.taluka,
+    village: answers.village,
+    q10:answers["1"]
+  };
+};
 
   const serializedData = [];
   let headingCount = 0;
@@ -60,40 +71,40 @@ export default function QuestionsScreen() {
     setAnswers((prev) => ({ ...prev, [id]: finalValue }));
   };
 
-  const submitSurveyData = async (surveyData) => {
-    try {
-      // Retrieve the access token from AsyncStorage
-      const accessToken = await AsyncStorage.getItem('accessToken');
+const submitSurveyData = async (surveyData) => {
+  try {
+    // Retrieve the access token from AsyncStorage
+    const accessToken = await AsyncStorage.getItem('accessToken');
 
-      if (!accessToken) {
-        throw new Error('No access token found');
-      }
-
-      const response = await axios.post(
-        'https://tomhudson.pythonanywhere.com/form',
-        {
-          survey_id: "SURV0012",
-          surveyor_name: surveyorName,
-          district: "Haridwar",
-          taluka: "Roorkee",
-          village: village,
-          ...surveyData
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      return response.data;
-
-    } catch (error) {
-      console.error('Error submitting survey:', error);
-      throw error;
+    if (!accessToken) {
+      throw new Error('No access token found');
     }
-  };
+
+    // Get all the metadata fields
+    const metadata = extractSurveyMetadata();
+
+    const response = await axios.post(
+      'https://tomhudson.pythonanywhere.com/form',
+      {
+        survey_id: "SURV0012",
+        ...metadata,  // Spread all metadata fields
+        ...surveyData  // Spread all the question answers
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+
+  } catch (error) {
+    console.error('Error submitting survey:', error);
+    throw error;
+  }
+};
 
   // Then modify your handleSubmit function in the component:
   const handleSubmit = async () => {
@@ -123,8 +134,8 @@ export default function QuestionsScreen() {
 
     try {
       console.log('Submitting survey data:', payload);
-      const response = await submitSurveyData(payload);
-      console.log('Submission successful:', response);
+      // const response = await submitSurveyData(payload);
+      // console.log('Submission successful:', response);
       Alert.alert('Success', 'Answers submitted successfully!');
     } catch (error) {
       console.error('Submission failed:', error);
@@ -166,8 +177,8 @@ export default function QuestionsScreen() {
     }
 
     return parentQuestion.subQuestions.questions.map((subQ) => (
-      <View key={subQ.id} style={[styles.questionContainer, styles.subQuestionContainer]}>
-        <Text style={styles.questionText}>{subQ.text.replace(/Before MI ₹: ________ After MI ₹: ________/g, '')}</Text>
+      <View key={subQ.id} style={[ styles.subQuestionContainer]}>
+        <Text style={styles.questionTextCrop}>{subQ.text.replace(/Before MI ₹: ________ After MI ₹: ________/g, '')}</Text>
         {subQ.text.includes('Before MI ₹') ? (
           renderBeforeAfterInputs(subQ)
         ) : subQ.question_type === 'text' ? (
@@ -221,7 +232,7 @@ export default function QuestionsScreen() {
 
       return (
         <View style={styles.questionContainer}>
-          <Text style={styles.questionText}>
+          <Text style={styles.questionTextCrop}>
             {item.showSerial ? `${item.serial}. ` : ''}
             {item.text}
           </Text>
@@ -268,7 +279,7 @@ export default function QuestionsScreen() {
     if (item.question_type === 'dropdown') {
       return (
         <View style={styles.questionContainer}>
-          <Text style={styles.questionText}>
+          <Text style={styles.questionTextCrop}>
             {item.showSerial ? `${item.serial}. ` : ''}
             {item.text}
           </Text>
@@ -293,7 +304,7 @@ export default function QuestionsScreen() {
     if (item.question_type === 'photo') {
       return (
         <View style={styles.questionContainer}>
-          <Text style={styles.questionText}>
+          <Text style={styles.questionTextCrop}>
             {item.showSerial ? `${item.serial}. ` : ''}
             {item.text}
           </Text>
@@ -307,7 +318,7 @@ export default function QuestionsScreen() {
 
     return (
       <View style={styles.questionContainer}>
-        <Text style={styles.questionText}>
+        <Text style={styles.questionTextCrop}>
           {item.showSerial ? `${item.serial}. ` : ''}
           {item.text}
         </Text>
@@ -376,6 +387,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginBottom: 4,
     color: '#333',
+  },
+  questionTextCrop: {
+    fontSize: 13,
+    marginBottom: 4,
+    color: '#333',
+    fontWeight:"bold"
   },
   input: {
     borderWidth: 1,
@@ -468,4 +485,25 @@ const styles = StyleSheet.create({
     fontSize: 13,
     backgroundColor: '#fff',
   },
+  
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

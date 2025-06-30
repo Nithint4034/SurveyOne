@@ -2,23 +2,23 @@ export default [
     { id: 'survey_id', type: 'question', text: 'Survey ID' },
     { id: 'surveyor_name', type: 'question', text: 'Surveyor Name' },
     {
-    id: 'district',
-    type: 'question',
-    text: 'District',
-    question_type: 'dropdown',
-    options: [
-        'Belagavi',
-        'Bidar',
-        'Chikkaballapur',
-        'Chitradurga',
-        'Kalaburagi',
-        'Mandya',
-        'Shivamogga',
-        'Udupi',
-        'Uttara Kannada',
-        'Vijayapura'
-    ]
-},
+        id: 'district',
+        type: 'question',
+        text: 'District',
+        question_type: 'dropdown',
+        options: [
+            'Belagavi',
+            'Bidar',
+            'Chikkaballapur',
+            'Chitradurga',
+            'Kalaburagi',
+            'Mandya',
+            'Shivamogga',
+            'Udupi',
+            'Uttara Kannada',
+            'Vijayapura'
+        ]
+    },
     { id: 'taluka', type: 'question', text: 'Taluka' },
     { id: 'village', type: 'question', text: 'Village' },
 
@@ -394,9 +394,14 @@ export default [
             questions: [
                 {
                     id: '38a',
-                    text: 'Before MI ₹: ________ After MI ₹: ________',
+                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
                     question_type: 'text'
                 },
+                {
+                    id: '38b',
+                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                }
             ]
         }
     },
@@ -411,9 +416,14 @@ export default [
             questions: [
                 {
                     id: '39a',
-                    text: 'Before MI ₹: ________ After MI ₹: ________',
+                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
                     question_type: 'text'
                 },
+                {
+                    id: '39b',
+                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                }
             ]
         }
     },
@@ -428,9 +438,14 @@ export default [
             questions: [
                 {
                     id: '40a',
-                    text: 'Before MI ₹: ________ After MI ₹: ________',
+                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
                     question_type: 'text'
                 },
+                {
+                    id: '40b',
+                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                }
             ]
         }
     },
@@ -445,9 +460,14 @@ export default [
             questions: [
                 {
                     id: '41a',
-                    text: 'Before MI ₹: ________ After MI ₹: ________',
+                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
                     question_type: 'text'
                 },
+                {
+                    id: '41b',
+                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                }
             ]
         }
     },
@@ -519,12 +539,18 @@ export default [
         type: 'question',
         text: 'Have you attended any MI promotion activity organized by Government Departments? If yes, please provide the details.',
     },
+
+    {
+        id: '54',
+        type: 'question',
+        text: 'Location (Latitude/Longitude)',
+        question_type: 'location',
+    },
     { id: 'h7', type: 'heading', text: 'Farmer or Area Photo' },
     {
-        id: '56',
+        id: '57',
         type: 'question',
         text: 'Capture a photo of the farmer or the area',
         question_type: 'photo'
     }
-
 ];
