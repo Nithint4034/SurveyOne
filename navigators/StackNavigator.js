@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import MapDetailsScreen from '../screens/MapDetailsScreen';
 import TabNavigator from './TabNavigator';
 import AdminTabNavigator from './AdminTabNavigator'; // Make sure to create this file
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -50,11 +49,6 @@ function StackNavigator() {
         name="MapMain" 
         component={role === 'admin' ? AdminTabNavigator : TabNavigator} 
         options={{ headerShown: false }} 
-      />
-      <Stack.Screen 
-        name="MapDetails" 
-        component={MapDetailsScreen} 
-        options={{ title: 'Enter Plot Details' }} 
       />
     </Stack.Navigator>
   );

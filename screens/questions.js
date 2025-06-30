@@ -1,5 +1,4 @@
 export default [
-    { id: 'survey_id', type: 'question', text: 'Survey ID' },
     { id: 'surveyor_name', type: 'question', text: 'Surveyor Name' },
     {
         id: 'district',
@@ -74,6 +73,17 @@ export default [
         question_type: 'radio',
         options: ['Yes - Drip', 'Yes - Sprinkler', 'Yes - Both', 'Other(Specify)'],
     },
+    // {
+    //     id: '13.1', type: 'question', text: 'If Drip',
+    //     question_type: 'dropdown',
+    //     options: ['Online', 'In-line'],
+    // },
+    // {
+    //     id: '13.2', type: 'question', text: 'If Sprinkler',
+    //     question_type: 'dropdown',
+    //     options: ['Portable', 'Micro', 'Mini', 'Semi-permanent', 'Large Volume (Rain Gun)'],
+    // },
+    // { id: '12', type: 'question', text: 'Non Irrigated Land (in acre. Gunta)' },
     {
         id: '14',
         type: 'question',
@@ -100,10 +110,15 @@ export default [
     {
         id: '17',
         type: 'question',
-        text: 'Crop1 (Primary crop taken MI)',
+        text: 'Crop 1 (Primary crop taken MI)',
         question_type: 'radio',
         options: ['Plantation crop – Banana', 'Plantation crop – Arecanut', 'Vegetables ', 'Flowers (Rose, Chrysanthemum, Jasmine, Marigold'],
     },
+    // { id: '17.1', type: 'question', text: 'Area1 (Acres, Gunta)' },
+    // { id: '17.2', type: 'question', text: 'Crop 2 (Primary crop taken MI)' },
+    // { id: '17.3', type: 'question', text: 'Area2 (Acres, Gunta)' },
+    // { id: '17.4', type: 'question', text: 'Other Crop' },
+    // { id: '17.5', type: 'question', text: 'Other Area(Acres, Gunta)' },
     {
         id: '18',
         type: 'question',
@@ -541,7 +556,7 @@ export default [
     },
 
     {
-        id: '54',
+        id: '56',
         type: 'question',
         text: 'Location (Latitude/Longitude)',
         question_type: 'location',

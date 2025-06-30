@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,25 +15,123 @@ import questions from './questions';
 import PhotoCapture from './PhotoCapture';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import LocationPicker from './LocationPicker';
+
 
 export default function QuestionsScreen() {
   const [answers, setAnswers] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
-const surveyorName = answers.surveyor_name;
-const village = answers["1"];  // Correct way to access key "1"
-console.log(village);         // "Vvh" (if exists)
-console.log(surveyorName); 
+  const surveyorName = answers.surveyor_name;
+  const village = answers["1"];
+  console.log(village);
+  console.log(surveyorName);
 
   const extractSurveyMetadata = () => {
-  return {
-    surveyor_name: answers.surveyor_name,
-    village: answers.village,
-    district: answers.district, 
-    taluka: answers.taluka,
-    village: answers.village,
-    q10:answers["1"]
+    return {
+      surveyor_name: answers.surveyor_name,
+      village: answers.village,
+      district: answers.district,
+      taluka: answers.taluka,
+      village: answers.village,
+      q1: answers["1"],
+      q2: answers["2"],
+      q3: answers["3"],
+      q4: answers["4"],
+      q5: answers["5"],
+      q6: answers["6"],
+      q7: answers["7"],
+      q8: answers["8"],
+      q9: answers["9"],
+      q10: answers["10"],
+      q11: answers["1"],
+      q12: answers["1"],
+      q13_1: answers["1"],
+      q13_2: answers["1"],
+      q14: answers["1"],
+      q15: answers["1"],
+      q16: answers["1"],
+      q17: answers["1"],
+      q17_1: answers["1"],
+      q17_2: answers["1"],
+      q17_3: answers["1"],
+      q17_4: answers["1"],
+      q18: answers["1"],
+      q23: answers["1"],
+      q23_1: answers["1"],
+      q24: answers["1"],
+      q25: answers["1"],
+      q26: answers["1"],
+      q27: answers["1"],
+      q28: answers["1"],
+      q29: answers["1"],
+      q30: answers["1"],
+      q31: answers["1"],
+      q32: answers["1"],
+      q33: answers["1"],
+      q34: answers["1"],
+      q35: answers["1"],
+      q36: answers["1"],
+      q37: answers["1"],
+      q37_1: answers["1"],
+      q37_2: answers["1"],
+      q37_3: answers["1"],
+      q37_4: answers["1"],
+      q38: answers["1"],
+      q38_1: answers["1"],
+      q38_2: answers["1"],
+      q38_3: answers["1"],
+      q38_4: answers["1"],
+      q39: answers["1"],
+      q39_1: answers["1"],
+      q39_2: answers["1"],
+      q39_3: answers["1"],
+      q39_4: answers["1"],
+      q40: answers["1"],
+      q40_1: answers["1"],
+      q40_2: answers["1"],
+      q40_3: answers["1"],
+      q40_4: answers["1"],
+      q41: answers["1"],
+      q41_1: answers["1"],
+      q41_2: answers["1"],
+      q41_3: answers["1"],
+      q41_4: answers["1"],
+      q42: answers["1"],
+      q43: answers["1"],
+      q44: answers["1"],
+      q45: answers["1"],
+      q46: answers["1"],
+      q47: answers["1"],
+      q48: answers["1"],
+      q49: answers["1"],
+      q50: answers["1"],
+      q51: answers["1"],
+      q52: answers["1"],
+      q53: answers["1"],
+      q54: answers["1"],
+      q55: answers["1"],
+      q57: answers["1"],
+    };
   };
-};
+
+  // Load username from AsyncStorage when component mounts
+  useEffect(() => {
+    const loadUsername = async () => {
+      try {
+        const username = await AsyncStorage.getItem('username');
+        if (username) {
+          setAnswers(prev => ({ ...prev, surveyor_name: username }));
+        }
+      } catch (error) {
+        console.error('Error loading username:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUsername();
+  }, []);
 
   const serializedData = [];
   let headingCount = 0;
@@ -66,45 +164,55 @@ console.log(surveyorName);
   });
 
   const handleAnswerChange = (id, value) => {
-    // Convert empty strings to null
+    if (id === 'location' && typeof value === 'object') {
+      setAnswers((prev) => ({
+        ...prev,
+        latitude: value.latitude.toString(),
+        longitude: value.longitude.toString(),
+        [id]: value // Store the complete location object
+      }));
+      return;
+    }
+
+    // Convert empty strings to null for all other fields
     const finalValue = value === '' ? null : value;
     setAnswers((prev) => ({ ...prev, [id]: finalValue }));
   };
 
-const submitSurveyData = async (surveyData) => {
-  try {
-    // Retrieve the access token from AsyncStorage
-    const accessToken = await AsyncStorage.getItem('accessToken');
+  const submitSurveyData = async (surveyData) => {
+    try {
+      // Retrieve the access token from AsyncStorage
+      const accessToken = await AsyncStorage.getItem('accessToken');
 
-    if (!accessToken) {
-      throw new Error('No access token found');
-    }
-
-    // Get all the metadata fields
-    const metadata = extractSurveyMetadata();
-
-    const response = await axios.post(
-      'https://tomhudson.pythonanywhere.com/form',
-      {
-        survey_id: "SURV0012",
-        ...metadata,  // Spread all metadata fields
-        ...surveyData  // Spread all the question answers
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
+      if (!accessToken) {
+        throw new Error('No access token found');
       }
-    );
 
-    return response.data;
+      // Get all the metadata fields
+      const metadata = extractSurveyMetadata();
 
-  } catch (error) {
-    console.error('Error submitting survey:', error);
-    throw error;
-  }
-};
+      const response = await axios.post(
+        'https://tomhudson.pythonanywhere.com/form',
+        {
+          survey_id: "SURV0012",
+          ...metadata,  // Spread all metadata fields
+          ...surveyData  // Spread all the question answers
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      return response.data;
+
+    } catch (error) {
+      console.error('Error submitting survey:', error);
+      throw error;
+    }
+  };
 
   // Then modify your handleSubmit function in the component:
   const handleSubmit = async () => {
@@ -136,6 +244,21 @@ const submitSurveyData = async (surveyData) => {
       console.log('Submitting survey data:', payload);
       // const response = await submitSurveyData(payload);
       // console.log('Submission successful:', response);
+
+      // Reset form after successful submission
+      const username = await AsyncStorage.getItem('username');
+
+      // Create fresh empty state
+      const freshState = {};
+
+      // Only preserve surveyor_name if it exists
+      if (username) {
+        freshState.surveyor_name = username;
+      }
+
+      // Reset all answers including location
+      setAnswers(freshState);
+
       Alert.alert('Success', 'Answers submitted successfully!');
     } catch (error) {
       console.error('Submission failed:', error);
@@ -177,7 +300,7 @@ const submitSurveyData = async (surveyData) => {
     }
 
     return parentQuestion.subQuestions.questions.map((subQ) => (
-      <View key={subQ.id} style={[ styles.subQuestionContainer]}>
+      <View key={subQ.id} style={[styles.subQuestionContainer]}>
         <Text style={styles.questionTextCrop}>{subQ.text.replace(/Before MI ₹: ________ After MI ₹: ________/g, '')}</Text>
         {subQ.text.includes('Before MI ₹') ? (
           renderBeforeAfterInputs(subQ)
@@ -213,6 +336,23 @@ const submitSurveyData = async (surveyData) => {
           {item.showSerial ? `${item.serial}. ` : ''}
           {item.text}
         </Text>
+      );
+    }
+
+    // For the surveyor_name field specifically
+    if (item.id === 'surveyor_name') {
+      return (
+        <View style={styles.questionContainer}>
+          <Text style={styles.questionTextCrop}>
+            {item.showSerial ? `${item.serial}. ` : ''}
+            {item.text}
+          </Text>
+          <TextInput
+            style={[styles.input, styles.disabledInput]}
+            value={answers.surveyor_name || ''}
+            editable={false}
+          />
+        </View>
       );
     }
 
@@ -316,6 +456,21 @@ const submitSurveyData = async (surveyData) => {
       );
     }
 
+    if (item.question_type === 'location') {
+      return (
+        <View style={styles.questionContainer}>
+          <Text style={styles.questionTextCrop}>
+            {item.showSerial ? `${item.serial}. ` : ''}
+            {item.text}
+          </Text>
+          <LocationPicker
+            onLocationChange={(coords) => handleAnswerChange(item.id, coords)}
+            currentLocation={answers[item.id]} // Pass the stored location back
+          />
+        </View>
+      );
+    }
+
     return (
       <View style={styles.questionContainer}>
         <Text style={styles.questionTextCrop}>
@@ -327,7 +482,7 @@ const submitSurveyData = async (surveyData) => {
           placeholder="Answer"
           value={answers[item.id] || ''}
           onChangeText={(text) => handleAnswerChange(item.id, text)}
-          keyboardType={['12', '8', '16', '17', '18'].includes(item.id) ? 'phone-pad' : 'default'}
+          keyboardType={['2', '6', '10', '11', '12', '49'].includes(item.id) ? 'phone-pad' : 'default'}
         />
       </View>
     );
@@ -359,6 +514,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 20,
+    paddingTop: 10,
   },
   questionContainer: {
     backgroundColor: '#fff',
@@ -366,10 +522,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 2,
+    elevation: 1,
   },
   heading: {
     fontSize: 15,
@@ -392,7 +548,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginBottom: 4,
     color: '#333',
-    fontWeight:"bold"
+    fontWeight: "bold"
   },
   input: {
     borderWidth: 1,
@@ -410,7 +566,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 30,
+    marginBottom: 50,
   },
   buttonText: {
     color: '#fff',
@@ -485,25 +641,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
     backgroundColor: '#fff',
   },
-  
+  disabledInput: {
+    backgroundColor: '#f0f0f0',
+    color: '#666',
+  },
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
