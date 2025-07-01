@@ -23,67 +23,67 @@ const Signin = () => {
     const [showComponent, setShowComponent] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
-const handleLogin = async () => {
-    if (!phone || !password) {
-        setError('Phone and password are required');
-        clearErrorAfterTimeout();
-        return;
-    }
+    const handleLogin = async () => {
+        if (!phone || !password) {
+            setError('Phone and password are required');
+            clearErrorAfterTimeout();
+            return;
+        }
 
-    if (phone.length !== 10) {
-        setError('Phone number must be 10 digits');
-        clearErrorAfterTimeout();
-        return;
-    }
+        if (phone.length !== 10) {
+            setError('Phone number must be 10 digits');
+            clearErrorAfterTimeout();
+            return;
+        }
 
-    setIsLoading(true);
-    setError(null);
+        setIsLoading(true);
+        setError(null);
 
-    try {
-        const response = await axios.post(
-            'https://tomhudson.pythonanywhere.com/login',
-            { phone, password, role },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+        try {
+            const response = await axios.post(
+                'https://tomhudson.pythonanywhere.com/login',
+                { phone, password, role },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            if (!response.data) {
+                throw new Error('Failed to authenticate');
             }
-        );
 
-        if (!response.data) {
-            throw new Error('Failed to authenticate');
+            const { user, access } = response.data;
+            alert('Login successful');
+
+            // Store all authentication data
+            await AsyncStorage.multiSet([
+                ['phone', phone],
+                ['role', role],
+                ['accessToken', access],  // Store access token
+                // ['refreshToken', refresh],  // Store refresh token
+                // ['userId', user.id.toString()],
+                ['username', user.username],
+                ['isLoggedIn', 'true']  // Additional flag for quick login check
+            ]);
+
+            setIsLoggedIn(true);
+        } catch (error) {
+            console.error('Login error:', error);
+            let errorMessage = 'Login failed. Please check your credentials.';
+
+            if (error.response) {
+                errorMessage = error.response.data?.message || errorMessage;
+            } else if (error.request) {
+                errorMessage = 'No response from server. Please check your connection.';
+            }
+
+            setError(errorMessage);
+        } finally {
+            setIsLoading(false);
         }
-
-        const { user, refresh, access } = response.data;
-        alert('Login successful');
-        
-        // Store all authentication data
-        await AsyncStorage.multiSet([
-            ['phone', phone],
-            ['role', role],
-            ['accessToken', access],  // Store access token
-            // ['refreshToken', refresh],  // Store refresh token
-            // ['userId', user.id.toString()],
-            ['username', user.username],
-            ['isLoggedIn', 'true']  // Additional flag for quick login check
-        ]);
-
-        setIsLoggedIn(true);
-    } catch (error) {
-        console.error('Login error:', error);
-        let errorMessage = 'Login failed. Please check your credentials.';
-        
-        if (error.response) {
-            errorMessage = error.response.data?.message || errorMessage;
-        } else if (error.request) {
-            errorMessage = 'No response from server. Please check your connection.';
-        }
-        
-        setError(errorMessage);
-    } finally {
-        setIsLoading(false);
-    }
-};
+    };
 
     const handleError = (errorMessage) => {
         setError(errorMessage);
@@ -94,10 +94,6 @@ const handleLogin = async () => {
         setTimeout(() => {
             setError(null);
         }, 4000);
-    };
-
-    const handleRegisterPress = () => {
-        setShowComponent('register');
     };
 
     const handlePhoneChange = (text) => {
@@ -120,8 +116,8 @@ const handleLogin = async () => {
                         style={styles.logo}
                     />
 
-                    <Text style={styles.title}>KMEA Survey Login</Text>
-                    
+                    <Text style={styles.title}>eGeo Tech</Text>
+                    <Text style={styles.title}>PMKSY Field Survey</Text>
                     <TextInput
                         style={styles.input}
                         placeholder="Phone Number"
@@ -130,7 +126,7 @@ const handleLogin = async () => {
                         keyboardType="phone-pad"
                         maxLength={10}
                     />
-                    
+
                     <View style={styles.pickerContainer}>
                         <Picker
                             selectedValue={role}
@@ -141,7 +137,7 @@ const handleLogin = async () => {
                             <Picker.Item label="Admin" value="admin" />
                         </Picker>
                     </View>
-                    
+
                     <TextInput
                         style={styles.input}
                         placeholder="Password"
@@ -149,11 +145,11 @@ const handleLogin = async () => {
                         value={password}
                         onChangeText={(text) => setPassword(text)}
                     />
-                    
+
                     {error && <Text style={styles.error}>{error}</Text>}
 
-                    <TouchableOpacity 
-                        style={styles.loginButton} 
+                    <TouchableOpacity
+                        style={styles.loginButton}
                         onPress={handleLogin}
                         disabled={isLoading}
                     >

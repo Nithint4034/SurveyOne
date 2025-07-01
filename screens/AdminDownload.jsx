@@ -17,13 +17,13 @@ import surveyQuestions from '../assets/surveyQuestions';
 // Simulated response data (partial data in some rows)
 const csvData = [
   {
-    '1': 'SURV-001',
+    '1': 'G01',
     '6': 'Nithin',
     '2': '2025-06-28 18:45',
     '56': 'https://example.com/photo.jpg',
   },
   {
-    '1': 'SURV-002',
+    '1': 'G02',
     '6': 'Bhavana',
     '2': '2025-06-28 19:30',
     '56': 'https://example.com/photo2.jpg',

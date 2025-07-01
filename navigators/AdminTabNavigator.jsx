@@ -42,25 +42,14 @@ function AdminTabNavigator() {
         },
       }}
     >
-      {/* <Tab.Screen
-        name="Map"
-        component={QuestionsScreen}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="map-outline" color={color} size={size} />
-          ),
-          tabBarLabel: 'Map',
-          headerTitle: () => <CustomHeaderTitlePro />,
-        }}
-      /> */}
       <Tab.Screen
-        name="Dashboard"
+        name="Downloads"
         component={AdminDownload}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="stats-chart-outline" color={color} size={size} />
+            <Icon name="download-outline" color={color} size={size} />
           ),
-          tabBarLabel: 'Dashboard',
+          tabBarLabel: 'Downloads',
           headerTitle: () => <CustomHeaderTitlePro />,
         }}
       />

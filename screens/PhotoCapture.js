@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity, Image, StyleSheet, Text, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
 export default function PhotoCapture({ onCapture, onClear }) {
   const [imageUri, setImageUri] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleCapture = async () => {
     if (imageUri) {
@@ -22,21 +25,61 @@ export default function PhotoCapture({ onCapture, onClear }) {
 
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.3, // Lower quality (0.0-1.0)
+        quality: 0.7, // Medium quality (better for conversion)
         allowsEditing: false,
         aspect: [4, 3],
         base64: false,
-        exif: false // Don't include extra metadata
+        exif: false
       });
 
       if (!result.canceled && result.assets?.length > 0) {
         const uri = result.assets[0].uri;
         setImageUri(uri);
-        onCapture(uri);
+        
+        // Process and send the image
+        await processAndSendImage(uri);
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to capture image');
       console.error('Image capture error:', error);
+    }
+  };
+
+  const processAndSendImage = async (uri) => {
+    setIsProcessing(true);
+    try {
+      // Convert to JPG and compress
+      const processedImage = await manipulateAsync(
+        uri,
+        [],
+        { 
+          compress: 0.7, // Adjust compression (0-1)
+          format: SaveFormat.JPEG 
+        }
+      );
+
+      // Read the file as base64 string
+      const base64Data = await FileSystem.readAsStringAsync(processedImage.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Create the data URI
+      const dataUri = `data:image/jpeg;base64,${base64Data}`;
+      
+      // Call the onCapture callback with the processed image
+      onCapture({
+        uri: processedImage.uri,
+        dataUri,
+        base64Data,
+        type: 'image/jpeg',
+        name: `photo_${Date.now()}.jpg`
+      });
+
+    } catch (error) {
+      Alert.alert('Error', 'Failed to process image');
+      console.error('Image processing error:', error);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -51,17 +94,24 @@ export default function PhotoCapture({ onCapture, onClear }) {
       )}
       
       <TouchableOpacity 
-        style={styles.button}
+        style={[styles.button, isProcessing && styles.disabledButton]}
         onPress={handleCapture}
+        disabled={isProcessing}
       >
-        <MaterialIcons 
-          name={imageUri ? "camera" : "camera-alt"} 
-          size={20} 
-          color="white" 
-        />
-        <Text style={styles.buttonText}>
-          {imageUri ? 'Retake Photo' : 'Take Photo'}
-        </Text>
+        {isProcessing ? (
+          <Text style={styles.buttonText}>Processing...</Text>
+        ) : (
+          <>
+            <MaterialIcons 
+              name={imageUri ? "camera" : "camera-alt"} 
+              size={20} 
+              color="white" 
+            />
+            <Text style={styles.buttonText}>
+              {imageUri ? 'Retake Photo' : 'Take Photo'}
+            </Text>
+          </>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -88,6 +138,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 5,
     elevation: 2,
+  },
+  disabledButton: {
+    backgroundColor: '#cccccc',
   },
   buttonText: {
     color: 'white',
