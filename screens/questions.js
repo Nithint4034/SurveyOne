@@ -114,6 +114,7 @@ export default [
         question_type: 'radio',
         options: ['Plantation crop – Banana', 'Plantation crop – Arecanut', 'Vegetables ', 'Flowers (Rose, Chrysanthemum, Jasmine, Marigold'],
     },
+
     {
         id: '18',
         type: 'question',

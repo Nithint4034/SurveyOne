@@ -93,26 +93,29 @@ export default function PhotoCapture({ onCapture, onClear }) {
         />
       )}
       
-      <TouchableOpacity 
-        style={[styles.button, isProcessing && styles.disabledButton]}
-        onPress={handleCapture}
-        disabled={isProcessing}
-      >
-        {isProcessing ? (
-          <Text style={styles.buttonText}>Processing...</Text>
-        ) : (
-          <>
-            <MaterialIcons 
-              name={imageUri ? "camera" : "camera-alt"} 
-              size={20} 
-              color="white" 
-            />
-            <Text style={styles.buttonText}>
-              {imageUri ? 'Retake Photo' : 'Take Photo'}
-            </Text>
-          </>
-        )}
-      </TouchableOpacity>
+      <View style={styles.buttonWrapper}>
+  <TouchableOpacity 
+    style={[styles.button, isProcessing && styles.disabledButton]}
+    onPress={handleCapture}
+    disabled={isProcessing}
+  >
+    {isProcessing ? (
+      <Text style={styles.buttonText}>Processing...</Text>
+    ) : (
+      <>
+        <MaterialIcons 
+          name={imageUri ? "camera" : "camera-alt"} 
+          size={20} 
+          color="white" 
+        />
+        <Text style={styles.buttonText}>
+          {imageUri ? 'Retake Photo' : 'Take Photo'}
+        </Text>
+      </>
+    )}
+  </TouchableOpacity>
+</View>
+
     </View>
   );
 }
@@ -130,6 +133,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   button: {
+    width: '50%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -148,4 +152,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
   },
+  buttonWrapper: {
+  alignItems: 'center',
+  marginTop: 2,
+},
+
 });

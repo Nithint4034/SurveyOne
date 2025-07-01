@@ -9,8 +9,6 @@ import PhotoCapture from './PhotoCapture';
 import LocationPicker from './LocationPicker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
-import * as FileSystem from 'expo-file-system';
 
 
 export default function QuestionsScreen() {
@@ -18,6 +16,9 @@ export default function QuestionsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const flatListRef = useRef(null);
+  const [errors, setErrors] = useState({});
+  const requiredFields = ['6', 'surveyor_name','district', 'taluka', 'village', '1','2','3', '18', '26', '56','57'];
+
 
   useEffect(() => {
     (async () => {
@@ -70,34 +71,22 @@ export default function QuestionsScreen() {
 
 
   const handleAnswerChange = (id, value) => {
-    setAnswers(prev => ({
-      ...prev,
-      [id]: typeof value === 'string' && value === '' ? null : value,
-      ...(id === 'location' && typeof value === 'object' ? {
-        latitude: value.latitude?.toString() || null,
-        longitude: value.longitude?.toString() || null
-      } : {})
-    }));
-  };
+    if (id === '6') {
+      // Remove non-digit characters
+      const numeric = value.replace(/\D/g, '');
 
-  const processImage = async (uri) => {
-    const processedImage = await manipulateAsync(
-      uri,
-      [],
-      {
-        compress: 0.7,
-        format: SaveFormat.JPEG,
-      }
-    );
+      // Limit to 10 digits
+      const trimmed = numeric.slice(0, 10);
 
-    const base64Data = await FileSystem.readAsStringAsync(processedImage.uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-
-    return {
-      base64Data,
-      filename: `photo_${Date.now()}.jpg`,
-    };
+      // Set answer and validate
+      setAnswers(prev => ({ ...prev, [id]: trimmed }));
+      setErrors(prev => ({
+        ...prev,
+        [id]: trimmed.length === 10 ? null : 'Phone number must be 10 digits',
+      }));
+    } else {
+      setAnswers(prev => ({ ...prev, [id]: value }));
+    }
   };
 
 
@@ -145,67 +134,90 @@ export default function QuestionsScreen() {
     return response.data;
   };
 
-const handleSubmit = async () => {
-  if (isSubmitting) return;
-  setIsSubmitting(true);
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
-  try {
-    const payload = {};
+    try {
+      const currentErrors = {};
 
-    for (const item of serializedData) {
-      if (item.type === 'question') {
-        const val = answers[item.id] || null;
-        const otherVal = answers[`${item.id}_other`] || null;
-
-        if (item.question_type === 'multi-select') {
-          const selected = answers[item.id] || [];
-          const otherInput = answers[`${item.id}_other`] || '';
-
-          // Replace "Other(Specify)" with actual input if provided
-          const cleanedSelected = selected.map(opt =>
-            opt === 'Other(Specify)' && otherInput ? otherInput : opt
-          );
-
-          payload[item.id] = JSON.stringify(cleanedSelected);
-        } else {
-          payload[item.id] = val === 'Other(Specify)' ? otherVal : val;
+      for (const field of requiredFields) {
+        const value = answers[field];
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          Alert.alert('Missing Answer', `Please fill in the required field : ${field}`);
+          setIsSubmitting(false);
+          return;
         }
 
-        // Handle sub-questions
-        const trigger = item.subQuestions?.triggerValue;
-        const triggered = (
-          item.question_type === 'multi-select'
-            ? Array.isArray(val) && val.includes(trigger)
-            : val === trigger
-        );
+        // Special case for phone number (e.g., q6)
+        if (field === '6' && value.length !== 10) {
+          Alert.alert('Invalid Phone Number', 'Phone number must be exactly 10 digits.');
+          setIsSubmitting(false);
+          return;
+        }
+      }
 
-        if (item.subQuestions && triggered) {
-          for (const subQ of item.subQuestions.questions) {
-            if (subQ.text.includes('Before MI ₹')) {
-              payload[`${subQ.id}_before`] = answers[`${subQ.id}_before`] || null;
-              payload[`${subQ.id}_after`] = answers[`${subQ.id}_after`] || null;
-            } else {
-              payload[subQ.id] = answers[subQ.id] || null;
+      if (Object.keys(currentErrors).length > 0) {
+        setErrors(currentErrors);
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Clear previous errors
+      setErrors({});
+
+      const payload = {};
+      for (const item of serializedData) {
+        if (item.type === 'question') {
+          const val = answers[item.id] || null;
+          const otherVal = answers[`${item.id}_other`] || null;
+
+          if (item.question_type === 'multi-select') {
+            const selected = answers[item.id] || [];
+            const otherInput = answers[`${item.id}_other`] || '';
+
+            const cleanedSelected = selected.map(opt =>
+              opt === 'Other(Specify)' && otherInput ? otherInput : opt
+            );
+
+            payload[item.id] = JSON.stringify(cleanedSelected);
+          } else {
+            payload[item.id] = val === 'Other(Specify)' ? otherVal : val;
+          }
+
+          const trigger = item.subQuestions?.triggerValue;
+          const triggered = (
+            item.question_type === 'multi-select'
+              ? Array.isArray(val) && val.includes(trigger)
+              : val === trigger
+          );
+
+          if (item.subQuestions && triggered) {
+            for (const subQ of item.subQuestions.questions) {
+              if (subQ.text.includes('Before MI ₹')) {
+                payload[`${subQ.id}_before`] = answers[`${subQ.id}_before`] || null;
+                payload[`${subQ.id}_after`] = answers[`${subQ.id}_after`] || null;
+              } else {
+                payload[subQ.id] = answers[subQ.id] || null;
+              }
             }
           }
         }
       }
+
+      await submitSurveyData(payload);
+      const username = await AsyncStorage.getItem('username');
+      setAnswers({ surveyor_name: username || '' });
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      Alert.alert('Success', 'Survey submitted successfully!');
+    } catch (error) {
+      console.error('Survey submit error:', error);
+      Alert.alert('Error', 'Survey submission failed.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    await submitSurveyData(payload);
-    const username = await AsyncStorage.getItem('username');
-    setAnswers({ surveyor_name: username || '' });
-    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-    Alert.alert('Success', 'Survey submitted successfully!');
-  } catch (error) {
-    console.error('Survey submit error:', error);
-    Alert.alert('Error', 'Survey submission failed.');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-
+  };
 
   const renderBeforeAfterInputs = (subQ) => (
     <View style={styles.beforeAfterContainer}>
@@ -272,6 +284,7 @@ const handleSubmit = async () => {
           <Text style={styles.questionTextCrop}>
             {item.showSerial ? `${item.serial}. ` : ''}
             {item.text}
+            {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
           </Text>
           <TextInput
             style={[styles.input, styles.disabledInput]}
@@ -297,6 +310,7 @@ const handleSubmit = async () => {
           <Text style={styles.questionTextCrop}>
             {item.showSerial ? `${item.serial}. ` : ''}
             {item.text}
+            {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
           </Text>
           <View style={styles.radioOptionsContainer}>
             {item.options.map(option => (
@@ -336,6 +350,7 @@ const handleSubmit = async () => {
           <Text style={styles.questionTextCrop}>
             {item.showSerial ? `${item.serial}. ` : ''}
             {item.text}
+            {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
           </Text>
           <View style={styles.pickerWrapper}>
             <Picker
@@ -360,6 +375,7 @@ const handleSubmit = async () => {
           <Text style={styles.questionTextCrop}>
             {item.showSerial ? `${item.serial}. ` : ''}
             {item.text}
+            {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
           </Text>
           <PhotoCapture
             onCapture={(uri) => handleAnswerChange(item.id, uri)}
@@ -370,53 +386,54 @@ const handleSubmit = async () => {
     }
 
     if (item.question_type === 'multi-select') {
-  const selectedOptions = answers[item.id] || [];
+      const selectedOptions = answers[item.id] || [];
 
-  const toggleOption = (option) => {
-    let updated = [...selectedOptions];
-    if (updated.includes(option)) {
-      updated = updated.filter(o => o !== option);
-    } else {
-      updated.push(option);
+      const toggleOption = (option) => {
+        let updated = [...selectedOptions];
+        if (updated.includes(option)) {
+          updated = updated.filter(o => o !== option);
+        } else {
+          updated.push(option);
+        }
+        handleAnswerChange(item.id, updated);
+
+        // If deselecting 'Other(Specify)', also clear its value
+        if (option === 'Other(Specify)' && selectedOptions.includes('Other(Specify)')) {
+          handleAnswerChange(`${item.id}_other`, null);
+        }
+      };
+
+      return (
+        <View style={styles.questionContainer}>
+          <Text style={styles.questionTextCrop}>
+            {item.showSerial ? `${item.serial}. ` : ''}{item.text}
+            {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
+          </Text>
+
+          {item.options.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.checkboxContainer}
+              onPress={() => toggleOption(option)}
+            >
+              <View style={styles.checkbox}>
+                {selectedOptions.includes(option) && <Text style={styles.checkboxTick}>✔</Text>}
+              </View>
+              <Text style={styles.checkboxLabel}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+
+          {selectedOptions.includes('Other(Specify)') && (
+            <TextInput
+              style={styles.input}
+              placeholder="Please specify"
+              value={answers[`${item.id}_other`] || ''}
+              onChangeText={(text) => handleAnswerChange(`${item.id}_other`, text)}
+            />
+          )}
+        </View>
+      );
     }
-    handleAnswerChange(item.id, updated);
-
-    // If deselecting 'Other(Specify)', also clear its value
-    if (option === 'Other(Specify)' && selectedOptions.includes('Other(Specify)')) {
-      handleAnswerChange(`${item.id}_other`, null);
-    }
-  };
-
-  return (
-    <View style={styles.questionContainer}>
-      <Text style={styles.questionTextCrop}>
-        {item.showSerial ? `${item.serial}. ` : ''}{item.text}
-      </Text>
-
-      {item.options.map(option => (
-        <TouchableOpacity
-          key={option}
-          style={styles.checkboxContainer}
-          onPress={() => toggleOption(option)}
-        >
-          <View style={styles.checkbox}>
-            {selectedOptions.includes(option) && <Text style={styles.checkboxTick}>✔</Text>}
-          </View>
-          <Text style={styles.checkboxLabel}>{option}</Text>
-        </TouchableOpacity>
-      ))}
-
-      {selectedOptions.includes('Other(Specify)') && (
-        <TextInput
-          style={styles.input}
-          placeholder="Please specify"
-          value={answers[`${item.id}_other`] || ''}
-          onChangeText={(text) => handleAnswerChange(`${item.id}_other`, text)}
-        />
-      )}
-    </View>
-  );
-}
 
 
 
@@ -428,6 +445,7 @@ const handleSubmit = async () => {
           <Text style={styles.questionTextCrop}>
             {item.showSerial ? `${item.serial}. ` : ''}
             {item.text}
+            {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
           </Text>
           <LocationPicker
             onLocationChange={(coords) => handleAnswerChange(item.id, coords)}
@@ -442,16 +460,23 @@ const handleSubmit = async () => {
         <Text style={styles.questionTextCrop}>
           {item.showSerial ? `${item.serial}. ` : ''}
           {item.text}
+          {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
         </Text>
+
         <TextInput
           style={styles.input}
           placeholder="Answer"
           value={answers[item.id] || ''}
           onChangeText={(text) => handleAnswerChange(item.id, text)}
           keyboardType={['2', '6', '10', '11', '12', '49'].includes(item.id) ? 'phone-pad' : 'default'}
+          maxLength={item.id === '6' ? 10 : undefined}
         />
+        {errors[item.id] && (
+          <Text style={styles.errorText}> {errors[item.id]} *</Text>
+        )}
       </View>
     );
+
   };
 
 
@@ -634,39 +659,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
+  redStar: {
+    color: 'red',
+    fontWeight: 'bold',
+  },
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
