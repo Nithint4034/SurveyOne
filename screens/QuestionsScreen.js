@@ -100,63 +100,49 @@ export default function QuestionsScreen() {
   };
 
 
-  const submitSurveyData = async (payload) => {
-    console.log('Submitting survey data:', payload);
-    const accessToken = await AsyncStorage.getItem('accessToken');
-    if (!accessToken) throw new Error('No access token found');
+ const submitSurveyData = async (payload) => {
+  const accessToken = await AsyncStorage.getItem('accessToken');
+  if (!accessToken) throw new Error('No access token found');
 
-    const processed = { ...payload };
+  const formData = new FormData();
 
-    for (const key in payload) {
-      if (key.startsWith('q') && payload[key]?.startsWith?.('file:')) {
-        const img = await processImage(payload[key]);
-        processed[key] = img.base64Data;
-        processed[`${key}_filename`] = img.filename;
-      }
+  // Append meta fields
+  const metadata = extractSurveyMetadata();
+  for (const key in metadata) {
+    if (metadata[key] !== null) {
+      formData.append(key, metadata[key]);
     }
+  }
 
-    const formData = new FormData();
+  // Append answers (including image file if present)
+  for (const key in payload) {
+    const val = payload[key];
 
-    // Add meta fields
-    const metadata = extractSurveyMetadata();
-    for (const key in metadata) {
-      if (metadata[key] !== null) {
-        formData.append(key, metadata[key]);
-      }
+    if (typeof val === 'string' && val.startsWith('file://')) {
+      const name = val.split('/').pop();
+      formData.append(key, {
+        uri: val,
+        type: 'image/jpeg',
+        name: name || `photo_${Date.now()}.jpg`,
+      });
+    } else if (val !== null && val !== undefined) {
+      formData.append(key, val);
     }
+  }
 
-    // Add answers
-    for (const key in payload) {
-      const val = payload[key];
-
-      if (typeof val === 'string' && val.startsWith('file:')) {
-        // It's an image URI
-        const uriParts = val.split('/');
-        const name = uriParts[uriParts.length - 1];
-        formData.append(key, {
-          uri: val,
-          type: 'image/jpeg',
-          name,
-        });
-      } else if (val !== null && val !== undefined) {
-        formData.append(key, val);
-      }
+  const response = await axios.post(
+    'https://tomhudson.pythonanywhere.com/form',
+    formData,
+    {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'multipart/form-data',
+      },
     }
+  );
 
-    const response = await axios.post(
-      'https://tomhudson.pythonanywhere.com/form',
-      formData,
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'multipart/form-data',
-        }
-      }
-    );
-
-
-    return response.data;
-  };
+  return response.data;
+};
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
