@@ -114,16 +114,11 @@ export default [
         question_type: 'radio',
         options: ['Plantation crop – Banana', 'Plantation crop – Arecanut', 'Vegetables ', 'Flowers (Rose, Chrysanthemum, Jasmine, Marigold'],
     },
-    // { id: '17.1', type: 'question', text: 'Area1 (Acres, Gunta)' },
-    // { id: '17.2', type: 'question', text: 'Crop 2 (Primary crop taken MI)' },
-    // { id: '17.3', type: 'question', text: 'Area2 (Acres, Gunta)' },
-    // { id: '17.4', type: 'question', text: 'Other Crop' },
-    // { id: '17.5', type: 'question', text: 'Other Area(Acres, Gunta)' },
     {
         id: '18',
         type: 'question',
         text: 'Source of Irrigation (tick applicable)',
-        question_type: 'radio',
+        question_type: 'multi-select',
         options: ['Borewell', 'Open well', 'Canal', 'Krishi Honda'],
     },
     {
@@ -284,7 +279,7 @@ export default [
         id: '22',
         type: 'question',
         text: 'What are the MI components received? (tick applicable)',
-        question_type: 'radio',
+        question_type: 'multi-select',
         options: ['PVC', 'Venturi', 'Filter', ' Lateral ', 'Sprinkler', 'Valves', 'Raingun', 'Other(Specify)']
     },
     {
@@ -309,7 +304,7 @@ export default [
         id: '26',
         type: 'question',
         text: 'How did you receive the communication? (tick applicable)',
-        question_type: 'radio',
+        question_type: 'multi-select',
         options: ['SMS on Phone', 'Intimation from Village', 'Assistant', 'Intimation from AO/HO'],
     },
     {

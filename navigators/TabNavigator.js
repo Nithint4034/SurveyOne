@@ -45,7 +45,7 @@ function TabNavigator() {
         headerStyle: {
           backgroundColor: '#FAF7F0',
         },
-        keyboardHidesTabBar: true, // This hides the tab bar when keyboard appears
+        tabBarHideOnKeyboard: true, 
       }}
     >
       <Tab.Screen

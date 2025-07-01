@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system';
 
+
 export default function QuestionsScreen() {
   const [answers, setAnswers] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -100,88 +101,111 @@ export default function QuestionsScreen() {
   };
 
 
- const submitSurveyData = async (payload) => {
-  const accessToken = await AsyncStorage.getItem('accessToken');
-  if (!accessToken) throw new Error('No access token found');
+  const submitSurveyData = async (payload) => {
+    const accessToken = await AsyncStorage.getItem('accessToken');
+    if (!accessToken) throw new Error('No access token found');
 
-  const formData = new FormData();
+    const formData = new FormData();
 
-  // Append meta fields
-  const metadata = extractSurveyMetadata();
-  for (const key in metadata) {
-    if (metadata[key] !== null) {
-      formData.append(key, metadata[key]);
+    // Append meta fields
+    const metadata = extractSurveyMetadata();
+    for (const key in metadata) {
+      if (metadata[key] !== null) {
+        formData.append(key, metadata[key]);
+      }
     }
-  }
 
-  // Append answers (including image file if present)
-  for (const key in payload) {
-    const val = payload[key];
+    // Append answers (including image file if present)
+    for (const key in payload) {
+      const val = payload[key];
 
-    if (typeof val === 'string' && val.startsWith('file://')) {
-      const name = val.split('/').pop();
-      formData.append(key, {
-        uri: val,
-        type: 'image/jpeg',
-        name: name || `photo_${Date.now()}.jpg`,
-      });
-    } else if (val !== null && val !== undefined) {
-      formData.append(key, val);
+      if (typeof val === 'string' && val.startsWith('file://')) {
+        const name = val.split('/').pop();
+        formData.append(key, {
+          uri: val,
+          type: 'image/jpeg',
+          name: name || `photo_${Date.now()}.jpg`,
+        });
+      } else if (val !== null && val !== undefined) {
+        formData.append(key, val);
+      }
     }
-  }
 
-  const response = await axios.post(
-    'https://tomhudson.pythonanywhere.com/form',
-    formData,
-    {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'multipart/form-data',
-      },
-    }
-  );
+    const response = await axios.post(
+      'https://tomhudson.pythonanywhere.com/form',
+      formData,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
 
-  return response.data;
-};
+    return response.data;
+  };
 
-  const handleSubmit = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
+const handleSubmit = async () => {
+  if (isSubmitting) return;
+  setIsSubmitting(true);
 
-    try {
-      const payload = {};
+  try {
+    const payload = {};
 
-      for (const item of serializedData) {
-        if (item.type === 'question') {
-          const val = answers[item.id] || null;
-          const otherVal = answers[`${item.id}_other`] || null;
+    for (const item of serializedData) {
+      if (item.type === 'question') {
+        const val = answers[item.id] || null;
+        const otherVal = answers[`${item.id}_other`] || null;
+
+        if (item.question_type === 'multi-select') {
+          const selected = answers[item.id] || [];
+          const otherInput = answers[`${item.id}_other`] || '';
+
+          // Replace "Other(Specify)" with actual input if provided
+          const cleanedSelected = selected.map(opt =>
+            opt === 'Other(Specify)' && otherInput ? otherInput : opt
+          );
+
+          payload[item.id] = JSON.stringify(cleanedSelected);
+        } else {
           payload[item.id] = val === 'Other(Specify)' ? otherVal : val;
+        }
 
-          if (item.subQuestions && val === item.subQuestions.triggerValue) {
-            for (const subQ of item.subQuestions.questions) {
-              if (subQ.text.includes('Before MI ₹')) {
-                payload[`${subQ.id}_before`] = answers[`${subQ.id}_before`] || null;
-                payload[`${subQ.id}_after`] = answers[`${subQ.id}_after`] || null;
-              } else {
-                payload[subQ.id] = answers[subQ.id] || null;
-              }
+        // Handle sub-questions
+        const trigger = item.subQuestions?.triggerValue;
+        const triggered = (
+          item.question_type === 'multi-select'
+            ? Array.isArray(val) && val.includes(trigger)
+            : val === trigger
+        );
+
+        if (item.subQuestions && triggered) {
+          for (const subQ of item.subQuestions.questions) {
+            if (subQ.text.includes('Before MI ₹')) {
+              payload[`${subQ.id}_before`] = answers[`${subQ.id}_before`] || null;
+              payload[`${subQ.id}_after`] = answers[`${subQ.id}_after`] || null;
+            } else {
+              payload[subQ.id] = answers[subQ.id] || null;
             }
           }
         }
       }
-
-      await submitSurveyData(payload);
-      const username = await AsyncStorage.getItem('username');
-      setAnswers({ surveyor_name: username || '' });
-      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-      Alert.alert('Success', 'Survey submitted successfully!');
-    } catch (error) {
-      console.error('Survey submit error:', error);
-      Alert.alert('Error', 'Survey submission failed.');
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+
+    await submitSurveyData(payload);
+    const username = await AsyncStorage.getItem('username');
+    setAnswers({ surveyor_name: username || '' });
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+    Alert.alert('Success', 'Survey submitted successfully!');
+  } catch (error) {
+    console.error('Survey submit error:', error);
+    Alert.alert('Error', 'Survey submission failed.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
 
   const renderBeforeAfterInputs = (subQ) => (
     <View style={styles.beforeAfterContainer}>
@@ -344,6 +368,59 @@ export default function QuestionsScreen() {
         </View>
       );
     }
+
+    if (item.question_type === 'multi-select') {
+  const selectedOptions = answers[item.id] || [];
+
+  const toggleOption = (option) => {
+    let updated = [...selectedOptions];
+    if (updated.includes(option)) {
+      updated = updated.filter(o => o !== option);
+    } else {
+      updated.push(option);
+    }
+    handleAnswerChange(item.id, updated);
+
+    // If deselecting 'Other(Specify)', also clear its value
+    if (option === 'Other(Specify)' && selectedOptions.includes('Other(Specify)')) {
+      handleAnswerChange(`${item.id}_other`, null);
+    }
+  };
+
+  return (
+    <View style={styles.questionContainer}>
+      <Text style={styles.questionTextCrop}>
+        {item.showSerial ? `${item.serial}. ` : ''}{item.text}
+      </Text>
+
+      {item.options.map(option => (
+        <TouchableOpacity
+          key={option}
+          style={styles.checkboxContainer}
+          onPress={() => toggleOption(option)}
+        >
+          <View style={styles.checkbox}>
+            {selectedOptions.includes(option) && <Text style={styles.checkboxTick}>✔</Text>}
+          </View>
+          <Text style={styles.checkboxLabel}>{option}</Text>
+        </TouchableOpacity>
+      ))}
+
+      {selectedOptions.includes('Other(Specify)') && (
+        <TextInput
+          style={styles.input}
+          placeholder="Please specify"
+          value={answers[`${item.id}_other`] || ''}
+          onChangeText={(text) => handleAnswerChange(`${item.id}_other`, text)}
+        />
+      )}
+    </View>
+  );
+}
+
+
+
+
 
     if (item.question_type === 'location') {
       return (
@@ -533,6 +610,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     color: '#666',
   },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderWidth: 2,
+    borderColor: '#4A4947',
+    borderRadius: 4,
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxTick: {
+    fontSize: 12,
+    color: '#4A4947',
+    fontWeight: 'bold',
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    color: '#333',
+  },
+
 });
 
 
@@ -568,97 +670,3 @@ const styles = StyleSheet.create({
 
 
 
-
-
-// const extractSurveyMetadata = () => {
-//   return {
-//     surveyor_name: answers.surveyor_name,
-//     village: answers.village,
-//     district: answers.district,
-//     taluka: answers.taluka,
-//     village: answers.village,
-//     q1: answers["1"],
-//     q2: answers["2"],
-//     q3: answers["3"],
-//     q4: answers["4"],
-//     q5: answers["5"],
-//     q6: answers["6"],
-//     q7: answers["7"],
-//     q8: answers["8"],
-//     q9: answers["9"],
-//     q10: answers["10"],
-//     q11: answers["11"],
-//     q12: answers["12"],
-//     q13_1: answers[""],
-//     q13_2: answers[""],
-//     q14: answers["14"],
-//     q15: answers["15"],
-//     q16: answers["16"],
-//     q17: answers["17"],
-//     q17_1: answers[""],
-//     q17_2: answers[""],
-//     q17_3: answers[""],
-//     q17_4: answers[""],
-//     q18: answers["18"],
-//     q19: answers["19"],
-//     q20: answers["20"],
-//     q21: answers["21"],
-//     q22: answers["22"],
-//     q23: answers["23"],
-//     q23_1: answers[""],
-//     q24: answers["24"],
-//     q25: answers["25"],
-//     q26: answers["26"],
-//     q27: answers["27"],
-//     q28: answers["28"],
-//     q29: answers["29"],
-//     q30: answers["30"],
-//     q31: answers["31"],
-//     q32: answers["32"],
-//     q33: answers["33"],
-//     q34: answers["34"],
-//     q35: answers["35"],
-//     q36: answers["36"],
-//     q37: answers["37"],
-//     q37_1: answers["1"],
-//     q37_2: answers["1"],
-//     q37_3: answers["1"],
-//     q37_4: answers["1"],
-//     q38: answers["38"],
-//     q38_1: answers[""],
-//     q38_2: answers[""],
-//     q38_3: answers[""],
-//     q38_4: answers[""],
-//     q39: answers["39"],
-//     q39_1: answers[""],
-//     q39_2: answers[""],
-//     q39_3: answers[""],
-//     q39_4: answers[""],
-//     q40: answers["40"],
-//     q40_1: answers[""],
-//     q40_2: answers[""],
-//     q40_3: answers[""],
-//     q40_4: answers[""],
-//     q41: answers["41"],
-//     q41_1: answers[""],
-//     q41_2: answers[""],
-//     q41_3: answers[""],
-//     q41_4: answers[""],
-//     q42: answers["42"],
-//     q43: answers["43"],
-//     q44: answers["44"],
-//     q45: answers["45"],
-//     q46: answers["46"],
-//     q47: answers["47"],
-//     q48: answers["48"],
-//     q49: answers["49"],
-//     q50: answers["50"],
-//     q51: answers["51"],
-//     q52: answers["52"],
-//     q53: answers["53"],
-//     q54: answers["54"],
-//     q55: answers["55"],
-//     q56: answers["56"],
-//     q57: answers["57"],
-//   };
-// };

@@ -6,6 +6,7 @@ import LoginProvider from './context/LoginProvider';
 import AppNavigator from './navigators/AppNavigator';
 import { LogBox } from 'react-native';
 
+
 LogBox.ignoreAllLogs(true);
 
 export default function App() {

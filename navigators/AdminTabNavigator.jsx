@@ -40,6 +40,7 @@ function AdminTabNavigator() {
         headerStyle: {
           backgroundColor: '#FAF7F0', 
         },
+        tabBarHideOnKeyboard: true
       }}
     >
       <Tab.Screen
