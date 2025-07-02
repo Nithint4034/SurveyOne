@@ -111,13 +111,26 @@ const Signin = () => {
                     source={require('../assets/UILand.png')}
                     style={styles.container}
                 >
-                    <Image
-                        source={require('../assets/icon.jpg')}
-                        style={styles.logo}
-                    />
+                   <View style={styles.logoRow}>
+    <View style={styles.logoWithText}>
+        <Image
+            source={require('../assets/icon.jpg')}
+            style={styles.logo}
+            resizeMode="contain"
+        />
+        <Text style={styles.logoText}>KMEA</Text>
+    </View>
+    <View style={styles.logoWithText}>
+        <Image
+            source={require('../assets/icon2.jpg')}
+            style={styles.logo}
+            resizeMode="contain"
+        />
+        <Text style={styles.logoText}>eGeo Tech</Text>
+    </View>
+</View>
 
-                    <Text style={styles.title}>eGeo Tech</Text>
-                    <Text style={styles.title}>PMKSY Field Survey</Text>
+
                     <TextInput
                         style={styles.input}
                         placeholder="Phone Number"
@@ -158,11 +171,7 @@ const Signin = () => {
                         </Text>
                     </TouchableOpacity>
 
-                    {/* <View style={styles.linksContainer}>
-                        <TouchableOpacity onPress={handleRegisterPress}>
-                            <Text style={styles.link}>Register</Text>
-                        </TouchableOpacity>
-                    </View> */}
+
                 </ImageBackground>
             )}
         </View>
@@ -241,6 +250,28 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
+    logoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 20,
+},
+
+logoWithText: {
+    alignItems: 'center',
+    flex: 1,
+},
+
+logoText: {
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#4A4947',
+    textAlign: 'center',
+},
+
+
 });
 
 export default Signin;
