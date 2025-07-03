@@ -110,7 +110,7 @@ export default [
     {
         id: '17',
         type: 'question',
-        text: 'Crop 1 (Primary crop taken MI)',
+        text: 'Crops Details. ',
         question_type: 'radio',
         options: ['Plantation crop – Banana', 'Plantation crop – Arecanut', 'Vegetables ', 'Flowers (Rose, Chrysanthemum, Jasmine, Marigold'],
     },

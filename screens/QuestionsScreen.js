@@ -18,7 +18,7 @@ export default function QuestionsScreen() {
   const flatListRef = useRef(null);
   const [errors, setErrors] = useState({});
   // const requiredFields = ['6', 'surveyor_name','district', 'taluka', 'village', '1','2','3', '18', '26', '56','57'];
-const requiredFields = []
+  const requiredFields = []
 
   useEffect(() => {
     (async () => {
@@ -173,6 +173,19 @@ const requiredFields = []
           const val = answers[item.id] || null;
           const otherVal = answers[`${item.id}_other`] || null;
 
+          // Handle question 17 separately
+          if (item.id === '17') {
+            payload['17_crop1'] = answers['17_crop1'] || null;
+            payload['17_area1'] = answers['17_area1'] || null;
+            payload['17_crop2'] = answers['17_crop2'] || null;
+            payload['17_area2'] = answers['17_area2'] || null;
+            payload['17_other_crop'] = answers['17_other_crop'] || null;
+            payload['17_other_area'] = answers['17_other_area'] || null;
+
+            // Optionally skip setting payload['17']
+            continue;
+          }
+
           if (item.question_type === 'multi-select') {
             const selected = answers[item.id] || [];
             const otherInput = answers[`${item.id}_other`] || '';
@@ -207,6 +220,8 @@ const requiredFields = []
       }
 
       await submitSurveyData(payload);
+      console.log('payload', payload);
+
       const username = await AsyncStorage.getItem('username');
       setAnswers({ surveyor_name: username || '' });
       flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
@@ -296,81 +311,81 @@ const requiredFields = []
     }
 
     if (item.id === '17') {
-  return (
-    <View style={styles.questionContainer}>
-      <Text style={styles.questionTextCrop}>
-        {item.showSerial ? `${item.serial}. ` : ''}{item.text}
-        {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
-      </Text>
+      return (
+        <View style={styles.questionContainer}>
+          <Text style={styles.questionTextCrop}>
+            {item.showSerial ? `${item.serial}. ` : ''}{item.text}
+            {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
+          </Text>
 
-      {/* Crop 1 */}
-      <Text style={styles.subLabel}>Crop1 (Primary crop taken MI)</Text>
-      <View style={styles.pickerWrapper}>
-        <Picker
-          selectedValue={answers['17_crop1'] || ''}
-          onValueChange={(value) => handleAnswerChange('17_crop1', value)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Select crop..." value="" />
-          {item.options?.map(option => (
-            <Picker.Item key={option} label={option} value={option} />
-          ))}
-        </Picker>
-      </View>
+          {/* Crop 1 */}
+          <Text style={styles.subLabel}>Crop1 (Primary crop taken MI)</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={answers['17_crop1'] || ''}
+              onValueChange={(value) => handleAnswerChange('17_crop1', value)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select crop..." value="" />
+              {item.options?.map(option => (
+                <Picker.Item key={option} label={option} value={option} />
+              ))}
+            </Picker>
+          </View>
 
-      <Text style={styles.subLabel}>Area1 (Acres, Gunta)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter area"
-        value={answers['17_area1'] || ''}
-        onChangeText={(text) => handleAnswerChange('17_area1', text)}
-        keyboardType="numeric"
-      />
+          <Text style={styles.subLabel}>Area1 (Acres, Gunta)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter area"
+            value={answers['17_area1'] || ''}
+            onChangeText={(text) => handleAnswerChange('17_area1', text)}
+            keyboardType="numeric"
+          />
 
-      {/* Crop 2 */}
-      <Text style={styles.subLabel}>Crop2</Text>
-      <View style={styles.pickerWrapper}>
-        <Picker
-          selectedValue={answers['17_crop2'] || ''}
-          onValueChange={(value) => handleAnswerChange('17_crop2', value)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Select crop..." value="" />
-          {item.options?.map(option => (
-            <Picker.Item key={option} label={option} value={option} />
-          ))}
-        </Picker>
-      </View>
+          {/* Crop 2 */}
+          <Text style={styles.subLabel}>Crop2</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={answers['17_crop2'] || ''}
+              onValueChange={(value) => handleAnswerChange('17_crop2', value)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select crop..." value="" />
+              {item.options?.map(option => (
+                <Picker.Item key={option} label={option} value={option} />
+              ))}
+            </Picker>
+          </View>
 
-      <Text style={styles.subLabel}>Area2 (Acres, Gunta)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter area"
-        value={answers['17_area2'] || ''}
-        onChangeText={(text) => handleAnswerChange('17_area2', text)}
-        keyboardType="numeric"
-      />
+          <Text style={styles.subLabel}>Area2 (Acres, Gunta)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter area"
+            value={answers['17_area2'] || ''}
+            onChangeText={(text) => handleAnswerChange('17_area2', text)}
+            keyboardType="numeric"
+          />
 
-      {/* Other Crop */}
-      <Text style={styles.subLabel}>Other Crop</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter other crop"
-        value={answers['17_other_crop'] || ''}
-        onChangeText={(text) => handleAnswerChange('17_other_crop', text)}
-      />
+          {/* Other Crop */}
+          <Text style={styles.subLabel}>Other Crop</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter other crop"
+            value={answers['17_other_crop'] || ''}
+            onChangeText={(text) => handleAnswerChange('17_other_crop', text)}
+          />
 
-      <Text style={styles.subLabel}>Other Area (Acres, Gunta)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter area"
-        value={answers['17_other_area'] || ''}
-        onChangeText={(text) => handleAnswerChange('17_other_area', text)}
-        keyboardType="numeric"
-      />
-    </View>
-  );
-}
+          <Text style={styles.subLabel}>Other Area (Acres, Gunta)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter area"
+            value={answers['17_other_area'] || ''}
+            onChangeText={(text) => handleAnswerChange('17_other_area', text)}
+            keyboardType="numeric"
+          />
+        </View>
+      );
+    }
 
 
     if (item.type === 'submit_button') {
@@ -747,11 +762,11 @@ const styles = StyleSheet.create({
     color: 'red',
     fontWeight: 'bold',
   },
-subLabel: {
-  fontSize: 13,
-  marginTop: 10,
-  marginBottom: 4,
-  fontWeight: '500',
-  color: '#555',
-},
+  subLabel: {
+    fontSize: 13,
+    marginTop: 10,
+    marginBottom: 4,
+    fontWeight: '500',
+    color: '#555',
+  },
 });
