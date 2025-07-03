@@ -17,7 +17,7 @@ const CustomHeaderTitlePro = () => (
       </View>
     </View>
     <View style={{ marginLeft: 70, alignItems: 'center' }}>
-      <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#4A4947' }}>KMEA Survey Admin</Text>
+      <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#4A4947' }}>PMKYS Survey Admin</Text>
       <Text style={{ fontSize: 14, color: 'gray' }}>Version - 0.0.1</Text>
     </View>
   </View>

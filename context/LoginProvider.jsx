@@ -14,7 +14,7 @@ const LoginProvider = ({ children }) => {
   const checkLoginStatus = async () => {
     try {
       // Retrieve the token from AsyncStorage
-      const token = await AsyncStorage.getItem('userName');
+      const token = await AsyncStorage.getItem('username');
       
       // Update isLoggedIn based on the presence of the token
       setIsLoggedIn(token !== null);
