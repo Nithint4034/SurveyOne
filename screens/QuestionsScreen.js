@@ -175,14 +175,12 @@ export default function QuestionsScreen() {
 
           // Handle question 17 separately
           if (item.id === '17') {
-            payload['17_crop1'] = answers['17_crop1'] || null;
-            payload['17_area1'] = answers['17_area1'] || null;
-            payload['17_crop2'] = answers['17_crop2'] || null;
-            payload['17_area2'] = answers['17_area2'] || null;
-            payload['17_other_crop'] = answers['17_other_crop'] || null;
-            payload['17_other_area'] = answers['17_other_area'] || null;
-
-            // Optionally skip setting payload['17']
+            payload['q17_1'] = answers['17_crop1'] || null;
+            payload['q17_2'] = answers['17_area1'] || null;
+            payload['q17_3'] = answers['17_crop2'] || null;
+            payload['q17_4'] = answers['17_area2'] || null;
+            payload['q17_5'] = answers['17_other_crop'] || null;
+            payload['q17'] = answers['17_other_area'] || null;
             continue;
           }
 
