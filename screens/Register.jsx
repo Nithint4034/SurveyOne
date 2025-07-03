@@ -49,7 +49,7 @@ const Register = ({ setShowComponent }) => {
                 }
             );
 
-            console.log('res',response);
+            // console.log('res',response);
             
 
             if (response.status === 201) {
@@ -60,7 +60,7 @@ const Register = ({ setShowComponent }) => {
                 clearErrorAfterTimeout();
             }
         } catch (error) {
-            console.log('res',error);
+            // console.log('res',error);
             if (error.response && error.response.data.error) {
                 setError(error.response.data.error);
                 clearErrorAfterTimeout();

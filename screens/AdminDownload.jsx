@@ -45,7 +45,7 @@ const apiToHeaderMap = {
   q17_3: '17.3. Crop2',
   q17_4: '17.4. Area2 (Acres  Gunta)',
   q17_5: '17.5. Other Crop',
-  q17_6: '17.6. Other Area(Acres  Gunta)',
+  q17: '17.6. Other Area(Acres  Gunta)',
   q18: '18. Source of Irrigation (tick applicable)',
   q19: '19. How did you come to know about the PMKSY-PDMC Scheme?',
   q20: '20. Who Installed the MI System?',
@@ -185,25 +185,25 @@ const AdminDownload = () => {
 
   const convertToCSV = (data) => {
     if (!data || data.length === 0) return '';
-    
+
     // Get all possible keys from the first item
     const allKeys = [];
     if (data.length > 0) {
       // First get the metadata fields
       const metaKeys = ['survey_id', 'surveyor_name', 'created_at', 'district', 'taluka', 'village'];
       allKeys.push(...metaKeys);
-      
+
       // Then get all q1-q56 fields
       for (let i = 1; i <= 56; i++) {
         allKeys.push(`q${i}`);
-        
+
         // Add sub-questions for specific questions
         if (i === 13 || i === 17 || i === 23 || i === 37 || i === 38 || i === 39 || i === 40 || i === 41) {
           const subKeys = Object.keys(data[0]).filter(k => k.startsWith(`q${i}_`));
           allKeys.push(...subKeys);
         }
       }
-      
+
       // Finally add the photo field if it exists
       if (data[0].q57) {
         allKeys.push('q57');
@@ -219,17 +219,19 @@ const AdminDownload = () => {
     const csvRows = data.map(row => {
       return allKeys.map(key => {
         let value = row[key] ?? '';
-        
+
         // Format dates
         if (key === 'created_at' && value) {
           value = new Date(value).toLocaleString();
         }
-        
-        // Handle photo URL
+
+        // Handle photo URL - fix the path
         if (key === 'q57' && value) {
+          // Remove duplicate 'uploads' from path if it exists
+          value = value.replace('/media/uploads/uploads/', '/media/uploads/');
           value = `https://tomhudson.pythonanywhere.com${value}`;
         }
-        
+
         // Escape commas and quotes
         if (typeof value === 'string') {
           value = value.replace(/"/g, '""');
@@ -237,7 +239,7 @@ const AdminDownload = () => {
             value = `"${value}"`;
           }
         }
-        
+
         return value;
       }).join(',');
     });
@@ -253,8 +255,8 @@ const AdminDownload = () => {
 
     const csvContent = convertToCSV(csvData);
     console.log('Generated CSV:', csvContent); // For debugging
-    
-    const fileName = `survey_data_${selectedUser}_${new Date().toISOString().slice(0,10)}.csv`;
+
+    const fileName = `survey_data_${selectedUser}_${new Date().toISOString().slice(0, 10)}.csv`;
     const fileUri = FileSystem.documentDirectory + fileName;
 
     try {
@@ -281,8 +283,8 @@ const AdminDownload = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Survey Data Export</Text>
-        <TouchableOpacity 
-          onPress={handleDownloadCSV} 
+        <TouchableOpacity
+          onPress={handleDownloadCSV}
           style={styles.downloadButton}
           disabled={loading || csvData.length === 0}
         >
@@ -334,8 +336,8 @@ const AdminDownload = () => {
               </View>
               <ScrollView>
                 {csvData.map((item, rowIndex) => (
-                  <View 
-                    key={rowIndex} 
+                  <View
+                    key={rowIndex}
                     style={[
                       styles.tableRow,
                       rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow
@@ -347,11 +349,13 @@ const AdminDownload = () => {
                         value = new Date(value).toLocaleString();
                       }
                       if (key === 'q57' && value) {
+                        // Fix the URL path before displaying
+                        const fixedUrl = value.replace('/media/uploads/uploads/', '/media/uploads/');
                         return (
                           <TouchableOpacity
                             key={cellIndex}
                             style={styles.cell}
-                            onPress={() => Linking.openURL(`https://tomhudson.pythonanywhere.com${value}`)}
+                            onPress={() => Linking.openURL(`https://tomhudson.pythonanywhere.com${fixedUrl}`)}
                           >
                             <Text style={styles.linkText}>View Photo</Text>
                           </TouchableOpacity>

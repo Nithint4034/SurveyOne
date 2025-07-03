@@ -13,15 +13,17 @@ const LocationPicker = ({
   const [isLoading, setIsLoading] = useState(false);
 
   // Initialize location from props
-  useEffect(() => {
-    if (currentLocation) {
-      const lat = parseFloat(currentLocation.latitude);
-      const lng = parseFloat(currentLocation.longitude);
-      if (!isNaN(lat) && !isNaN(lng)) {
-        setLocation({ latitude: lat, longitude: lng });
-      }
+ useEffect(() => {
+  if (currentLocation) {
+    const lat = parseFloat(currentLocation.latitude);
+    const lng = parseFloat(currentLocation.longitude);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      setLocation({ latitude: lat, longitude: lng });
     }
-  }, [currentLocation]);
+  } else {
+    setLocation(null); // Clear the local state when currentLocation is null
+  }
+}, [currentLocation]);
 
   const getCurrentLocation = async () => {
     setIsLoading(true);

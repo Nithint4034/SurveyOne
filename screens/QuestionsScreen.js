@@ -70,29 +70,29 @@ export default function QuestionsScreen() {
   };
 
 
-const handleAnswerChange = (id, value) => {
-  if (id === '6') {
-    const numeric = value.replace(/\D/g, '');
-    const trimmed = numeric.slice(0, 10);
-    setAnswers(prev => ({ ...prev, [id]: trimmed }));
-    setErrors(prev => ({
-      ...prev,
-      [id]: trimmed.length === 10 ? null : 'Phone number must be 10 digits',
-    }));
-  } else if (
-    value &&
-    typeof value === 'object' &&
-    'latitude' in value &&
-    'longitude' in value
-  ) {
-    // Safely handle location object
-    const latLngString = `${value.latitude},${value.longitude}`;
-    setAnswers(prev => ({ ...prev, [id]: latLngString }));
-  } else {
-    // Normal field or null
-    setAnswers(prev => ({ ...prev, [id]: value }));
-  }
-};
+  const handleAnswerChange = (id, value) => {
+    if (id === '6') {
+      const numeric = value.replace(/\D/g, '');
+      const trimmed = numeric.slice(0, 10);
+      setAnswers(prev => ({ ...prev, [id]: trimmed }));
+      setErrors(prev => ({
+        ...prev,
+        [id]: trimmed.length === 10 ? null : 'Phone number must be 10 digits',
+      }));
+    } else if (
+      value &&
+      typeof value === 'object' &&
+      'latitude' in value &&
+      'longitude' in value
+    ) {
+      // Safely handle location object
+      const latLngString = `${value.latitude},${value.longitude}`;
+      setAnswers(prev => ({ ...prev, [id]: latLngString }));
+    } else {
+      // Normal field or null
+      setAnswers(prev => ({ ...prev, [id]: value }));
+    }
+  };
 
 
   const submitSurveyData = async (payload) => {
@@ -233,10 +233,13 @@ const handleAnswerChange = (id, value) => {
       }
 
       await submitSurveyData(payload);
-      console.log('payload', payload);
+      // console.log('payload', payload);
 
       const username = await AsyncStorage.getItem('username');
-      setAnswers({ surveyor_name: username || '' });
+      setAnswers({
+        surveyor_name: username || '',
+        '56': null, // Reset location field
+      });
       flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
       Alert.alert('Success', 'Survey submitted successfully!');
     } catch (error) {
@@ -403,9 +406,16 @@ const handleAnswerChange = (id, value) => {
 
     if (item.type === 'submit_button') {
       return (
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Submit Answers</Text>
+        <TouchableOpacity
+          style={[styles.button, isSubmitting && { backgroundColor: '#999' }]}
+          onPress={handleSubmit}
+          disabled={isSubmitting}
+        >
+          <Text style={styles.buttonText}>
+            {isSubmitting ? 'Submitting...' : 'Submit Answers'}
+          </Text>
         </TouchableOpacity>
+
       );
     }
 
@@ -576,7 +586,7 @@ const handleAnswerChange = (id, value) => {
           placeholder="Answer"
           value={answers[item.id] || ''}
           onChangeText={(text) => handleAnswerChange(item.id, text)}
-          keyboardType={['2', '6', '10', '11', '12', '49', '43', '44','49'].includes(item.id) ? 'phone-pad' : 'default'}
+          keyboardType={['2', '6', '10', '11', '12', '49', '43', '44', '49'].includes(item.id) ? 'phone-pad' : 'default'}
           maxLength={item.id === '6' ? 10 : undefined}
         />
         {errors[item.id] && (
