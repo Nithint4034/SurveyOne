@@ -2,45 +2,52 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import PropTypes from 'prop-types'; // Add prop-types for type checking
+import PropTypes from 'prop-types';
 
-const LocationPicker = ({ onLocationChange, currentLocation }) => {
+const LocationPicker = ({ 
+  onLocationChange = () => {}, 
+  currentLocation = null 
+}) => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Initialize location from props
   useEffect(() => {
-    if (currentLocation && (currentLocation.latitude && currentLocation.longitude)) {
-      setLocation({
-        latitude: parseFloat(currentLocation.latitude),
-        longitude: parseFloat(currentLocation.longitude)
-      });
+    if (currentLocation) {
+      const lat = parseFloat(currentLocation.latitude);
+      const lng = parseFloat(currentLocation.longitude);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        setLocation({ latitude: lat, longitude: lng });
+      }
     }
   }, [currentLocation]);
 
   const getCurrentLocation = async () => {
     setIsLoading(true);
+    setErrorMsg(null);
+    
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        Alert.alert('Permission Denied', 'Location permission is required to get your current coordinates.');
-        return;
+        throw new Error('Permission to access location was denied');
       }
 
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      const coords = {
-        latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude,
+      const { coords } = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.BestForNavigation,
+      });
+      
+      const newLocation = {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
       };
-      setLocation(coords);
-      onLocationChange(coords);
-      setErrorMsg(null);
+      
+      setLocation(newLocation);
+      onLocationChange(newLocation);
     } catch (error) {
-      setErrorMsg('Error getting location');
-      console.error('Error getting location:', error);
-      Alert.alert('Error', 'Could not get your current location. Please try again.');
+      console.error('Location error:', error);
+      setErrorMsg(error.message);
+      Alert.alert('Location Error', error.message);
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +62,7 @@ const LocationPicker = ({ onLocationChange, currentLocation }) => {
             : 'No location selected'}
         </Text>
         <TouchableOpacity 
-          style={styles.button} 
+          style={[styles.button, isLoading && styles.buttonDisabled]} 
           onPress={getCurrentLocation}
           disabled={isLoading}
         >
@@ -71,17 +78,12 @@ const LocationPicker = ({ onLocationChange, currentLocation }) => {
   );
 };
 
-// Add prop type validation
 LocationPicker.propTypes = {
-  onLocationChange: PropTypes.func.isRequired,
+  onLocationChange: PropTypes.func,
   currentLocation: PropTypes.shape({
     latitude: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     longitude: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
   })
-};
-
-LocationPicker.defaultProps = {
-  currentLocation: null
 };
 
 const styles = StyleSheet.create({
@@ -103,6 +105,9 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
     backgroundColor: '#B17457',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   errorText: {
     fontSize: 12,

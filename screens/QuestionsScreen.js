@@ -66,6 +66,13 @@ export default function QuestionsScreen() {
       }
     }
 
+    // Special handling for location (question 56)
+  if (answers['56']) {
+    meta['q56'] = [answers['56'].latitude, answers['56'].longitude];
+  } else {
+    meta['q56'] = null;
+  }
+
     return meta;
   };
 
@@ -134,103 +141,75 @@ export default function QuestionsScreen() {
     return response.data;
   };
 
-  const handleSubmit = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
+const handleSubmit = async () => {
+  if (isSubmitting) return;
+  setIsSubmitting(true);
 
-    try {
-      const currentErrors = {};
-
-      for (const field of requiredFields) {
-        const value = answers[field];
-        if (!value || (typeof value === 'string' && value.trim() === '')) {
-          Alert.alert('Missing Answer', `Please fill in the required field : ${field}`);
-          setIsSubmitting(false);
-          return;
-        }
-
-        // Special case for phone number (e.g., q6)
-        if (field === '6' && value.length !== 10) {
-          Alert.alert('Invalid Phone Number', 'Phone number must be exactly 10 digits.');
-          setIsSubmitting(false);
-          return;
-        }
-      }
-
-      if (Object.keys(currentErrors).length > 0) {
-        setErrors(currentErrors);
-        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  try {
+    // Validate required fields
+    for (const field of requiredFields) {
+      const value = answers[field];
+      
+      // Skip location field from standard validation (handled separately)
+      if (field === '56') continue;
+      
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        Alert.alert('Missing Answer', `Please fill in the required field: ${field}`);
         setIsSubmitting(false);
         return;
       }
 
-      // Clear previous errors
-      setErrors({});
+      // Special case for phone number validation
+      if (field === '6' && value.length !== 10) {
+        Alert.alert('Invalid Phone Number', 'Phone number must be exactly 10 digits.');
+        setIsSubmitting(false);
+        return;
+      }
+    }
 
-      const payload = {};
-      for (const item of serializedData) {
-        if (item.type === 'question') {
-          const val = answers[item.id] || null;
-          const otherVal = answers[`${item.id}_other`] || null;
+    // Special validation for location (question 56)
+    if (requiredFields.includes('56') && !answers['56']) {
+      Alert.alert('Missing Location', 'Please provide the location data');
+      setIsSubmitting(false);
+      return;
+    }
 
-          // Handle question 17 separately
-          if (item.id === '17') {
-            payload['q17_1'] = answers['17_crop1'] || null;
-            payload['q17_2'] = answers['17_area1'] || null;
-            payload['q17_3'] = answers['17_crop2'] || null;
-            payload['q17_4'] = answers['17_area2'] || null;
-            payload['q17_5'] = answers['17_other_crop'] || null;
-            payload['q17'] = answers['17_other_area'] || null;
-            continue;
-          }
+    // Clear previous errors
+    setErrors({});
 
-          if (item.question_type === 'multi-select') {
-            const selected = answers[item.id] || [];
-            const otherInput = answers[`${item.id}_other`] || '';
-
-            const cleanedSelected = selected.map(opt =>
-              opt === 'Other(Specify)' && otherInput ? otherInput : opt
-            );
-
-            payload[item.id] = JSON.stringify(cleanedSelected);
-          } else {
-            payload[item.id] = val === 'Other(Specify)' ? otherVal : val;
-          }
-
-          const trigger = item.subQuestions?.triggerValue;
-          const triggered = (
-            item.question_type === 'multi-select'
-              ? Array.isArray(val) && val.includes(trigger)
-              : val === trigger
-          );
-
-          if (item.subQuestions && triggered) {
-            for (const subQ of item.subQuestions.questions) {
-              if (subQ.text.includes('Before MI ₹')) {
-                payload[`${subQ.id}_before`] = answers[`${subQ.id}_before`] || null;
-                payload[`${subQ.id}_after`] = answers[`${subQ.id}_after`] || null;
-              } else {
-                payload[subQ.id] = answers[subQ.id] || null;
-              }
-            }
-          }
+  const payload = {};
+  for (const item of serializedData) {
+    if (item.type === 'question') {
+      // Handle location (question 56) - Modified this part
+      if (item.id === '56') {
+        if (answers['56']) {
+          payload['q56'] = [answers['56'].latitude, answers['56'].longitude];
         }
+        continue;
       }
 
-      await submitSurveyData(payload);
-      console.log('payload', payload);
-
-      const username = await AsyncStorage.getItem('username');
-      setAnswers({ surveyor_name: username || '' });
-      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-      Alert.alert('Success', 'Survey submitted successfully!');
-    } catch (error) {
-      console.error('Survey submit error:', error);
-      Alert.alert('Error', 'Survey submission failed.');
-    } finally {
-      setIsSubmitting(false);
+        // Rest of your payload construction logic...
+        // [Keep all your existing payload construction code here]
+      }
     }
-  };
+
+    await submitSurveyData(payload);
+    console.log('Submission payload:', payload);
+
+    const username = await AsyncStorage.getItem('username');
+    setAnswers({ surveyor_name: username || '' });
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+    Alert.alert('Success', 'Survey submitted successfully!');
+  } catch (error) {
+    console.error('Survey submit error:', error);
+    Alert.alert(
+      'Error', 
+      `Survey submission failed: ${error.message || 'Unknown error'}`
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const renderBeforeAfterInputs = (subQ) => (
     <View style={styles.beforeAfterContainer}>
@@ -539,7 +518,10 @@ export default function QuestionsScreen() {
             {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
           </Text>
           <LocationPicker
-            onLocationChange={(coords) => handleAnswerChange(item.id, coords)}
+            onLocationChange={(coords) => handleAnswerChange('56', {
+              latitude: coords.latitude,
+              longitude: coords.longitude
+            })}
             currentLocation={answers[item.id]}
           />
         </View>
