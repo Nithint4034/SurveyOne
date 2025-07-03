@@ -254,7 +254,7 @@ const AdminDownload = () => {
     }
 
     const csvContent = convertToCSV(csvData);
-    console.log('Generated CSV:', csvContent); // For debugging
+    // console.log('Generated CSV:', csvContent); // For debugging
 
     const fileName = `survey_data_${selectedUser}_${new Date().toISOString().slice(0, 10)}.csv`;
     const fileUri = FileSystem.documentDirectory + fileName;
