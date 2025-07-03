@@ -70,24 +70,29 @@ export default function QuestionsScreen() {
   };
 
 
-  const handleAnswerChange = (id, value) => {
-    if (id === '6') {
-      // Remove non-digit characters
-      const numeric = value.replace(/\D/g, '');
-
-      // Limit to 10 digits
-      const trimmed = numeric.slice(0, 10);
-
-      // Set answer and validate
-      setAnswers(prev => ({ ...prev, [id]: trimmed }));
-      setErrors(prev => ({
-        ...prev,
-        [id]: trimmed.length === 10 ? null : 'Phone number must be 10 digits',
-      }));
-    } else {
-      setAnswers(prev => ({ ...prev, [id]: value }));
-    }
-  };
+const handleAnswerChange = (id, value) => {
+  if (id === '6') {
+    const numeric = value.replace(/\D/g, '');
+    const trimmed = numeric.slice(0, 10);
+    setAnswers(prev => ({ ...prev, [id]: trimmed }));
+    setErrors(prev => ({
+      ...prev,
+      [id]: trimmed.length === 10 ? null : 'Phone number must be 10 digits',
+    }));
+  } else if (
+    value &&
+    typeof value === 'object' &&
+    'latitude' in value &&
+    'longitude' in value
+  ) {
+    // Safely handle location object
+    const latLngString = `${value.latitude},${value.longitude}`;
+    setAnswers(prev => ({ ...prev, [id]: latLngString }));
+  } else {
+    // Normal field or null
+    setAnswers(prev => ({ ...prev, [id]: value }));
+  }
+};
 
 
   const submitSurveyData = async (payload) => {
@@ -571,7 +576,7 @@ export default function QuestionsScreen() {
           placeholder="Answer"
           value={answers[item.id] || ''}
           onChangeText={(text) => handleAnswerChange(item.id, text)}
-          keyboardType={['2', '6', '10', '11', '12', '49'].includes(item.id) ? 'phone-pad' : 'default'}
+          keyboardType={['2', '6', '10', '11', '12', '49', '43', '44','49'].includes(item.id) ? 'phone-pad' : 'default'}
           maxLength={item.id === '6' ? 10 : undefined}
         />
         {errors[item.id] && (
