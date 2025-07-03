@@ -108,12 +108,32 @@ export default [
         options: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
     },
     {
-        id: '17',
-        type: 'question',
-        text: 'Crops Details. ',
-        question_type: 'radio',
-        options: ['Plantation crop – Banana', 'Plantation crop – Arecanut', 'Vegetables ', 'Flowers (Rose, Chrysanthemum, Jasmine, Marigold'],
-    },
+  id: '17',
+  type: 'question',
+  text: 'Crops Details.',
+  question_type: 'radio',
+  options: [
+    'Cereals - Maize',
+    'Cereals - Wheat',
+    'Cereals - Rice',
+    'Flowers - Rose',
+    'Flowers - Chrysanthemum',
+    'Flowers - Jasmine',
+    'Flowers - Marigold',
+    'Fruits',
+    'Millets - Bajra',
+    'Millets - Jowar',
+    'Millets - Ragi',
+    'Mulberry',
+    'Oilseeds (Soybean, Sunflower, Groundnut, Sesamum)',
+    'Plantation crop – Arecanut',
+    'Plantation crop – Banana',
+    'Plantation crop – Coconut',
+    'Pulses - Red gram, Black gram, Green gram, Cowpea, Bengal gram',
+    'Vegetables'
+  ],
+},
+
 
     {
         id: '18',

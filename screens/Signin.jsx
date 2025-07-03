@@ -111,26 +111,30 @@ const Signin = () => {
                     source={require('../assets/UILand.png')}
                     style={styles.container}
                 >
-                   <View style={styles.logoRow}>
-    <View style={styles.logoWithText}>
-        <Image
-            source={require('../assets/icon.jpg')}
-            style={styles.logo}
-            resizeMode="contain"
-        />
-        <Text style={styles.logoText}>KMEA</Text>
-    </View>
-    <View style={styles.logoWithText}>
-        <Image
-            source={require('../assets/icon2.jpg')}
-            style={styles.logo}
-            resizeMode="contain"
-        />
-        <Text style={styles.logoText}>eGeo Tech</Text>
-    </View>
-</View>
+                    {/* Logo Row */}
+                    <View style={styles.logoRow}>
+                        <View style={styles.logoWithText}>
+                            <Image
+                                source={require('../assets/icon2.jpg')}
+                                style={styles.logo}
+                                resizeMode="contain"
+                            />
+                            <Text style={styles.logoText}>KMEA</Text>
+                        </View>
+                        <View style={styles.logoWithText}>
+                            <Image
+                                source={require('../assets/icon.jpg')}
+                                style={styles.logo}
+                                resizeMode="contain"
+                            />
+                            <Text style={styles.logoText}>eGeo Tech</Text>
+                        </View>
+                    </View>
 
+                    {/* Survey Title */}
+                    <Text style={styles.surveyTitle}>PMKYS Survey</Text>
 
+                    {/* Form Fields */}
                     <TextInput
                         style={styles.input}
                         placeholder="Phone Number"
@@ -159,19 +163,19 @@ const Signin = () => {
                         onChangeText={(text) => setPassword(text)}
                     />
 
-                    {error && <Text style={styles.error}>{error}</Text>}
-
-                    <TouchableOpacity
-                        style={styles.loginButton}
-                        onPress={handleLogin}
-                        disabled={isLoading}
-                    >
-                        <Text style={styles.loginButtonText}>
-                            {isLoading ? 'Logging in...' : 'Login'}
-                        </Text>
-                    </TouchableOpacity>
-
-
+                    {/* Error and Login Button */}
+                    <View style={styles.loginSection}>
+                        {error && <Text style={styles.error}>{error}</Text>}
+                        <TouchableOpacity
+                            style={styles.loginButton}
+                            onPress={handleLogin}
+                            disabled={isLoading}
+                        >
+                            <Text style={styles.loginButtonText}>
+                                {isLoading ? 'Logging in...' : 'Login'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </ImageBackground>
             )}
         </View>
@@ -189,6 +193,7 @@ const styles = StyleSheet.create({
     },
     input: {
         width: '80%',
+        height: 50, // Added fixed height
         marginBottom: 10,
         padding: 10,
         borderWidth: 1.2,
@@ -198,15 +203,17 @@ const styles = StyleSheet.create({
     },
     pickerContainer: {
         width: '80%',
+        height: 50, 
         marginBottom: 10,
         borderWidth: 1.2,
         borderColor: 'black',
         borderRadius: 8,
         overflow: 'hidden',
+        justifyContent: 'center', 
     },
     picker: {
         width: '100%',
-        height: 50,
+        height: 60,
     },
     error: {
         color: 'red',
@@ -215,8 +222,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     logo: {
-        width: 100,
-        height: 100,
+        width: 80,
+        height: 80,
         marginBottom: 5,
     },
     title: {
@@ -251,25 +258,31 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     logoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: 20,
-},
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        marginBottom: 20,
+        gap: 40,
+    },
+   surveyTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#4A4947',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    logoWithText: {
+        alignItems: 'center',
+    },
 
-logoWithText: {
-    alignItems: 'center',
-    flex: 1,
-},
-
-logoText: {
-    marginTop: 8,
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4A4947',
-    textAlign: 'center',
-},
+    logoText: {
+        marginTop: 8,
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#4A4947',
+        textAlign: 'center',
+    },
 
 
 });
