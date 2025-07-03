@@ -479,9 +479,11 @@ export default function QuestionsScreen() {
             {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
           </Text>
           <PhotoCapture
-            onCapture={(uri) => handleAnswerChange(item.id, uri)}
+            onCapture={(photo) => handleAnswerChange(item.id, photo)}
             onClear={() => handleAnswerChange(item.id, null)}
+            value={answers[item.id]}
           />
+
         </View>
       );
     }

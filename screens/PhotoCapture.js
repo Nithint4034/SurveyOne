@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, Image, StyleSheet, Text, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
-export default function PhotoCapture({ onCapture, onClear }) {
+export default function PhotoCapture({ onCapture, onClear, value }) {
   const [imageUri, setImageUri] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    setImageUri(value?.uri || null);
+  }, [value]);
 
   const handleCapture = async () => {
     if (imageUri) {
@@ -35,7 +39,7 @@ export default function PhotoCapture({ onCapture, onClear }) {
       if (!result.canceled && result.assets?.length > 0) {
         const uri = result.assets[0].uri;
         setImageUri(uri);
-        
+
         // Process and send the image
         await processAndSendImage(uri);
       }
@@ -52,9 +56,9 @@ export default function PhotoCapture({ onCapture, onClear }) {
       const processedImage = await manipulateAsync(
         uri,
         [],
-        { 
+        {
           compress: 0.7, // Adjust compression (0-1)
-          format: SaveFormat.JPEG 
+          format: SaveFormat.JPEG
         }
       );
 
@@ -65,7 +69,7 @@ export default function PhotoCapture({ onCapture, onClear }) {
 
       // Create the data URI
       const dataUri = `data:image/jpeg;base64,${base64Data}`;
-      
+
       // Call the onCapture callback with the processed image
       onCapture({
         uri: processedImage.uri,
@@ -86,35 +90,35 @@ export default function PhotoCapture({ onCapture, onClear }) {
   return (
     <View style={styles.container}>
       {imageUri && (
-        <Image 
-          source={{ uri: imageUri }} 
+        <Image
+          source={{ uri: imageUri }}
           style={styles.image}
           resizeMode="cover"
         />
       )}
-      
+
       <View style={styles.buttonWrapper}>
-  <TouchableOpacity 
-    style={[styles.button, isProcessing && styles.disabledButton]}
-    onPress={handleCapture}
-    disabled={isProcessing}
-  >
-    {isProcessing ? (
-      <Text style={styles.buttonText}>Processing...</Text>
-    ) : (
-      <>
-        <MaterialIcons 
-          name={imageUri ? "camera" : "camera-alt"} 
-          size={20} 
-          color="white" 
-        />
-        <Text style={styles.buttonText}>
-          {imageUri ? 'Retake Photo' : 'Take Photo'}
-        </Text>
-      </>
-    )}
-  </TouchableOpacity>
-</View>
+        <TouchableOpacity
+          style={[styles.button, isProcessing && styles.disabledButton]}
+          onPress={handleCapture}
+          disabled={isProcessing}
+        >
+          {isProcessing ? (
+            <Text style={styles.buttonText}>Processing...</Text>
+          ) : (
+            <>
+              <MaterialIcons
+                name={imageUri ? "camera" : "camera-alt"}
+                size={20}
+                color="white"
+              />
+              <Text style={styles.buttonText}>
+                {imageUri ? 'Retake Photo' : 'Take Photo'}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
+      </View>
 
     </View>
   );
@@ -153,8 +157,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   buttonWrapper: {
-  alignItems: 'center',
-  marginTop: 2,
-},
+    alignItems: 'center',
+    marginTop: 2,
+  },
 
 });
