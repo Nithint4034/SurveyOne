@@ -17,10 +17,10 @@ export default function QuestionsScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const flatListRef = useRef(null);
   const [errors, setErrors] = useState({});
-  // const requiredFields = ['6', 'surveyor_name','district', 'taluka', 'village', '1','2','3', '18', '26', '56','57'];
-  const requiredFields = []
+  const requiredFields = ['6', 'surveyor_name','district', 'taluka', 'village', '1','2','3', '18', '26', '56','57'];
+  // const requiredFields = []
 
-  useEffect(() => {
+  useEffect(() => {Log1
     (async () => {
       const username = await AsyncStorage.getItem('username');
       setAnswers(prev => ({ ...prev, surveyor_name: username || '' }));
