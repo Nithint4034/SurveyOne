@@ -20,7 +20,7 @@ export default function QuestionsScreen() {
   const requiredFields = ['6', 'surveyor_name','district', 'taluka', 'village', '1','2','3', '18', '26', '56','57'];
   // const requiredFields = []
 
-  useEffect(() => {Log1
+  useEffect(() => {
     (async () => {
       const username = await AsyncStorage.getItem('username');
       setAnswers(prev => ({ ...prev, surveyor_name: username || '' }));
