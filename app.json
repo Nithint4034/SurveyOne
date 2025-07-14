@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "PMKYS Survey",
+    "name": "PMKSY Survey",
     "slug": "SurveyOne",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.jpg",
+    "icon": "./assets/icon1.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {

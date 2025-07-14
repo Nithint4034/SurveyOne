@@ -10,16 +10,16 @@ const CustomHeaderTitlePro = () => (
   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
     <View style={{ marginLeft:10,flexDirection: 'row', alignItems: 'center' }}>
       <Image
-        source={require('../assets/icon2.jpg')}
+        source={require('../assets/icon2.png')}
         style={{ width: 40, height: 50, marginRight: 10 }}
       />
       <Image
-        source={require('../assets/icon.jpg')}
+        source={require('../assets/icon1.png')}
         style={{ width: 50, height: 50 }}
       />
     </View>
     <View style={{ marginLeft: 35, alignItems: 'center' }}>
-      <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#4A4947' }}>PMKYS Survey Admin</Text>
+      <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#4A4947' }}>PMKSY Survey Admin</Text>
       <Text style={{ fontSize: 14, color: 'gray' }}>Version - 0.0.1</Text>
     </View>
   </View>

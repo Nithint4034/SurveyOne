@@ -47,7 +47,7 @@ const apiToHeaderMap = {
   q17_5: '17.5. Other Crop',
   q17: '17.6. Other Area(Acres  Gunta)',
   q18: '18. Source of Irrigation (tick applicable)',
-  q19: '19. How did you come to know about the PMKSY-PDMC Scheme?',
+  q19: '19. How did you come to know about the  -PDMC Scheme?',
   q20: '20. Who Installed the MI System?',
   q21: '21. Name of the agency / vendor',
   q22: '22. What are the MI components received? (tick applicable)',

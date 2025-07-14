@@ -88,10 +88,10 @@ const Register = ({ setShowComponent }) => {
                 {/* Icons Container */}
                 <View style={styles.iconsContainer}>
                     <View style={styles.iconView}>
-                        <Image source={require('../assets/Log1.png')} style={styles.icon1} />
+                        <Image source={require('../assets/icon1.png')} style={styles.icon1} />
                     </View>
                     <View style={styles.iconView}>
-                        <Image source={require('../assets/Log2.png')} style={styles.icon2} />
+                        <Image source={require('../assets/icon2.png')} style={styles.icon2} />
                     </View>
                 </View>
 

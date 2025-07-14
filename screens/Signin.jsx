@@ -115,7 +115,7 @@ const Signin = () => {
                     <View style={styles.logoRow}>
                         <View style={styles.logoWithText}>
                             <Image
-                                source={require('../assets/icon2.jpg')}
+                                source={require('../assets/icon2.png')}
                                 style={styles.logo}
                                 resizeMode="contain"
                             />
@@ -123,7 +123,7 @@ const Signin = () => {
                         </View>
                         <View style={styles.logoWithText}>
                             <Image
-                                source={require('../assets/icon.jpg')}
+                                source={require('../assets/icon1.png')}
                                 style={styles.logo}
                                 resizeMode="contain"
                             />
