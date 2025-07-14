@@ -18,9 +18,8 @@ export default [
             'Vijayapura'
         ]
     },
-    { id: 'taluka', type: 'question', text: 'Taluka' },
+    { id: 'taluka', type: 'question', text: 'Taluka', question_type: 'dropdown', options: ['Challekere', 'Hiriyur', 'Holalkere', 'Shikaripura', 'Shimoga', 'Hosanagara', 'Byandur', 'Udupi', 'K R Pet', 'Malvallai', 'Srirangapatna', 'Gauribidanur', 'Bagepalli', 'Gudibande', 'Basavakalyan', 'Humnabad', 'Chitaguppa', 'Aland', 'Afzalpur', 'Yadrami', 'Mundgod', 'Sirsi', 'Ankola', 'Indi', 'Bijapur', 'Kolhara', 'Athani', 'Raibagh', 'Illiterate'] },
     { id: 'village', type: 'question', text: 'Village' },
-
     { id: 'h1', type: 'heading', text: 'General Information of Respondent' },
     { id: '1', type: 'question', text: 'Name of the Farmer / Beneficiary' },
     { id: '2', type: 'question', text: 'Age in Years' },
@@ -36,7 +35,7 @@ export default [
         type: 'question',
         text: 'Category',
         question_type: 'radio',
-        options: ['General', 'OBC', 'SC', 'ST'],
+        options: ['General', 'SC', 'ST'],
     },
     {
         id: '5',
@@ -61,103 +60,261 @@ export default [
         options: ['Agriculture', 'Agri-Labor', 'Bussiness', 'Other(Specify)'],
     },
     { id: '9', type: 'question', text: 'Secoundary Occupation (if any)' },
-
     { id: 'h2', type: 'heading', text: 'Landholding & Farming Practices' },
-    { id: '10', type: 'question', text: 'Total Agricultural Land Owned (in acre. Gunta)' },
-    { id: '11', type: 'question', text: 'Irrigated Land (in acre. Gunta)' },
-    { id: '12', type: 'question', text: 'Non Irrigated Land (in acre. Gunta)' },
+    { id: '10', type: 'question', text: 'Total Agricultural Land Owned (In Acre. Gunta)' },
+    { id: '11', type: 'question', text: 'Irrigated Land (In Acre. Gunta)' },
+    { id: '12', type: 'question', text: 'Non Irrigated Land (In Acre. Gunta)' },
     {
         id: '13',
-        type: 'question',
-        text: 'Have you adopted micro irrigation? (Tick the appropriate option):',
-        question_type: 'radio',
-        options: ['Yes - Drip', 'Yes - Sprinkler', 'Yes - Both', 'Other(Specify)'],
-    },
-    // {
-    //     id: '13.1', type: 'question', text: 'If Drip',
-    //     question_type: 'dropdown',
-    //     options: ['Online', 'In-line'],
-    // },
-    // {
-    //     id: '13.2', type: 'question', text: 'If Sprinkler',
-    //     question_type: 'dropdown',
-    //     options: ['Portable', 'Micro', 'Mini', 'Semi-permanent', 'Large Volume (Rain Gun)'],
-    // },
-    // { id: '12', type: 'question', text: 'Non Irrigated Land (in acre. Gunta)' },
-    {
-        id: '14',
-        type: 'question',
-        text: 'Have you taken government subsidy for setting up Micro Irrigation?',
-        question_type: 'radio',
-        options: ['Yes', 'No'],
-    },
-    {
-        id: '15',
-        type: 'question',
-        text: 'Which year you submitted your application?',
-        question_type: 'dropdown',
-        options: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
-    },
-
-    { id: 'h3', type: 'heading', text: 'Adoption & Usage of Micro-Irrigation (MI)' },
-    {
-        id: '16',
-        type: 'question',
-        text: ' Month & Year of Installation',
-        question_type: 'dropdown',
-        options: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
-    },
-    {
-  id: '17',
-  type: 'question',
-  text: 'Crops Details.',
-  question_type: 'radio',
-  options: [
-    'Cereals - Maize',
-    'Cereals - Wheat',
-    'Cereals - Rice',
-    'Flowers - Rose',
-    'Flowers - Chrysanthemum',
-    'Flowers - Jasmine',
-    'Flowers - Marigold',
-    'Fruits',
-    'Millets - Bajra',
-    'Millets - Jowar',
-    'Millets - Ragi',
-    'Mulberry',
-    'Oilseeds (Soybean, Sunflower, Groundnut, Sesamum)',
-    'Plantation crop – Arecanut',
-    'Plantation crop – Banana',
-    'Plantation crop – Coconut',
-    'Pulses - Red gram, Black gram, Green gram, Cowpea, Bengal gram',
-    'Vegetables'
-  ],
-},
-
-
-    {
-        id: '18',
         type: 'question',
         text: 'Source of Irrigation (tick applicable)',
         question_type: 'multi-select',
         options: ['Borewell', 'Open well', 'Canal', 'Krishi Honda'],
     },
     {
+        id: '14',
+        type: 'question',
+        text: 'What is Borewell water Depth (feet) before & after MI',
+        question_type: 'radio',
+        options: ['Yes', 'No'],
+        subQuestions: {
+            triggerValue: 'Yes',
+            questions: [
+                {
+                    id: '14a',
+                    text: 'Before MI in feet',
+                    question_type: 'text'
+                },
+                {
+                    id: '14b',
+                    text: 'After MI in feet',
+                    question_type: 'text'
+                }
+            ]
+        }
+    },
+    {
+        id: '15',
+        type: 'question',
+        text: 'Have you adopted micro irrigation? (Tick the appropriate option):',
+        question_type: 'radio',
+        options: ['Yes - Drip', 'Yes - Sprinkler', 'Yes - Both', 'Other(Specify)'],
+        subQuestionsByValue: {
+            'Yes - Drip': [
+                {
+                    id: '15a',
+                    text: 'Type of Drip System Used',
+                    question_type: 'multi-select',
+                    options: ['Online', 'In-line', 'None']
+                }
+            ],
+            'Yes - Sprinkler': [
+                {
+                    id: '15b',
+                    text: 'Type of Sprinkler System Used',
+                    question_type: 'multi-select',
+                    options: ['Portable', 'Micro', 'Mini', 'Semi-permanent', 'Large Volume (Rain Gun)', 'None']
+                }
+            ]
+        }
+    },
+    {
+        id: '16',
+        type: 'question',
+        text: 'Have you taken government subsidy for setting up Micro Irrigation?',
+        question_type: 'radio',
+        options: ['Yes', 'No'],
+    },
+    {
+        id: '17',
+        type: 'question',
+        text: 'Which year you submitted your application?',
+        question_type: 'dropdown',
+        options: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+    },
+    { id: 'h3', type: 'heading', text: 'Adoption & Usage of Micro-Irrigation (MI)' },
+    {
+        id: '18',
+        type: 'question',
+        text: ' Month & Year of Installation',
+        question_type: 'dropdown',
+        options: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+    },
+    {
         id: '19',
+        type: 'question',
+        text: 'What among the below documents did you submit during MI subsidy application time? (Tick applicable)',
+        question_type: 'multi-select',
+        options: ['Aadhaar card',
+            'Land ownership document / RTC', 'Bank passbook copy',
+            'Mobile number (linked to Aadhaar)',
+            'Caste certificate (if applicable)',
+            'Income certificate (if applicable)',
+            'Photograph (passport size)',
+            'Water source ownership proof',
+            'Water and Soil Analysis reports',
+            'Cropping pattern details']
+    },
+    { id: '20', type: 'question', text: 'Has water saving from MI helped you to expand your irrigated land? If yes, how much in acres' },
+    {
+        id: '21',
+        type: 'question',
+        text: 'Which Crops were you growing before setting up MI.',
+        question_type: 'radio',
+        options: [
+            'Cereals - Maize',
+            'Cereals - Wheat',
+            'Cereals - Rice',
+            'Flowers - Rose',
+            'Flowers - Chrysanthemum',
+            'Flowers - Jasmine',
+            'Flowers - Marigold',
+            'Fruits',
+            'Millets - Bajra',
+            'Millets - Jowar',
+            'Millets - Ragi',
+            'Mulberry',
+            'Oilseeds (Soybean, Sunflower, Groundnut, Sesamum)',
+            'Plantation crop – Arecanut',
+            'Plantation crop – Banana',
+            'Plantation crop – Coconut',
+            'Pulses - Red gram, Black gram, Green gram, Cowpea, Bengal gram',
+            'Vegetables'
+        ],
+    },
+    {
+        id: '22',
+        type: 'question',
+        text: 'Is there any reduction in labour cost per acre after using the MI system?',
+        question_type: 'radio',
+        options: ['Yes', 'No'],
+        subQuestions: {
+            triggerValue: 'Yes',
+            questions: [
+                {
+                    id: '37a',
+                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                },
+                {
+                    id: '37b',
+                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                }
+            ]
+        }
+    },
+    {
+        id: '23',
+        type: 'question',
+        text: 'Has the nutrition management cost per acre reduced after MI system use?',
+        question_type: 'radio',
+        options: ['Yes', 'No'],
+        subQuestions: {
+            triggerValue: 'Yes',
+            questions: [
+                {
+                    id: '38a',
+                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                },
+                {
+                    id: '38b',
+                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                }
+            ]
+        }
+    },
+    {
+        id: '24',
+        type: 'question',
+        text: 'Has the plant protection cost per acre reduced after MI system use?',
+        question_type: 'radio',
+        options: ['Yes', 'No'],
+        subQuestions: {
+            triggerValue: 'Yes',
+            questions: [
+                {
+                    id: '39a',
+                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                },
+                {
+                    id: '39b',
+                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                }
+            ]
+        }
+    },
+    {
+        id: '25',
+        type: 'question',
+        text: 'Has the crop yield per acre increased after adopting the MI system?',
+        question_type: 'radio',
+        options: ['Yes', 'No'],
+        subQuestions: {
+            triggerValue: 'Yes',
+            questions: [
+                {
+                    id: '40a',
+                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                },
+                {
+                    id: '40b',
+                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                }
+            ]
+        }
+    },
+    {
+        id: '26',
+        type: 'question',
+        text: 'Has your income per acre increased after adopting the MI system?',
+        question_type: 'radio',
+        options: ['Yes', 'No'],
+        subQuestions: {
+            triggerValue: 'Yes',
+            questions: [
+                {
+                    id: '41a',
+                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                },
+                {
+                    id: '41b',
+                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
+                    question_type: 'text'
+                }
+            ]
+        }
+    },
+    {
+        id: '27',
+        type: 'question',
+        text: 'What was the reason for MI adpation? (Tick applicable)',
+        question_type: 'multi-select',
+        options: ['Advice from Department officials', 'Decline in water availability', 'Labour Scarcity, Less water scarcity', 'Promotion by MI suppliers', 'Subsidy support', 'To adopt new technology', 'To enhance crop production', 'To extend irrigated area', 'To save time in irrigation', 'Other(Specify)']
+    },
+    {
+        id: '28',
         type: 'question',
         text: 'How did you come to know about the PMKSY-PDMC Scheme?',
         question_type: 'radio',
-        options: ['Government Officials', 'MI Companies', ' Media', 'Farmer Groups', 'Other(Specify)'],
+        options: ['Government Officials', 'MI Companies', 'Media', 'Farmer Groups', 'Other(Specify)'],
     },
     {
-        id: '20',
+        id: '29',
         type: 'question',
         text: 'Who Installed the MI System?',
         question_type: 'dropdown',
-        options: ['Govt Agency', 'Private Vendor', 'MI Company', 'Self-installed'],
+        options: ['Govt Agency ', 'Private Vendor', 'MI Company', 'Self-installed'],
     },
     {
-        id: '21',
+        id: '30',
         type: 'question',
         text: 'Name of the agency / vendor',
         question_type: 'dropdown',
@@ -297,291 +454,213 @@ export default [
         ]
     },
     {
-        id: '22',
+        id: '31',
         type: 'question',
         text: 'What are the MI components received? (tick applicable)',
         question_type: 'multi-select',
         options: ['PVC', 'Venturi', 'Filter', ' Lateral ', 'Sprinkler', 'Valves', 'Raingun', 'Other(Specify)']
     },
     {
-        id: '23', type: 'question', text: 'Is the MI System Still in Use? If No, share the reason',
+        id: '32',
+        type: 'question',
+        text: 'Is the MI System Still in Use? If No, share the reason',
         question_type: 'radio',
-        options: ['Yes', 'No', 'Other(Specify)'],
-        requireNoDetails: true
+        options: ['Yes', 'No'],
+        subQuestions: {
+            triggerValue: 'No',
+            questions: [
+                {
+                    id: '32a',
+                    text: 'If No, Mention the reason',
+                    question_type: 'text'
+                }
+            ]
+        }
     },
     {
-        id: '24',
+        id: '33',
         type: 'question',
         text: 'Did the MI agency or Government Department assist with the subsidy documentation? How was their response?',
     },
     {
-        id: '25',
+        id: '34',
         type: 'question',
-        text: 'Have you received the MI subsidy approval communication?',
-        question_type: 'radio',
-        options: ['Yes', 'No'],
-    },
-    {
-        id: '26',
-        type: 'question',
-        text: 'How did you receive the communication? (tick applicable)',
+        text: 'Have you received any MI subsidy approval or payment communications? If yes, how did you received',
         question_type: 'multi-select',
-        options: ['SMS on Phone', 'Intimation from Village', 'Assistant', 'Intimation from AO/HO'],
+        options: ['No Communication', 'SMS on Phone', 'Intimation from Village Assistant', 'Intimation from AO/HO', 'Intimation from MI', 'Payment not yet received'],
     },
     {
-        id: '27',
+        id: '35',
         type: 'question',
         text: 'Did the MI or Dept take your signature after successful installation?',
         question_type: 'radio',
         options: ['Yes', 'No'],
     },
     {
-        id: '28',
+        id: '36',
         type: 'question',
-        text: 'Have you received the MI subsidy payment approval message via SMS? ',
+        text: 'What was the mode of MI subsidy disbursement?',
+        question_type: 'multi-select',
+        options: ['Received Directly to Bank', 'Payment made to MI supplier', 'Not yet received', 'Other (please specify)'],
+    },
+    {
+        id: '37',
+        type: 'question',
+        text: 'Did you get any training or booklet on MI operation and maintenance? If yes, please give details',
         question_type: 'radio',
         options: ['Yes', 'No'],
     },
     {
-        id: '29',
-        type: 'question',
-        text: 'Did you get any training or booklet on MI operation and maintenance? If yes, please give details',
-    },
-    {
-        id: '30',
+        id: '38',
         type: 'question',
         text: 'Have you received any communication on MI System Warranty?',
         question_type: 'radio',
         options: ['Yes', 'No'],
     },
     {
-        id: '31',
+        id: '39',
         type: 'question',
         text: ' Has the MI company provided any service after installation?',
         question_type: 'radio',
         options: ['Yes', 'No'],
     },
     {
-        id: '32',
+        id: '40',
         type: 'question',
         text: 'Are you aware of the MI company’s service person, center, or helpline number? Please share details.',
     },
     {
-        id: '33',
+        id: '41',
         type: 'question',
         text: 'When do you do the maintenance?',
         question_type: 'radio',
         options: ['Regularly', 'Occasionally', 'Never'],
     },
     {
-        id: '34',
+        id: '42',
         type: 'question',
         text: 'Did you face any problems while using the MI system? If yes, please explain.',
     },
+
     {
-        id: '35',
+        id: '43',
         type: 'question',
-        text: 'Overall Satisfaction Level with MI System Provider:',
-        question_type: 'radio',
+        text: 'Overall Satisfaction Level with MI System:',
+        question_type: 'dropdown',
         options: ['Highly Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied', 'Highly Dissatisfied'],
     },
     {
-        id: '36',
+        id: '44',
         type: 'question',
-        text: 'Has your water use reduced after using the MI system? If yes, how much?',
+        text: 'Have you observed any reduction in water usage after the MI system? If yes, approx percentage reduction (%)',
+        question_type: 'dropdown',
+        options: ['0%', '10%', '20%', '30%', '40%', '50%', '60%', '75%', '100%'],
     },
-
-    { id: 'h4', type: 'heading', text: 'Impact of MI System on Agriculture / Horticulture / Mulberry' },
-    {
-        id: '37',
-        type: 'question',
-        text: 'Is there any reduction in labour cost per acre after using the MI system?',
-        question_type: 'radio',
-        options: ['Yes', 'No'],
-        subQuestions: {
-            triggerValue: 'Yes',
-            questions: [
-                {
-                    id: '37a',
-                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
-                    question_type: 'text'
-                },
-                {
-                    id: '37b',
-                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
-                    question_type: 'text'
-                }
-            ]
-        }
-    },
-    {
-        id: '38',
-        type: 'question',
-        text: 'Has the nutrition management cost per acre reduced after MI system use?',
-        question_type: 'radio',
-        options: ['Yes', 'No'],
-        subQuestions: {
-            triggerValue: 'Yes',
-            questions: [
-                {
-                    id: '38a',
-                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
-                    question_type: 'text'
-                },
-                {
-                    id: '38b',
-                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
-                    question_type: 'text'
-                }
-            ]
-        }
-    },
-    {
-        id: '39',
-        type: 'question',
-        text: 'Has the plant protection cost per acre reduced after MI system use?',
-        question_type: 'radio',
-        options: ['Yes', 'No'],
-        subQuestions: {
-            triggerValue: 'Yes',
-            questions: [
-                {
-                    id: '39a',
-                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
-                    question_type: 'text'
-                },
-                {
-                    id: '39b',
-                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
-                    question_type: 'text'
-                }
-            ]
-        }
-    },
-    {
-        id: '40',
-        type: 'question',
-        text: 'Has the crop yield per acre increased after adopting the MI system?',
-        question_type: 'radio',
-        options: ['Yes', 'No'],
-        subQuestions: {
-            triggerValue: 'Yes',
-            questions: [
-                {
-                    id: '40a',
-                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
-                    question_type: 'text'
-                },
-                {
-                    id: '40b',
-                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
-                    question_type: 'text'
-                }
-            ]
-        }
-    },
-    {
-        id: '41',
-        type: 'question',
-        text: 'Has your income per acre increased after adopting the MI system?',
-        question_type: 'radio',
-        options: ['Yes', 'No'],
-        subQuestions: {
-            triggerValue: 'Yes',
-            questions: [
-                {
-                    id: '41a',
-                    text: 'Crop 1 Before MI ₹: ________ After MI ₹: ________',
-                    question_type: 'text'
-                },
-                {
-                    id: '41b',
-                    text: 'Crop 2 Before MI ₹: ________ After MI ₹: ________',
-                    question_type: 'text'
-                }
-            ]
-        }
-    },
-    { id: '42', type: 'question', text: 'MI Financial Details – Total cost of MI system installed (₹ per acre)' },
-
-    { id: 'h5', type: 'heading', text: 'Financial & Subsidy Aspects' },
-    { id: '43', type: 'question', text: 'MI Financial Details – Subsidy availed from the government (₹ per acre)' },
-    { id: '44', type: 'question', text: 'Have you taken any loan from a financial institution for MI? If yes, from where and how much (₹)' },
-    { id: '45', type: 'question', text: 'Has the adoption of MI influenced your standard of living?' },
-    {
-        id: '46',
-        type: 'question',
-        text: 'Did MI Adoption Create New Employment in Your Area?',
-        question_type: 'radio',
-        options: ['Yes', 'No'],
-    },
-    {
-        id: '47',
-        type: 'question',
-        text: 'Has the adoption of MI helped in women empowerment?',
-        question_type: 'radio',
-        options: ['Yes', 'No'],
-    },
+    { id: '45', type: 'question', text: 'MI Financial Details – Total cost of MI system installed (₹ per acre)' },
+    { id: '46', type: 'question', text: 'How much amount you paid to Department or Agency for MI instalation (₹ per acre)' },
+    { id: '47', type: 'question', text: 'Have you taken any loan from a financial institution for MI? If yes, from where and how much (₹)' },
     {
         id: '48',
         type: 'question',
-        text: 'Has any member of your family been training on MI Maintenance?',
+        text: 'Has the adoption of MI influenced your standard of living?',
         question_type: 'radio',
         options: ['Yes', 'No'],
     },
     {
         id: '49',
         type: 'question',
-        text: 'Have you observed any water saving after using the MI system? If yes, approx percentage reduction (%)',
+        text: 'As there has been an improvement in lifestyle, what type of assets have you gained as a result?',
+        question_type: 'multi-select',
+        options: ['Household items', 'Livestock', 'Infrastructure', 'Education support', 'Agricultural quipment', 'Transport vehicle', 'Other(Specify)']
     },
     {
         id: '50',
         type: 'question',
-        text: 'Have you observed any change in groundwater levels after MI adoption?',
-        question_type: 'radio',
-        options: ['Yes', 'No'],
+        text: 'Has labour migration changed after starting MI facilities?',
+        question_type: 'dropdown',
+        options: ['Reduced migration', 'Increased migration', 'No change'],
     },
     {
         id: '51',
         type: 'question',
-        text: 'Would you recommend MI to other farmers under the current scheme?',
+        text: 'Did MI Adoption Create New Employment in Your Area?',
         question_type: 'radio',
         options: ['Yes', 'No'],
     },
     {
         id: '52',
         type: 'question',
-        text: 'Any issues from Dept or MI agency during approval? If yes, list them',
+        text: 'Has the adoption of MI helped in women empowerment?',
         question_type: 'radio',
         options: ['Yes', 'No'],
+        subQuestionsByValue: {
+            'Yes':[
+                {
+                    id: '52a',
+                    text: 'How has it helped? (tick all that apply)',
+                    question_type: 'multi-select',
+                    options: [
+                        'Livestock Rearing',
+                        'Business or Petty Shop',
+                        'Alternate Employment Activity',
+                        'Other(Specify)'
+                    ]
+                }
+            ]
+        }
     },
     {
         id: '53',
         type: 'question',
-        text: 'Any Suggestions for Improving the MI Scheme?',
+        text: 'Has any member of your family been trained on MI Maintenance by company?',
+        question_type: 'radio',
+        options: ['Yes', 'No'],
     },
     {
         id: '54',
         type: 'question',
-        text: 'Any Additional comments?',
+        text: 'Have you observed any change in groundwater levels after MI adoption?',
+        question_type: 'radio',
+        options: ['Yes', 'No'],
     },
     {
         id: '55',
         type: 'question',
-        text: 'Have you attended any MI promotion activity organized by Government Departments? If yes, please provide the details.',
+        text: 'Would you recommend MI to other farmers under the current scheme?',
+        question_type: 'radio',
+        options: ['Yes', 'No'],
     },
-
     {
         id: '56',
+        type: 'question',
+        text: 'Any issues from Dept or MI agency during approval? If yes, list them',
+    },
+    {
+        id: '57',
+        type: 'question',
+        text: 'Have you attended any MI promotion activity organized by Government Departments? If yes, please provide the details.',
+    },
+    {
+        id: '58',
+        type: 'question',
+        text: 'Any Suggestions for Improving the MI Scheme?',
+    },
+    {
+        id: '59',
+        type: 'question',
+        text: 'Any Additional comments?',
+    },
+    {
+        id: '60',
         type: 'question',
         text: 'Location (Latitude/Longitude)',
         question_type: 'location',
     },
     { id: 'h7', type: 'heading', text: 'Farmer or Area Photo' },
     {
-        id: '57',
+        id: '61',
         type: 'question',
-        text: 'Capture a photo of the farmer or the area',
+        text: 'Farmer or location Photo',
         question_type: 'photo'
     }
 ];

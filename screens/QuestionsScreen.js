@@ -10,15 +10,14 @@ import LocationPicker from './LocationPicker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 export default function QuestionsScreen() {
   const [answers, setAnswers] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const flatListRef = useRef(null);
   const [errors, setErrors] = useState({});
-  const requiredFields = ['6', 'surveyor_name','district', 'taluka', 'village', '1','2','3', '18', '26', '56','57'];
-  // const requiredFields = []
+  // const requiredFields = ['6', 'surveyor_name', 'district', 'taluka', 'village', '1', '2', '3', '18', '26', '56', '57'];
+  const requiredFields = []
 
   useEffect(() => {
     (async () => {
@@ -65,10 +64,8 @@ export default function QuestionsScreen() {
         meta[key] = answers[key];
       }
     }
-
     return meta;
   };
-
 
   const handleAnswerChange = (id, value) => {
     if (id === '6') {
@@ -93,7 +90,6 @@ export default function QuestionsScreen() {
       setAnswers(prev => ({ ...prev, [id]: value }));
     }
   };
-
 
   const submitSurveyData = async (payload) => {
     const accessToken = await AsyncStorage.getItem('accessToken');
@@ -178,14 +174,14 @@ export default function QuestionsScreen() {
           const val = answers[item.id] || null;
           const otherVal = answers[`${item.id}_other`] || null;
 
-          // Handle question 17 separately
-          if (item.id === '17') {
-            payload['q17_1'] = answers['17_crop1'] || null;
-            payload['q17_2'] = answers['17_area1'] || null;
-            payload['q17_3'] = answers['17_crop2'] || null;
-            payload['q17_4'] = answers['17_area2'] || null;
-            payload['q17_5'] = answers['17_other_crop'] || null;
-            payload['q17'] = answers['17_other_area'] || null;
+          // Handle question 21 separately
+          if (item.id === '21') {
+            payload['q21_1'] = answers['21_crop1'] || null;
+            payload['q21_2'] = answers['21_area1'] || null;
+            payload['q21_3'] = answers['21_crop2'] || null;
+            payload['q21_4'] = answers['21_area2'] || null;
+            payload['q21_5'] = answers['21_other_crop'] || null;
+            payload['q21'] = answers['21_other_area'] || null;
             continue;
           }
 
@@ -228,12 +224,11 @@ export default function QuestionsScreen() {
               }
             }
           }
-
         }
       }
 
       await submitSurveyData(payload);
-      // console.log('payload', payload);
+      console.log('payload', payload);
 
       const username = await AsyncStorage.getItem('username');
       setAnswers({
@@ -268,11 +263,78 @@ export default function QuestionsScreen() {
   );
 
   const renderSubQuestions = (item) => {
+    // Handle subQuestionsByValue if defined
+    if (item.subQuestionsByValue) {
+      const subQList = item.subQuestionsByValue[answers[item.id]];
+      if (!subQList) return null;
+
+      return subQList.map((subQ) => (
+        <View key={subQ.id} style={styles.subQuestionContainer}>
+          <Text style={styles.questionTextCrop}>
+            {subQ.text}
+          </Text>
+
+          {subQ.question_type === 'multi-select' ? (
+            subQ.options.map((option) => (
+              <TouchableOpacity
+                key={option}
+                style={styles.checkboxContainer}
+                onPress={() => {
+                  const current = answers[subQ.id] || [];
+                  const updated = current.includes(option)
+                    ? current.filter((o) => o !== option)
+                    : [...current, option];
+
+                  handleAnswerChange(subQ.id, updated);
+
+                  if (!updated.includes('Other(Specify)')) {
+                    handleAnswerChange(`${subQ.id}_other`, null);
+                  }
+                }}
+              >
+                <View style={styles.checkbox}>
+                  {answers[subQ.id]?.includes(option) && (
+                    <Text style={styles.checkboxTick}>✔</Text>
+                  )}
+                </View>
+                <Text style={styles.checkboxLabel}>{option}</Text>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={answers[subQ.id] || ''}
+                onValueChange={(value) => handleAnswerChange(subQ.id, value)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Select an option..." value="" />
+                {subQ.options.map((opt) => (
+                  <Picker.Item key={opt} label={opt} value={opt} />
+                ))}
+              </Picker>
+            </View>
+          )}
+
+          {/* Optional "Other(Specify)" input for multi-select */}
+          {answers[subQ.id]?.includes?.('Other(Specify)') && (
+            <TextInput
+              style={styles.input}
+              placeholder="Please specify"
+              value={answers[`${subQ.id}_other`] || ''}
+              onChangeText={(text) => handleAnswerChange(`${subQ.id}_other`, text)}
+            />
+          )}
+        </View>
+      ));
+    }
+
+    // Fallback to old subQuestions logic
     if (!item.subQuestions || answers[item.id] !== item.subQuestions.triggerValue) return null;
+
     return item.subQuestions.questions.map((subQ) => (
       <View key={subQ.id} style={styles.subQuestionContainer}>
         <Text style={styles.questionTextCrop}>
-          {subQ.text.replace(/Before MI ₹:.*After MI ₹:.*/g, '')}
+          {subQ.text}
         </Text>
         {subQ.text.includes('Before MI ₹') ? renderBeforeAfterInputs(subQ) : (
           subQ.question_type === 'text' ? (
@@ -326,7 +388,7 @@ export default function QuestionsScreen() {
       );
     }
 
-    if (item.id === '17') {
+    if (item.id === '21') {
       return (
         <View style={styles.questionContainer}>
           <Text style={styles.questionTextCrop}>
@@ -338,8 +400,8 @@ export default function QuestionsScreen() {
           <Text style={styles.subLabel}>Crop1 (Primary crop taken MI)</Text>
           <View style={styles.pickerWrapper}>
             <Picker
-              selectedValue={answers['17_crop1'] || ''}
-              onValueChange={(value) => handleAnswerChange('17_crop1', value)}
+              selectedValue={answers['21_crop1'] || ''}
+              onValueChange={(value) => handleAnswerChange('21_crop1', value)}
               style={styles.picker}
             >
               <Picker.Item label="Select crop..." value="" />
@@ -353,8 +415,8 @@ export default function QuestionsScreen() {
           <TextInput
             style={styles.input}
             placeholder="Enter area"
-            value={answers['17_area1'] || ''}
-            onChangeText={(text) => handleAnswerChange('17_area1', text)}
+            value={answers['21_area1'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_area1', text)}
             keyboardType="numeric"
           />
 
@@ -362,8 +424,8 @@ export default function QuestionsScreen() {
           <Text style={styles.subLabel}>Crop2</Text>
           <View style={styles.pickerWrapper}>
             <Picker
-              selectedValue={answers['17_crop2'] || ''}
-              onValueChange={(value) => handleAnswerChange('17_crop2', value)}
+              selectedValue={answers['21_crop2'] || ''}
+              onValueChange={(value) => handleAnswerChange('21_crop2', value)}
               style={styles.picker}
             >
               <Picker.Item label="Select crop..." value="" />
@@ -377,8 +439,8 @@ export default function QuestionsScreen() {
           <TextInput
             style={styles.input}
             placeholder="Enter area"
-            value={answers['17_area2'] || ''}
-            onChangeText={(text) => handleAnswerChange('17_area2', text)}
+            value={answers['21_area2'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_area2', text)}
             keyboardType="numeric"
           />
 
@@ -387,22 +449,21 @@ export default function QuestionsScreen() {
           <TextInput
             style={styles.input}
             placeholder="Enter other crop"
-            value={answers['17_other_crop'] || ''}
-            onChangeText={(text) => handleAnswerChange('17_other_crop', text)}
+            value={answers['21_other_crop'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_other_crop', text)}
           />
 
           <Text style={styles.subLabel}>Other Area (Acres, Gunta)</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter area"
-            value={answers['17_other_area'] || ''}
-            onChangeText={(text) => handleAnswerChange('17_other_area', text)}
+            value={answers['21_other_area'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_other_area', text)}
             keyboardType="numeric"
           />
         </View>
       );
     }
-
 
     if (item.type === 'submit_button') {
       return (
@@ -415,7 +476,6 @@ export default function QuestionsScreen() {
             {isSubmitting ? 'Submitting...' : 'Submit Answers'}
           </Text>
         </TouchableOpacity>
-
       );
     }
 
@@ -498,7 +558,6 @@ export default function QuestionsScreen() {
             onClear={() => handleAnswerChange(item.id, null)}
             value={answers[item.id]}
           />
-
         </View>
       );
     }
@@ -553,10 +612,6 @@ export default function QuestionsScreen() {
       );
     }
 
-
-
-
-
     if (item.question_type === 'location') {
       return (
         <View style={styles.questionContainer}>
@@ -594,7 +649,6 @@ export default function QuestionsScreen() {
         )}
       </View>
     );
-
   };
 
 
