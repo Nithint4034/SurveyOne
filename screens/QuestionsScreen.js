@@ -82,11 +82,9 @@ export default function QuestionsScreen() {
       'latitude' in value &&
       'longitude' in value
     ) {
-      // Safely handle location object
       const latLngString = `${value.latitude},${value.longitude}`;
       setAnswers(prev => ({ ...prev, [id]: latLngString }));
     } else {
-      // Normal field or null
       setAnswers(prev => ({ ...prev, [id]: value }));
     }
   };
@@ -140,17 +138,16 @@ export default function QuestionsScreen() {
     setIsSubmitting(true);
 
     try {
+      // Validate required fields
       const currentErrors = {};
-
       for (const field of requiredFields) {
         const value = answers[field];
         if (!value || (typeof value === 'string' && value.trim() === '')) {
-          Alert.alert('Missing Answer', `Please fill in the required field : ${field}`);
+          Alert.alert('Missing Answer', `Please fill in the required field: ${field}`);
           setIsSubmitting(false);
           return;
         }
 
-        // Special case for phone number (e.g., q6)
         if (field === '6' && value.length !== 10) {
           Alert.alert('Invalid Phone Number', 'Phone number must be exactly 10 digits.');
           setIsSubmitting(false);
@@ -168,78 +165,166 @@ export default function QuestionsScreen() {
       // Clear previous errors
       setErrors({});
 
-      const payload = {};
+      // Build the payload
+      const payload = {
+        surveyor_name: answers.surveyor_name || '',
+        village: answers.village || null,
+        district: answers.district || null,
+        taluka: answers.taluka || null,
+      };
+
+      // Handle location
+      if (answers['60']) {
+        const [latitude, longitude] = answers['60'].split(',');
+        payload.latitude = latitude;
+        payload.longitude = longitude;
+      }
+
+      // Process all questions
       for (const item of serializedData) {
-        if (item.type === 'question') {
-          const val = answers[item.id] || null;
-          const otherVal = answers[`${item.id}_other`] || null;
+        if (item.type !== 'question') continue;
 
-          // Handle question 21 separately
-          if (item.id === '21') {
-            payload['q21_1'] = answers['21_crop1'] || null;
-            payload['q21_2'] = answers['21_area1'] || null;
-            payload['q21_3'] = answers['21_crop2'] || null;
-            payload['q21_4'] = answers['21_area2'] || null;
-            payload['q21_5'] = answers['21_other_crop'] || null;
-            payload['q21'] = answers['21_other_area'] || null;
-            continue;
+        const val = answers[item.id];
+        const otherVal = answers[`${item.id}_other`];
+
+        // Skip question 21 as we'll handle it separately
+        if (item.id === '21') continue;
+
+        // Handle main question
+        if (item.question_type === 'multi-select') {
+          payload[item.id] = val ? JSON.stringify(val) : '[]';
+        } else if (item.question_type === 'radio' && val === 'Other(Specify)') {
+          payload[item.id] = otherVal || null;
+        } else {
+          payload[item.id] = val || null;
+        }
+
+        // Handle subQuestionsByValue
+        if (item.subQuestionsByValue && val) {
+          const subQList = item.subQuestionsByValue[val];
+          if (subQList) {
+            for (const subQ of subQList) {
+              const subVal = answers[subQ.id];
+
+              if (subQ.question_type === 'multi-select') {
+                payload[subQ.id] = subVal ? JSON.stringify(subVal) : '[]';
+              } else if (subQ.question_type === 'radio' && subVal === 'Other(Specify)') {
+                payload[subQ.id] = answers[`${subQ.id}_other`] || null;
+              } else {
+                payload[subQ.id] = subVal || null;
+              }
+            }
           }
+        }
 
-          if (item.question_type === 'multi-select') {
-            const selected = answers[item.id] || [];
-            const otherInput = answers[`${item.id}_other`] || '';
-
-            const cleanedSelected = selected.map(opt =>
-              opt === 'Other(Specify)' && otherInput ? otherInput : opt
-            );
-
-            payload[item.id] = JSON.stringify(cleanedSelected);
-          } else {
-            payload[item.id] = val === 'Other(Specify)' ? otherVal : val;
-          }
-
-          const trigger = item.subQuestions?.triggerValue;
+        // Handle old-style subQuestions
+        if (item.subQuestions) {
+          const trigger = item.subQuestions.triggerValue;
           const triggered = (
             item.question_type === 'multi-select'
               ? Array.isArray(val) && val.includes(trigger)
               : val === trigger
           );
 
-          if (item.subQuestions && triggered) {
-            let index = 1;
-
+          if (triggered) {
             for (const subQ of item.subQuestions.questions) {
               if (subQ.text.includes('Before MI ₹')) {
-                const beforeVal = answers[`${subQ.id}_before`] || null;
-                const afterVal = answers[`${subQ.id}_after`] || null;
-
-                payload[`q${item.id}_${index}`] = beforeVal;
-                payload[`q${item.id}_${index + 1}`] = afterVal;
-
-                index += 2;
+                payload[`${subQ.id}_before`] = answers[`${subQ.id}_before`] || null;
+                payload[`${subQ.id}_after`] = answers[`${subQ.id}_after`] || null;
               } else {
-                const val = answers[subQ.id] || null;
-                payload[`q${item.id}_${index}`] = val;
-                index += 1;
+                payload[subQ.id] = answers[subQ.id] || null;
               }
             }
           }
         }
       }
 
-      await submitSurveyData(payload);
-      console.log('payload', payload);
+      // Handle question 21 specifically
+      const miCrops = [];
+      if (answers['21_crop1']) miCrops.push(answers['21_crop1']);
+      if (answers['21_crop2']) miCrops.push(answers['21_crop2']);
+      if (answers['21_other_crop']) miCrops.push(answers['21_other_crop']);
 
+      payload['21'] = miCrops.length > 0 ? JSON.stringify(miCrops) : null;
+
+      // Include all crop-related fields
+      const cropFields = {
+        // Pre-MI Crop 1
+        'q21_crop1': answers['21_crop1'],
+        'q21_labour_cost1': answers['21_labour_cost1'],
+        'q21_nutrition_cost1': answers['21_nutrition_cost1'],
+        'q21_plant_protection1': answers['21_plant_protection1'],
+        'q21_land_prep1': answers['21_land_prep1'],
+        'q21_yield1': answers['21_yield1'],
+        'q21_income1': answers['21_income1'],
+        'q21_hours_irrigation1': answers['21_hours_irrigation1'],
+        'q21_pump_capacity1': answers['21_pump_capacity1'],
+
+        // Pre-MI Crop 2
+        'q21_crop2': answers['21_crop2'],
+        'q21_labour_cost2': answers['21_labour_cost2'],
+        'q21_nutrition_cost2': answers['21_nutrition_cost2'],
+        'q21_plant_protection2': answers['21_plant_protection2'],
+        'q21_land_prep2': answers['21_land_prep2'],
+        'q21_yield2': answers['21_yield2'],
+        'q21_income2': answers['21_income2'],
+        'q21_hours_irrigation2': answers['21_hours_irrigation2'],
+        'q21_pump_capacity2': answers['21_pump_capacity2'],
+
+        // MI Crops
+        'q21_mi_crop1': answers['21_crop1'],  // Same as pre-MI crop1
+        'q21_mi_area1': answers['21_area1'],
+        'q21_mi_crop2': answers['21_crop2'],  // Same as pre-MI crop2
+        'q21_mi_area2': answers['21_area2'],
+        'q21_mi_other_crop': answers['21_other_crop'],
+        'q21_mi_other_area': answers['21_other_area']
+      };
+
+      // Add only non-empty crop fields to payload
+      Object.entries(cropFields).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          payload[key] = value;
+        }
+      });
+
+      // Handle photo upload if present
+      if (answers['61']) {
+        payload.photo = {
+          uri: answers['61'],
+          type: 'image/jpeg',
+          name: `survey_photo_${Date.now()}.jpg`
+        };
+      }
+
+      // Clean the payload by removing null/empty values
+      const cleanPayload = Object.fromEntries(
+        Object.entries(payload).filter(([_, value]) => {
+          if (value === null || value === undefined) return false;
+          if (typeof value === 'string' && value.trim() === '') return false;
+          if (typeof value === 'object' && Object.keys(value).length === 0) return false;
+          return true;
+        })
+      );
+
+      console.log('Final payload:', cleanPayload);
+
+      // Submit the data
+      const response = await submitSurveyData(cleanPayload);
+      console.log('Submission response:', response);
+
+      // Reset form after successful submission
       const username = await AsyncStorage.getItem('username');
       setAnswers({
         surveyor_name: username || '',
-        '56': null, // Reset location field
+        '60': null, // Reset location
       });
-      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+
       Alert.alert('Success', 'Survey submitted successfully!');
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+
     } catch (error) {
-      console.error('Survey submit error:', error);
-      Alert.alert('Error', 'Survey submission failed.');
+      console.error('Submission error:', error);
+      Alert.alert('Error', 'Failed to submit survey. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -396,7 +481,185 @@ export default function QuestionsScreen() {
             {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
           </Text>
 
-          {/* Crop 1 */}
+          {/* Pre MI Crop 1 Section */}
+          <Text style={styles.sectionHeading}>Pre MI Crop 1</Text>
+          <Text style={styles.subLabel}>Crop Type</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={answers['21_crop1'] || ''}
+              onValueChange={(value) => handleAnswerChange('21_crop1', value)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select crop..." value="" />
+              {item.options?.map(option => (
+                <Picker.Item key={option} label={option} value={option} />
+              ))}
+            </Picker>
+          </View>
+
+          <Text style={styles.subLabel}>Labour Cost (₹)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter amount"
+            value={answers['21_labour_cost1'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_labour_cost1', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Nutrition Management (Fertilizers) (₹)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter amount"
+            value={answers['21_nutrition_cost1'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_nutrition_cost1', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Plant Protection (Pesticide & Weedicides) (₹)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter amount"
+            value={answers['21_plant_protection1'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_plant_protection1', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Land Preparation & Harvesting (₹)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter amount"
+            value={answers['21_land_prep1'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_land_prep1', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Yield (Quintal)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter yield"
+            value={answers['21_yield1'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_yield1', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Income (₹)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter income"
+            value={answers['21_income1'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_income1', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Hours per Irrigation</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter hours"
+            value={answers['21_hours_irrigation1'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_hours_irrigation1', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Pump Capacity (HP)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter HP"
+            value={answers['21_pump_capacity1'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_pump_capacity1', text)}
+            keyboardType="numeric"
+          />
+
+          {/* Pre MI Crop 2 Section */}
+          <Text style={[styles.sectionHeading, { marginTop: 20 }]}>Pre MI Crop 2</Text>
+          <Text style={styles.subLabel}>Crop Type</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={answers['21_crop2'] || ''}
+              onValueChange={(value) => handleAnswerChange('21_crop2', value)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select crop..." value="" />
+              {item.options?.map(option => (
+                <Picker.Item key={option} label={option} value={option} />
+              ))}
+            </Picker>
+          </View>
+
+          <Text style={styles.subLabel}>Labour Cost (₹)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter amount"
+            value={answers['21_labour_cost2'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_labour_cost2', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Nutrition Management (Fertilizers) (₹)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter amount"
+            value={answers['21_nutrition_cost2'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_nutrition_cost2', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Plant Protection (Pesticide & Weedicides) (₹)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter amount"
+            value={answers['21_plant_protection2'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_plant_protection2', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Land Preparation & Harvesting (₹)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter amount"
+            value={answers['21_land_prep2'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_land_prep2', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Yield (Quintal)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter yield"
+            value={answers['21_yield2'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_yield2', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Income (₹)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter income"
+            value={answers['21_income2'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_income2', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Hours per Irrigation</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter hours"
+            value={answers['21_hours_irrigation2'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_hours_irrigation2', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Pump Capacity (HP)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter HP"
+            value={answers['21_pump_capacity2'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_pump_capacity2', text)}
+            keyboardType="numeric"
+          />
+
+          {/* MI Crop Section */}
+          <Text style={styles.sectionHeading}>MI Crops</Text>
+
           <Text style={styles.subLabel}>Crop1 (Primary crop taken MI)</Text>
           <View style={styles.pickerWrapper}>
             <Picker
@@ -420,7 +683,6 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          {/* Crop 2 */}
           <Text style={styles.subLabel}>Crop2</Text>
           <View style={styles.pickerWrapper}>
             <Picker
@@ -444,7 +706,6 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          {/* Other Crop */}
           <Text style={styles.subLabel}>Other Crop</Text>
           <TextInput
             style={styles.input}
@@ -464,6 +725,7 @@ export default function QuestionsScreen() {
         </View>
       );
     }
+
 
     if (item.type === 'submit_button') {
       return (
@@ -580,6 +842,7 @@ export default function QuestionsScreen() {
         }
       };
 
+
       return (
         <View style={styles.questionContainer}>
           <Text style={styles.questionTextCrop}>
@@ -650,7 +913,6 @@ export default function QuestionsScreen() {
       </View>
     );
   };
-
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -847,5 +1109,15 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontWeight: '500',
     color: '#555',
+  },
+  sectionHeading: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginTop: 15,
+    marginBottom: 8,
+    color: '#333',
+    backgroundColor: '#f5f5f5',
+    padding: 8,
+    borderRadius: 4,
   },
 });
