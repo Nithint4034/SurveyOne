@@ -123,12 +123,12 @@ export default function QuestionsScreen() {
       'q21_labour_cost2': 'q21_8',
       'q21_land_prep1': 'q21_9',
       'q21_land_prep2': 'q21_10',
-      'q21_mi_area1': 'q21_11',
-      'q21_mi_area2': 'q21_12',
+      'q21_area1': 'q21_11',
+      'q21_area2': 'q21_12',
       'q21_mi_crop1': 'q21_13',
       'q21_mi_crop2': 'q21_14',
-      'q21_mi_other_area': 'q21_15',
-      'q21_mi_other_crop': 'q21_16',
+      'q21_other_area': 'q21_15',
+      'q21_other_crop': 'q21_16',
       'q21_nutrition_cost1': 'q21_17',
       'q21_nutrition_cost2': 'q21_18',
       'q21_other_space': 'q21_19',
@@ -453,7 +453,7 @@ export default function QuestionsScreen() {
 
       // Submit the data
       const response = await submitSurveyData(cleanPayload);
-      // console.log('Submission response:', response);
+      console.log('Submission response:', response);
 
       // Reset form after successful submission
       const username = await AsyncStorage.getItem('username');
