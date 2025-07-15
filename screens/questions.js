@@ -115,6 +115,14 @@ export default [
                     question_type: 'multi-select',
                     options: ['Portable', 'Micro', 'Mini', 'Semi-permanent', 'Large Volume (Rain Gun)', 'None']
                 }
+            ],
+            'Yes - Both': [
+                {
+                    id: '15c',
+                    text: 'Type of Sprinkler System Used',
+                    question_type: 'multi-select',
+                    options: ['Online', 'In-line', 'Portable', 'Micro', 'Mini', 'Semi-permanent', 'Large Volume (Rain Gun)', 'None']
+                }
             ]
         }
     },
@@ -501,7 +509,7 @@ export default [
         type: 'question',
         text: 'What was the mode of MI subsidy disbursement?',
         question_type: 'multi-select',
-        options: ['Received Directly to Bank', 'Payment made to MI supplier', 'Not yet received', 'Other (please specify)'],
+        options: ['Received Directly to Bank', 'Payment made to MI supplier', 'Not yet received', 'Other(Specify)'],
     },
     {
         id: '37',
@@ -592,9 +600,9 @@ export default [
         type: 'question',
         text: 'Has the adoption of MI helped in women empowerment?',
         question_type: 'radio',
-        options: ['Yes', 'No'],
+        options: ['Yes', 'No','Other(Specify)'],
         subQuestionsByValue: {
-            'Yes':[
+            'Yes': [
                 {
                     id: '52a',
                     text: 'How has it helped? (tick all that apply)',
@@ -603,7 +611,7 @@ export default [
                         'Livestock Rearing',
                         'Business or Petty Shop',
                         'Alternate Employment Activity',
-                        'Other(Specify)'
+                        
                     ]
                 }
             ]
@@ -643,22 +651,44 @@ export default [
     {
         id: '58',
         type: 'question',
-        text: 'Any Suggestions for Improving the MI Scheme?',
+        text: 'Have you got your Soil Tested & have the Soil Health card?',
     },
     {
         id: '59',
         type: 'question',
-        text: 'Any Additional comments?',
+        text: 'Are you adopting the Nutrient Management Recommentations given in Soil Health Card?',
+        question_type: 'radio',
+        options: ['Yes', 'No'],
+        subQuestions: {
+            triggerValue: 'No',
+            questions: [
+                {
+                    id: '59a',
+                    text: 'If No, Mention the reason',
+                    question_type: 'text'
+                }
+            ]
+        }
     },
     {
         id: '60',
+        type: 'question',
+        text: 'Any Suggestions for Improving the MI Scheme?',
+    },
+    {
+        id: '61',
+        type: 'question',
+        text: 'Any Additional comments?',
+    },
+    {
+        id: '62',
         type: 'question',
         text: 'Location (Latitude/Longitude)',
         question_type: 'location',
     },
     { id: 'h7', type: 'heading', text: 'Farmer or Area Photo' },
     {
-        id: '61',
+        id: '63',
         type: 'question',
         text: 'Farmer or location Photo',
         question_type: 'photo'

@@ -199,8 +199,8 @@ export default function QuestionsScreen() {
       };
 
       // Handle location
-      if (answers['60']) {
-        const [latitude, longitude] = answers['60'].split(',');
+      if (answers['62']) {
+        const [latitude, longitude] = answers['62'].split(',');
         payload.latitude = latitude;
         payload.longitude = longitude;
       }
@@ -217,9 +217,20 @@ export default function QuestionsScreen() {
 
         // Handle main question
         if (item.question_type === 'multi-select') {
-          payload[item.id] = val ? JSON.stringify(val) : '[]';
-        } else if (item.question_type === 'radio' && val === 'Other(Specify)') {
-          payload[item.id] = otherVal || null;
+          // Filter out "Other(Specify)" from the array before stringifying
+          const filteredVal = val ? val.filter(option => option !== 'Other(Specify)') : [];
+          payload[item.id] = JSON.stringify(filteredVal);
+
+          // Include the "other" specification if "Other(Specify)" was selected
+          if (val && val.includes('Other(Specify)')) {
+            payload[`${item.id}_other`] = answers[`${item.id}_other`] || null;
+          }
+        } else if (item.question_type === 'radio') {
+          if (val === 'Other(Specify)') {
+            payload[item.id] = answers[`${item.id}_other`] || null;
+          } else {
+            payload[item.id] = val || null;
+          }
         } else {
           payload[item.id] = val || null;
         }
@@ -297,12 +308,15 @@ export default function QuestionsScreen() {
         'q21_pump_capacity2': answers['21_pump_capacity2'],
 
         // MI Crops
-        'q21_mi_crop1': answers['21_crop1'],  // Same as pre-MI crop1
+        'q21_mi_crop1': answers['21_mi_crop1'],
         'q21_mi_area1': answers['21_area1'],
-        'q21_mi_crop2': answers['21_crop2'],  // Same as pre-MI crop2
+        'q21_space1': answers['21_space1'],
+        'q21_mi_crop2': answers['21_mi_crop2'],
         'q21_mi_area2': answers['21_area2'],
+        'q21_space2': answers['21_space2'],
         'q21_mi_other_crop': answers['21_other_crop'],
-        'q21_mi_other_area': answers['21_other_area']
+        'q21_mi_other_area': answers['21_other_area'],
+        'q21_other_space': answers['21_other_space']
       };
 
       // Add only non-empty crop fields to payload
@@ -313,9 +327,9 @@ export default function QuestionsScreen() {
       });
 
       // Handle photo upload if present
-      if (answers['61']) {
+      if (answers['63']) {
         payload.photo = {
-          uri: answers['61'],
+          uri: answers['63'],
           type: 'image/jpeg',
           name: `survey_photo_${Date.now()}.jpg`
         };
@@ -335,13 +349,13 @@ export default function QuestionsScreen() {
 
       // Submit the data
       const response = await submitSurveyData(cleanPayload);
-      console.log('Submission response:', response);
+      // console.log('Submission response:', response);
 
       // Reset form after successful submission
       const username = await AsyncStorage.getItem('username');
       setAnswers({
         surveyor_name: username || '',
-        '60': null, // Reset location
+        '62': null, // Reset location
       });
 
       Alert.alert('Success', 'Survey submitted successfully!');
@@ -688,8 +702,8 @@ export default function QuestionsScreen() {
           <Text style={styles.subLabel}>Crop1 (Primary crop taken MI)</Text>
           <View style={styles.pickerWrapper}>
             <Picker
-              selectedValue={answers['21_crop1'] || ''}
-              onValueChange={(value) => handleAnswerChange('21_crop1', value)}
+              selectedValue={answers['21_mi_crop1'] || ''}
+              onValueChange={(value) => handleAnswerChange('21_mi_crop1', value)}
               style={styles.picker}
             >
               <Picker.Item label="Select crop..." value="" />
@@ -708,11 +722,20 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
+          <Text style={styles.subLabel}>Spacing1</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Spacing"
+            value={answers['21_space1'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_space1', text)}
+            keyboardType="numeric"
+          />
+
           <Text style={styles.subLabel}>Crop2</Text>
           <View style={styles.pickerWrapper}>
             <Picker
-              selectedValue={answers['21_crop2'] || ''}
-              onValueChange={(value) => handleAnswerChange('21_crop2', value)}
+              selectedValue={answers['21_mi_crop2'] || ''}
+              onValueChange={(value) => handleAnswerChange('21_mi_crop2', value)}
               style={styles.picker}
             >
               <Picker.Item label="Select crop..." value="" />
@@ -728,6 +751,15 @@ export default function QuestionsScreen() {
             placeholder="Enter area"
             value={answers['21_area2'] || ''}
             onChangeText={(text) => handleAnswerChange('21_area2', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Spacing2</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Spacing"
+            value={answers['21_space2'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_space2', text)}
             keyboardType="numeric"
           />
 
@@ -747,6 +779,13 @@ export default function QuestionsScreen() {
             onChangeText={(text) => handleAnswerChange('21_other_area', text)}
             keyboardType="numeric"
           />
+          <Text style={styles.subLabel}>Spacing Other</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Spacing"
+            value={answers['21_other_space'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_other_space', text)}
+          />
         </View>
       );
     }
@@ -760,7 +799,7 @@ export default function QuestionsScreen() {
           disabled={isSubmitting}
         >
           <Text style={styles.buttonText}>
-            {isSubmitting ? 'Submitting...' : 'Submit Answers'}
+            {isSubmitting ? 'Submitting...' : 'Submit Survey'}
           </Text>
         </TouchableOpacity>
       );
@@ -861,13 +900,7 @@ export default function QuestionsScreen() {
           updated.push(option);
         }
         handleAnswerChange(item.id, updated);
-
-        // If deselecting 'Other(Specify)', also clear its value
-        if (option === 'Other(Specify)' && selectedOptions.includes('Other(Specify)')) {
-          handleAnswerChange(`${item.id}_other`, null);
-        }
       };
-
 
       return (
         <View style={styles.questionContainer}>
@@ -889,6 +922,7 @@ export default function QuestionsScreen() {
             </TouchableOpacity>
           ))}
 
+          {/* Special handling for Other(Specify) */}
           {selectedOptions.includes('Other(Specify)') && (
             <TextInput
               style={styles.input}
