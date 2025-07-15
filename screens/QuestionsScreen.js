@@ -73,128 +73,143 @@ export default function QuestionsScreen() {
     return data;
   }, []);
 
-  const extractSurveyMetadata = () => {
-    const metaFields = ['surveyor_name', 'village', 'district', 'taluka', 'latitude', 'longitude'];
-    const meta = {};
+const extractSurveyMetadata = () => {
+  const metaFields = ['surveyor_name', 'village', 'district', 'taluka', 'latitude', 'longitude'];
+  const meta = {};
 
-    // Add standard metadata fields
-    for (const key of metaFields) {
-      meta[key] = answers[key] ?? null;
-    }
+  // Add standard metadata fields
+  for (const key of metaFields) {
+    meta[key] = answers[key] ?? null;
+  }
 
-    // Special handling for question 14 (14a -> 14_1, 14b -> 14_2)
-    if (answers['14'] === 'Yes') {
-      meta['q14'] = 'Yes';
-      meta['q14_1'] = answers['14a'] || null;
-      meta['q14_2'] = answers['14b'] || null;
+  // Special handling for question 14 (14a -> 14_1, 14b -> 14_2)
+  if (answers['14'] === 'Yes') {
+    meta['q14'] = 'Yes';
+    meta['q14_1'] = answers['14a'] || null;
+    meta['q14_2'] = answers['14b'] || null;
+  } else {
+    meta['q14'] = 'No';
+    meta['q14_1'] = null;
+    meta['q14_2'] = null;
+  }
+
+  // Handle questions 22-26 (before/after values)
+  const cropComparisonQuestions = ['22', '23', '24', '25', '26'];
+  cropComparisonQuestions.forEach(q => {
+    meta[`q${q}`] = answers[q] || null;
+    
+    if (answers[q] === 'Yes') {
+      meta[`q${q}_1`] = answers[`${q}a_before`] || null;
+      meta[`q${q}_2`] = answers[`${q}a_after`] || null;
+      meta[`q${q}_3`] = answers[`${q}b_before`] || null;
+      meta[`q${q}_4`] = answers[`${q}b_after`] || null;
     } else {
-      meta['q14'] = 'No';
-      meta['q14_1'] = null;
-      meta['q14_2'] = null;
+      meta[`q${q}_1`] = null;
+      meta[`q${q}_2`] = null;
+      meta[`q${q}_3`] = null;
+      meta[`q${q}_4`] = null;
     }
+  });
 
-    // Handle questions 22-26 (before/after values)
-    const cropComparisonQuestions = ['22', '23', '24', '25', '26'];
-    cropComparisonQuestions.forEach(q => {
-      meta[`q${q}`] = answers[q] || null;
-
-      if (answers[q] === 'Yes') {
-        meta[`q${q}_1`] = answers[`${q}a_before`] || null;
-        meta[`q${q}_2`] = answers[`${q}a_after`] || null;
-        meta[`q${q}_3`] = answers[`${q}b_before`] || null;
-        meta[`q${q}_4`] = answers[`${q}b_after`] || null;
-      } else {
-        meta[`q${q}_1`] = null;
-        meta[`q${q}_2`] = null;
-        meta[`q${q}_3`] = null;
-        meta[`q${q}_4`] = null;
-      }
-    });
-
-    // Handle question 21 crop data
-    const q21FieldsMapping = {
-      'q21_crop1': 'q21_1',
-      'q21_crop2': 'q21_2',
-      'q21_hours_irrigation1': 'q21_3',
-      'q21_hours_irrigation2': 'q21_4',
-      'q21_income1': 'q21_5',
-      'q21_income2': 'q21_6',
-      'q21_labour_cost1': 'q21_7',
-      'q21_labour_cost2': 'q21_8',
-      'q21_land_prep1': 'q21_9',
-      'q21_land_prep2': 'q21_10',
-      'q21_area1': 'q21_11',
-      'q21_area2': 'q21_12',
-      'q21_mi_crop1': 'q21_13',
-      'q21_mi_crop2': 'q21_14',
+  // Handle question 21 crop data
+  const q21FieldsMapping = {
+    'q21_crop1': 'q21_1',
+    'q21_crop2': 'q21_2',
+    'q21_hours_irrigation1': 'q21_3',
+    'q21_hours_irrigation2': 'q21_4',
+    'q21_income1': 'q21_5',
+    'q21_income2': 'q21_6',
+    'q21_labour_cost1': 'q21_7',
+    'q21_labour_cost2': 'q21_8',
+    'q21_land_prep1': 'q21_9',
+    'q21_land_prep2': 'q21_10',
+    'q21_area1': 'q21_11',
+    'q21_area2': 'q21_12',
+    'q21_mi_crop1': 'q21_13',
+    'q21_mi_crop2': 'q21_14',
       'q21_other_area': 'q21_15',
       'q21_other_crop': 'q21_16',
-      'q21_nutrition_cost1': 'q21_17',
-      'q21_nutrition_cost2': 'q21_18',
-      'q21_other_space': 'q21_19',
-      'q21_plant_protection1': 'q21_20',
-      'q21_plant_protection2': 'q21_21',
-      'q21_pump_capacity1': 'q21_22',
-      'q21_pump_capacity2': 'q21_23',
-      'q21_space1': 'q21_24',
-      'q21_space2': 'q21_25',
-      'q21_yield1': 'q21_26',
-      'q21_yield2': 'q21_27'
-    };
-
-    // Initialize all q21 fields to null
-    for (let i = 1; i <= 27; i++) {
-      meta[`q21_${i}`] = null;
-    }
-
-    // Map the q21 fields from frontend to backend format
-    Object.entries(q21FieldsMapping).forEach(([frontendKey, backendKey]) => {
-      if (answers[frontendKey.replace('q21_', '21_')] !== undefined) {
-        meta[backendKey] = answers[frontendKey.replace('q21_', '21_')];
-      }
-    });
-
-    // Add all other question answers
-    for (const key in answers) {
-      // Skip metadata fields we've already handled
-      if (metaFields.includes(key)) continue;
-
-      // Skip subquestions we've already handled (like 14a/14b)
-      if (key === '14a' || key === '14b') continue;
-
-      // Skip before/after values we've already handled
-      if (key.match(/^\d+[ab]_(before|after)$/)) continue;
-
-      // Skip q21 fields we've already handled
-      if (key.startsWith('21_')) continue;
-
-      // Handle regular numbered questions (1, 2, 3, etc.)
-      if (/^\d+$/.test(key)) {
-        meta[`q${key}`] = answers[key];
-      }
-      // Handle subquestions with underscore format (like 15a -> q15_1)
-      else if (/^(\d+)([a-z])$/.test(key)) {
-        const matches = key.match(/^(\d+)([a-z])$/);
-        const mainQ = matches[1];
-        const subQ = matches[2];
-        const subQNum = subQ.charCodeAt(0) - 'a'.charCodeAt(0) + 1;
-        meta[`q${mainQ}_${subQNum}`] = answers[key];
-      }
-      // Handle other question formats (like q21_crop1 - already handled above)
-      else if (/^q\d+(_[a-z0-9]+)?$/.test(key)) {
-        // Skip as we've already handled q21 fields
-        if (!key.startsWith('q21_')) {
-          meta[key] = answers[key];
-        }
-      }
-      // Handle multi-select questions (convert arrays to strings)
-      else if (Array.isArray(answers[key])) {
-        meta[`q${key}`] = answers[key].join(',');
-      }
-    }
-
-    return meta;
+    'q21_nutrition_cost1': 'q21_17',
+    'q21_nutrition_cost2': 'q21_18',
+    'q21_other_space': 'q21_19',
+    'q21_plant_protection1': 'q21_20',
+    'q21_plant_protection2': 'q21_21',
+    'q21_pump_capacity1': 'q21_22',
+    'q21_pump_capacity2': 'q21_23',
+    'q21_space1': 'q21_24',
+    'q21_space2': 'q21_25',
+    'q21_yield1': 'q21_26',
+    'q21_yield2': 'q21_27'
   };
+
+  // Initialize all q21 fields to null
+  for (let i = 1; i <= 27; i++) {
+    meta[`q21_${i}`] = null;
+  }
+
+  // Map the q21 fields from frontend to backend format
+  Object.entries(q21FieldsMapping).forEach(([frontendKey, backendKey]) => {
+    if (answers[frontendKey.replace('q21_', '21_')] !== undefined) {
+      meta[backendKey] = answers[frontendKey.replace('q21_', '21_')];
+    }
+  });
+
+  // Add all other question answers
+  for (const key in answers) {
+    // Skip metadata fields we've already handled
+    if (metaFields.includes(key)) continue;
+    
+    // Skip subquestions we've already handled (like 14a/14b)
+    if (key === '14a' || key === '14b') continue;
+    
+    // Skip before/after values we've already handled
+    if (key.match(/^\d+[ab]_(before|after)$/)) continue;
+
+    // Skip q21 fields we've already handled
+    if (key.startsWith('21_')) continue;
+
+    // Handle multi-select questions (like question 13)
+    if (Array.isArray(answers[key])) {
+      // Remove "Other(Specify)" option if present and no other text specified
+      const filteredOptions = answers[key].filter(option => {
+        if (option === 'Other(Specify)') {
+          return answers[`${key}_other`] && answers[`${key}_other`].trim() !== '';
+        }
+        return true;
+      });
+      
+      meta[`q${key}`] = filteredOptions.join(',');
+      
+      // Add other text if specified
+      if (answers[key].includes('Other(Specify)') && answers[`${key}_other`]) {
+        meta[`q${key}_1`] = answers[`${key}_other`];
+      }
+      continue;
+    }
+
+    // Handle regular numbered questions (1, 2, 3, etc.)
+    if (/^\d+$/.test(key)) {
+      meta[`q${key}`] = answers[key];
+    } 
+    // Handle subquestions with underscore format (like 15a -> q15_1)
+    else if (/^(\d+)([a-z])$/.test(key)) {
+      const matches = key.match(/^(\d+)([a-z])$/);
+      const mainQ = matches[1];
+      const subQ = matches[2];
+      const subQNum = subQ.charCodeAt(0) - 'a'.charCodeAt(0) + 1;
+      meta[`q${mainQ}_${subQNum}`] = answers[key];
+    }
+    // Handle other question formats (like q21_crop1 - already handled above)
+    else if (/^q\d+(_[a-z0-9]+)?$/.test(key)) {
+      // Skip as we've already handled q21 fields
+      if (!key.startsWith('q21_')) {
+        meta[key] = answers[key];
+      }
+    }
+  }
+
+  return meta;
+};
 
   const handleAnswerChange = (id, value) => {
     if (id === '6') {
