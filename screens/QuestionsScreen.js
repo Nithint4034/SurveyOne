@@ -16,8 +16,33 @@ export default function QuestionsScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const flatListRef = useRef(null);
   const [errors, setErrors] = useState({});
+  const [talukaOptions, setTalukaOptions] = useState([]);
+
   // const requiredFields = ['6', 'surveyor_name', 'district', 'taluka', 'village', '1', '2', '3', '18', '26', '56', '57'];
   const requiredFields = []
+
+  const districtTalukaMap = {
+    'Chitradurga': ['Challekere', 'Hiriyur', 'Holalkere', 'Chitradurga', 'Hosadurga', 'Molakalmuru'],
+    'Shivamogga': ['Shikaripura', 'Shimoga', 'Sagar', 'Hosanagara', 'Bhadravati', 'Sorab', 'Thirthahalli'],
+    'Udupi': ['Udupi', 'Karkala', 'Kundapura', 'Brahmavar', 'Byandur', 'Hebri', 'Kaapu'],
+    'Mandya': ['K R Pet', 'Nagamangala', 'Malavalli', 'Maddur', 'Mandya', 'Pandavapura', 'Srirangapatna'],
+    'Chikkaballapur': ['Gauribidanur', 'Chintamani', 'Bagepalli', 'Sidlaghatta', 'Chikkaballapur', 'Gudibande', 'Manchenhalli'],
+    'Bidar': ['Bhalki', 'Basavakalyan', 'Bidar', 'Aurad', 'Humnabad', 'Kamalanagar', 'Chitaguppa', 'Hulasuru'],
+    'Kalaburagi': ['Aland', 'Chincholi', 'Sedam', 'Afzalpur', 'Gulbarga', 'Kalagi', 'Chittapur', 'Jevargi', 'Yadrami', 'Kamalapura', 'Sahabada'],
+    'Uttara Kannada': ['Mundgod', 'Haliyal', 'Sirsi', 'Siddapur', 'Bhatkal', 'Yellapur', 'Joida', 'Ankola', 'Honnavar', 'Kumta', 'Karwar', 'Dandeli'],
+    'Vijayapura': ['Indi', 'Basavan Bagevadi', 'Sindagi', 'Muddebihal', 'Bijapur', 'Thikota', 'Devara Hippargi', 'Babaleshwar', 'Talikote', 'Chadachan', 'Kolhara', 'Nidagundi', 'Alamela'],
+    'Belagavi': ['Ramadurg', 'Athani', 'Khanapur', 'Savdatti', 'Raibag', 'Bailhongal', 'Belgaum', 'Chikkodi', 'Hukkeri', 'Kittur', 'Gokak', 'Kagavada', 'Mudalagi', 'Nippani', 'Yaragatti']
+  };
+
+  useEffect(() => {
+    if (answers.district && districtTalukaMap[answers.district]) {
+      setTalukaOptions(districtTalukaMap[answers.district]);
+      setAnswers((prev) => ({ ...prev, taluka: '' })); // reset taluka when district changes
+    } else {
+      setTalukaOptions([]);
+    }
+  }, [answers.district]);
+
 
   useEffect(() => {
     (async () => {
@@ -797,10 +822,11 @@ export default function QuestionsScreen() {
               style={styles.picker}
             >
               <Picker.Item label="Select an option..." value="" />
-              {item.options.map(option => (
+              {(item.id === 'taluka' ? talukaOptions : item.options).map(option => (
                 <Picker.Item key={option} label={option} value={option} />
               ))}
             </Picker>
+
           </View>
           {renderSubQuestions(item)}
         </View>
