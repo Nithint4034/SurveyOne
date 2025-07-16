@@ -155,11 +155,12 @@ export default function QuestionsScreen() {
     });
 
     // Add all other question answers
+    // Add all other question answers
     for (const key in answers) {
       // Skip metadata fields we've already handled
       if (metaFields.includes(key)) continue;
 
-      // Skip subquestions we've already handled (like 14a/14b)
+      // Skip subquestions we've already handled
       if (key === '14a' || key === '14b') continue;
 
       // Skip before/after values we've already handled
@@ -168,7 +169,20 @@ export default function QuestionsScreen() {
       // Skip q21 fields we've already handled
       if (key.startsWith('21_')) continue;
 
-      // Handle multi-select questions (like question 13)
+      // Get the question definition
+      const question = serializedData.find(q => q.id === key);
+
+      // Handle radio buttons with "Other(Specify)" option
+      if (question?.question_type === 'radio') {
+        if (answers[key] === 'Other(Specify)') {
+          meta[`q${key}`] = answers[`${key}_other`] || null;
+        } else {
+          meta[`q${key}`] = answers[key] || null;
+        }
+        continue;
+      }
+
+      // Handle multi-select questions (like question 13, 19, etc.)
       if (Array.isArray(answers[key])) {
         // Replace "Other(Specify)" with the specified text if available
         const processedOptions = answers[key].map(option => {
@@ -194,9 +208,8 @@ export default function QuestionsScreen() {
         const subQNum = subQ.charCodeAt(0) - 'a'.charCodeAt(0) + 1;
         meta[`q${mainQ}_${subQNum}`] = answers[key];
       }
-      // Handle other question formats (like q21_crop1 - already handled above)
+      // Handle other question formats
       else if (/^q\d+(_[a-z0-9]+)?$/.test(key)) {
-        // Skip as we've already handled q21 fields
         if (!key.startsWith('q21_')) {
           meta[key] = answers[key];
         }
@@ -224,6 +237,13 @@ export default function QuestionsScreen() {
       const latLngString = `${value.latitude},${value.longitude}`;
       setAnswers(prev => ({ ...prev, [id]: latLngString }));
     } else {
+      // For radio buttons with "Other(Specify)", clear the other field if another option is selected
+      if (/^\d+$/.test(id)) { // If it's a numbered question (like question 8)
+        const question = serializedData.find(q => q.id === id);
+        if (question?.question_type === 'radio' && value !== 'Other(Specify)') {
+          setAnswers(prev => ({ ...prev, [`${id}_other`]: null }));
+        }
+      }
       setAnswers(prev => ({ ...prev, [id]: value }));
     }
   };
