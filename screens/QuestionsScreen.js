@@ -445,15 +445,6 @@ const extractSurveyMetadata = () => {
         }
       });
 
-      // Handle photo upload if present
-      if (answers['63']) {
-        payload.photo = {
-          uri: answers['63'],
-          type: 'image/jpeg',
-          name: `survey_photo_${Date.now()}.jpg`
-        };
-      }
-
       // Clean the payload by removing null/empty values
       const cleanPayload = Object.fromEntries(
         Object.entries(payload).filter(([_, value]) => {

@@ -203,13 +203,13 @@ const styles = StyleSheet.create({
     },
     pickerContainer: {
         width: '80%',
-        height: 50, 
+        height: 50,
         marginBottom: 10,
         borderWidth: 1.2,
         borderColor: 'black',
         borderRadius: 8,
         overflow: 'hidden',
-        justifyContent: 'center', 
+        justifyContent: 'center',
     },
     picker: {
         width: '100%',
@@ -220,6 +220,12 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         fontWeight: 'bold',
         textAlign: 'center',
+        width: '100%',  // Ensure error text takes full width of its container
+    },
+    loginSection: {
+        width: '80%',  // Match the width of your input fields
+        alignItems: 'center',  // Center children horizontally
+        marginBottom: 10,  // Add some margin if needed
     },
     logo: {
         width: 80,
@@ -245,7 +251,7 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
     },
     loginButton: {
-        width: '80%',
+        width: '100%',  // Now takes full width of loginSection (which is 80% of screen)
         padding: 12,
         backgroundColor: '#4A4947',
         borderRadius: 8,
@@ -265,7 +271,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         gap: 40,
     },
-   surveyTitle: {
+    surveyTitle: {
         fontSize: 24,
         fontWeight: 'bold',
         color: '#4A4947',

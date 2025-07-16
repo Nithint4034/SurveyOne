@@ -6,7 +6,6 @@ import LoginProvider from './context/LoginProvider';
 import AppNavigator from './navigators/AppNavigator';
 import { LogBox } from 'react-native';
 
-
 LogBox.ignoreAllLogs(true);
 
 export default function App() {
@@ -27,7 +26,7 @@ export default function App() {
         style={styles.splashBackground}
         resizeMode="cover"
       >
-        <StatusBar backgroundColor="#4A4947" barStyle="light-content" />
+        <StatusBar backgroundColor="white" barStyle="light-content" />
       </ImageBackground>
     );
   }
@@ -35,7 +34,7 @@ export default function App() {
   return (
     <LoginProvider>
       <NavigationContainer>
-        <StatusBar backgroundColor="#4A4947" barStyle="light-content" />
+        <StatusBar backgroundColor="white" barStyle="light-content" />
         <AppNavigator />
       </NavigationContainer>
     </LoginProvider>
