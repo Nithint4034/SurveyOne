@@ -155,7 +155,6 @@ export default function QuestionsScreen() {
     });
 
     // Add all other question answers
-    // Add all other question answers
     for (const key in answers) {
       // Skip metadata fields we've already handled
       if (metaFields.includes(key)) continue;
@@ -168,6 +167,19 @@ export default function QuestionsScreen() {
 
       // Skip q21 fields we've already handled
       if (key.startsWith('21_')) continue;
+
+      // Handle question 15 subquestions specifically
+      if (key === '15a' || key === '15b' || key === '15c') {
+        const mainQ = '15';
+        const subQNum = key === '15a' ? 1 : key === '15b' ? 2 : 3;
+
+        if (Array.isArray(answers[key])) {
+          meta[`q${mainQ}_${subQNum}`] = answers[key].join(',');
+        } else {
+          meta[`q${mainQ}_${subQNum}`] = answers[key] || null;
+        }
+        continue;
+      }
 
       // Get the question definition
       const question = serializedData.find(q => q.id === key);
@@ -342,6 +354,26 @@ export default function QuestionsScreen() {
       // Process all questions
       for (const item of serializedData) {
         if (item.type !== 'question') continue;
+
+        // Handle question 15 specifically
+        if (item.id === '15') {
+          payload[item.id] = answers[item.id] || null;
+
+          // Handle subquestions based on selected value
+          if (item.subQuestionsByValue && answers[item.id]) {
+            const subQList = item.subQuestionsByValue[answers[item.id]];
+            if (subQList) {
+              for (const subQ of subQList) {
+                if (Array.isArray(answers[subQ.id])) {
+                  payload[subQ.id] = JSON.stringify(answers[subQ.id]);
+                } else {
+                  payload[subQ.id] = answers[subQ.id] || null;
+                }
+              }
+            }
+          }
+          continue;
+        }
 
         const val = answers[item.id];
         const otherVal = answers[`${item.id}_other`];
