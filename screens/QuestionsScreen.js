@@ -18,7 +18,8 @@ export default function QuestionsScreen() {
   const [errors, setErrors] = useState({});
   const [talukaOptions, setTalukaOptions] = useState([]);
 
-  // const requiredFields = ['6', 'surveyor_name', 'district', 'taluka', 'village', '1', '2', '3', '18', '26', '56', '57'];
+  // const requiredFields = ['surveyor_name', 'district', 'taluka', 'village', '1', '2', '3', '4', '6', '7', '8', '10',
+  //   '11', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '42', '43', '44', '46', '49', '52', '58', '59', '62', '63'];
   const requiredFields = []
 
   const districtTalukaMap = {
@@ -37,12 +38,11 @@ export default function QuestionsScreen() {
   useEffect(() => {
     if (answers.district && districtTalukaMap[answers.district]) {
       setTalukaOptions(districtTalukaMap[answers.district]);
-      setAnswers((prev) => ({ ...prev, taluka: '' })); // reset taluka when district changes
+      setAnswers((prev) => ({ ...prev, taluka: '' }));
     } else {
       setTalukaOptions([]);
     }
   }, [answers.district]);
-
 
   useEffect(() => {
     (async () => {
@@ -77,18 +77,20 @@ export default function QuestionsScreen() {
     const metaFields = ['surveyor_name', 'village', 'district', 'taluka', 'latitude', 'longitude'];
     const meta = {};
 
-    // Add standard metadata fields
     for (const key of metaFields) {
       meta[key] = answers[key] ?? null;
     }
 
-    // Special handling for question 14 (14a -> 14_1, 14b -> 14_2)
     if (answers['14'] === 'Yes') {
       meta['q14'] = 'Yes';
       meta['q14_1'] = answers['14a'] || null;
       meta['q14_2'] = answers['14b'] || null;
-    } else {
+    } else if (answers['14'] === 'No') {
       meta['q14'] = 'No';
+      meta['q14_1'] = null;
+      meta['q14_2'] = null;
+    } else {
+      meta['q14'] = null;
       meta['q14_1'] = null;
       meta['q14_2'] = null;
     }
@@ -121,6 +123,8 @@ export default function QuestionsScreen() {
       'q21_income2': 'q21_6',
       'q21_labour_cost1': 'q21_7',
       'q21_labour_cost2': 'q21_8',
+      '21_spacing1':'q64',
+      '21_spacing2':'q65',
       'q21_land_prep1': 'q21_9',
       'q21_land_prep2': 'q21_10',
       'q21_area1': 'q21_11',
@@ -143,7 +147,7 @@ export default function QuestionsScreen() {
     };
 
     // Initialize all q21 fields to null
-    for (let i = 1; i <= 27; i++) {
+    for (let i = 1; i <= 29; i++) {
       meta[`q21_${i}`] = null;
     }
 
@@ -249,6 +253,37 @@ export default function QuestionsScreen() {
       const latLngString = `${value.latitude},${value.longitude}`;
       setAnswers(prev => ({ ...prev, [id]: latLngString }));
     } else {
+      // Special handling for question 15
+      if (id === '15') {
+        setAnswers(prev => {
+          const newAnswers = { ...prev, [id]: value };
+
+          // Reset all subquestion answers when main answer changes
+          newAnswers['15a'] = null;
+          newAnswers['15b'] = null;
+          newAnswers['15c'] = null;
+          newAnswers['15_other'] = null;
+
+          // Automatically set 'None' for unselected subquestions
+          if (value === 'Yes - Drip') {
+            newAnswers['15b'] = ['None'];
+            newAnswers['15c'] = ['None'];
+          } else if (value === 'Yes - Sprinkler') {
+            newAnswers['15a'] = ['None'];
+            newAnswers['15c'] = ['None'];
+          } else if (value === 'Yes - Both') {
+            // Don't automatically set to None for Both option
+            // Let user select from combined options
+          } else if (value === 'Other(Specify)') {
+            newAnswers['15a'] = ['None'];
+            newAnswers['15b'] = ['None'];
+            newAnswers['15c'] = ['None'];
+          }
+
+          return newAnswers;
+        });
+      }
+
       // For radio buttons with "Other(Specify)", clear the other field if another option is selected
       if (/^\d+$/.test(id)) { // If it's a numbered question (like question 8)
         const question = serializedData.find(q => q.id === id);
@@ -256,6 +291,7 @@ export default function QuestionsScreen() {
           setAnswers(prev => ({ ...prev, [`${id}_other`]: null }));
         }
       }
+
       setAnswers(prev => ({ ...prev, [id]: value }));
     }
   };
@@ -526,23 +562,6 @@ export default function QuestionsScreen() {
     }
   };
 
-  const renderBeforeAfterInputs = (subQ) => (
-    <View style={styles.beforeAfterContainer}>
-      {['before', 'after'].map((type) => (
-        <View style={styles.inputPair} key={type}>
-          <Text style={styles.inputLabel}>{`${type === 'before' ? 'Before' : 'After'} MI ₹:`}</Text>
-          <TextInput
-            style={styles.numberInput}
-            keyboardType="numeric"
-            placeholder="Amount"
-            value={answers[`${subQ.id}_${type}`] || ''}
-            onChangeText={(text) => handleAnswerChange(`${subQ.id}_${type}`, text)}
-          />
-        </View>
-      ))}
-    </View>
-  );
-
   const renderSubQuestions = (item) => {
     // Handle subQuestionsByValue if defined
     if (item.subQuestionsByValue) {
@@ -612,34 +631,190 @@ export default function QuestionsScreen() {
     // Fallback to old subQuestions logic
     if (!item.subQuestions || answers[item.id] !== item.subQuestions.triggerValue) return null;
 
-    return item.subQuestions.questions.map((subQ) => (
-      <View key={subQ.id} style={styles.subQuestionContainer}>
-        <Text style={styles.questionTextCrop}>
-          {subQ.text}
-        </Text>
-        {subQ.text.includes('Before MI ₹') ? renderBeforeAfterInputs(subQ) : (
-          subQ.question_type === 'text' ? (
+    // Special handling for question 14 (Borewell depth)
+    if (item.id === '14') {
+      return (
+        <View style={styles.subQuestionContainer}>
+          <View style={styles.inputPairContainer}>
+            <Text style={styles.questionText}>Before MI (feet):</Text>
             <TextInput
-              style={styles.input}
-              value={answers[subQ.id] || ''}
-              placeholder="Answer"
-              onChangeText={(text) => handleAnswerChange(subQ.id, text)}
+              style={styles.numberInput}
+              keyboardType="numeric"
+              placeholder="Enter depth"
+              value={answers['14a'] || ''}
+              onChangeText={(text) => handleAnswerChange('14a', text)}
+
             />
-          ) : (
-            <View style={styles.pickerWrapper}>
-              <Picker
-                selectedValue={answers[subQ.id] || ''}
-                onValueChange={(value) => handleAnswerChange(subQ.id, value)}
-                style={styles.picker}
-              >
-                <Picker.Item label="Select an option..." value="" />
-                {subQ.options.map(opt => <Picker.Item key={opt} label={opt} value={opt} />)}
-              </Picker>
+          </View>
+          <View style={styles.inputPairContainer}>
+            <Text style={styles.questionText}>After MI (feet):</Text>
+            <TextInput
+              style={styles.numberInput}
+              keyboardType="numeric"
+              placeholder="Enter depth"
+              value={answers['14b'] || ''}
+              onChangeText={(text) => handleAnswerChange('14b', text)}
+
+            />
+          </View>
+        </View>
+      );
+    }
+
+    // Special handling for question 51 (Yes response)
+    if (item.id === '51') {
+      return (
+        <View style={styles.subQuestionContainer}>
+          <Text style={styles.questionText}>Details about new employment created:</Text>
+          <TextInput
+            style={[styles.input]}
+            placeholder="Describe the employment impact..."
+            value={answers['66'] || ''}
+            onChangeText={(text) => handleAnswerChange('66', text)}
+          />
+        </View>
+      );
+    }
+
+    // Special handling for question 59 (No response)
+    if (item.id === '59') {
+      return (
+        <View style={styles.subQuestionContainer}>
+          <Text style={styles.questionText}>Reason for not adopting recommendations:</Text>
+          <TextInput
+            style={[styles.input]}
+            placeholder="Please specify..."
+            value={answers['59a'] || ''}
+            onChangeText={(text) => handleAnswerChange('59a', text)}
+          />
+        </View>
+      );
+    }
+
+    // Special handling for question 32 (MI System Still in Use)
+    if (item.id === '32') {
+      return (
+        <View style={styles.subQuestionContainer}>
+          <Text style={styles.questionText}>
+            {item.subQuestions.questions[0].text}
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter reason"
+            value={answers['32a'] || ''}
+            onChangeText={(text) => handleAnswerChange('32a', text)}
+          />
+        </View>
+      );
+    }
+
+    // Special handling for question 25
+    if (item.id === '25') {
+      return (
+        <View>
+          <Text style={styles.subLabel}>Crop1</Text>
+          <View style={styles.beforeAfterContainer}>
+            <View style={styles.inputPair}>
+              <Text style={styles.inputLabel}>Before MI (Q):</Text>
+              <TextInput
+                style={styles.numberInput}
+                keyboardType="numeric"
+                placeholder="Quantal"
+                value={answers['25a_before'] || ''}
+                onChangeText={(text) => handleAnswerChange('25a_before', text)}
+              />
             </View>
-          )
-        )}
+            <View style={styles.inputPair}>
+              <Text style={styles.inputLabel}>After MI (Q):</Text>
+              <TextInput
+                style={styles.numberInput}
+                keyboardType="numeric"
+                placeholder="Quantal"
+                value={answers['25a_after'] || ''}
+                onChangeText={(text) => handleAnswerChange('25a_after', text)}
+              />
+            </View>
+          </View>
+
+          <Text style={[styles.subLabel, { marginTop: 10 }]}>Crop2</Text>
+          <View style={styles.beforeAfterContainer}>
+            <View style={styles.inputPair}>
+              <Text style={styles.inputLabel}>Before MI (Q):</Text>
+              <TextInput
+                style={styles.numberInput}
+                keyboardType="numeric"
+                placeholder="Quantal"
+                value={answers['25b_before'] || ''}
+                onChangeText={(text) => handleAnswerChange('25b_before', text)}
+              />
+            </View>
+            <View style={styles.inputPair}>
+              <Text style={styles.inputLabel}>After MI (Q):</Text>
+              <TextInput
+                style={styles.numberInput}
+                keyboardType="numeric"
+                placeholder="Quantal"
+                value={answers['25b_after'] || ''}
+                onChangeText={(text) => handleAnswerChange('25b_after', text)}
+              />
+            </View>
+          </View>
+        </View>
+      );
+    }
+
+    // Default handling for other questions (22, 23, 24)
+    return (
+      <View>
+        <Text style={styles.subLabel}>Crop1</Text>
+        <View style={styles.beforeAfterContainer}>
+          <View style={styles.inputPair}>
+            <Text style={styles.inputLabel}>Before MI ₹:</Text>
+            <TextInput
+              style={styles.numberInput}
+              keyboardType="numeric"
+              placeholder="Amount"
+              value={answers[`${item.id}a_before`] || ''}
+              onChangeText={(text) => handleAnswerChange(`${item.id}a_before`, text)}
+            />
+          </View>
+          <View style={styles.inputPair}>
+            <Text style={styles.inputLabel}>After MI ₹:</Text>
+            <TextInput
+              style={styles.numberInput}
+              keyboardType="numeric"
+              placeholder="Amount"
+              value={answers[`${item.id}a_after`] || ''}
+              onChangeText={(text) => handleAnswerChange(`${item.id}a_after`, text)}
+            />
+          </View>
+        </View>
+
+        <Text style={[styles.subLabel, { marginTop: 10 }]}>Crop2</Text>
+        <View style={styles.beforeAfterContainer}>
+          <View style={styles.inputPair}>
+            <Text style={styles.inputLabel}>Before MI ₹:</Text>
+            <TextInput
+              style={styles.numberInput}
+              keyboardType="numeric"
+              placeholder="Amount"
+              value={answers[`${item.id}b_before`] || ''}
+              onChangeText={(text) => handleAnswerChange(`${item.id}b_before`, text)}
+            />
+          </View>
+          <View style={styles.inputPair}>
+            <Text style={styles.inputLabel}>After MI ₹:</Text>
+            <TextInput
+              style={styles.numberInput}
+              keyboardType="numeric"
+              placeholder="Amount"
+              value={answers[`${item.id}b_after`] || ''}
+              onChangeText={(text) => handleAnswerChange(`${item.id}b_after`, text)}
+            />
+          </View>
+        </View>
       </View>
-    ));
+    );
   };
 
   const renderItem = ({ item }) => {
@@ -702,6 +877,15 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
+          <Text style={styles.subLabel}>Spacing</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Spacing"
+            value={answers['21_spacing1'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_spacing1', text)}
+            keyboardType="numeric"
+          />
+
           <Text style={styles.subLabel}>Nutrition Management (Fertilizers) (₹)</Text>
           <TextInput
             style={styles.input}
@@ -747,7 +931,7 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Hours per Irrigation</Text>
+          <Text style={styles.subLabel}>Hours per Irrigation per Acre</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter hours"
@@ -787,6 +971,15 @@ export default function QuestionsScreen() {
             placeholder="Enter amount"
             value={answers['21_labour_cost2'] || ''}
             onChangeText={(text) => handleAnswerChange('21_labour_cost2', text)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.subLabel}>Spacing</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Spacing"
+            value={answers['21_spacing2'] || ''}
+            onChangeText={(text) => handleAnswerChange('21_spacing2', text)}
             keyboardType="numeric"
           />
 
@@ -835,7 +1028,7 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Hours per Irrigation</Text>
+          <Text style={styles.subLabel}>Hours per Irrigation per Acre</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter hours"
@@ -963,7 +1156,7 @@ export default function QuestionsScreen() {
     }
 
     if (item.question_type === 'radio') {
-      const selected = answers[item.id];
+      const selected = answers[item.id]; // This will be undefined initially
       return (
         <View style={styles.questionContainer}>
           <Text style={styles.questionTextCrop}>
@@ -1183,6 +1376,7 @@ const styles = StyleSheet.create({
   questionText: {
     fontSize: 13,
     marginBottom: 4,
+    fontWeight: 'bold',
     color: '#333',
   },
   questionTextCrop: {
@@ -1324,7 +1518,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 10,
     marginBottom: 4,
-    fontWeight: '500',
+    fontWeight: 'bold',
     color: '#555',
   },
   sectionHeading: {

@@ -138,7 +138,7 @@ export default [
         type: 'question',
         text: 'Which year you submitted your application?',
         question_type: 'dropdown',
-        options: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+        options: ['2019', '2020', '2021', '2022', '2023', '2024', '2025', 'None'],
     },
     { id: 'h3', type: 'heading', text: 'Adoption & Usage of Micro-Irrigation (MI)' },
     {
@@ -146,7 +146,7 @@ export default [
         type: 'question',
         text: ' Month & Year of Installation',
         question_type: 'dropdown',
-        options: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+        options: ['2019', '2020', '2021', '2022', '2023', '2024', '2025', 'None'],
     },
     {
         id: '19',
@@ -161,7 +161,8 @@ export default [
             'Photograph (passport size)',
             'Water source ownership proof',
             'Water and Soil Analysis reports',
-            'Cropping pattern details']
+            'Cropping pattern details',
+            'None']
     },
     { id: '20', type: 'question', text: 'Has water saving from MI helped you to expand your irrigated land? If yes, how much in acres' },
     {
@@ -586,7 +587,7 @@ export default [
         type: 'question',
         text: 'Has labour migration changed after starting MI facilities?',
         question_type: 'dropdown',
-        options: ['Reduced migration', 'Increased migration', 'No change'],
+        options: ['Reduced migration Village to city', 'Increased migration Village to city', 'No change'],
     },
     {
         id: '51',
@@ -594,13 +595,23 @@ export default [
         text: 'Did MI Adoption Create New Employment in Your Area?',
         question_type: 'radio',
         options: ['Yes', 'No'],
+        subQuestions: {
+            triggerValue: 'Yes',
+            questions: [
+                {
+                    id: '66',
+                    text: 'If Yes, Mention the reason',
+                    question_type: 'text'
+                }
+            ]
+        }
     },
     {
         id: '52',
         type: 'question',
         text: 'Has the adoption of MI helped in women empowerment?',
         question_type: 'radio',
-        options: ['Yes', 'No','Other(Specify)'],
+        options: ['Yes', 'No', 'Other(Specify)'],
         subQuestionsByValue: {
             'Yes': [
                 {
@@ -611,7 +622,7 @@ export default [
                         'Livestock Rearing',
                         'Business or Petty Shop',
                         'Alternate Employment Activity',
-                        
+
                     ]
                 }
             ]

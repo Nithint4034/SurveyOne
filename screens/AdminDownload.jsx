@@ -33,12 +33,13 @@ const apiToHeaderMap = {
   q9: '9. Secondary Occupation (if any)',
   q10: '10. Total Agricultural Land Owned (in acre. Gunta)',
   q11: '11. Irrigated Land (in acres. Gunta)',
-  q12: '12. Non-Irrigated Land (in acres, Gunta)',
+  q12: '12. Non-Irrigated Land (in acres. Gunta)',
   q13: '13. Source of Irrigation (tick applicable)',
   q14: '14. What is Borewell water Depth (feet) before & after MI',
   q15: '15. Have you adopted micro irrigation? (Tick the appropriate option)',
-  q15_1: '15.1. If Drip',
-  q15_2: '15.2. If Sprinkler',
+  q15_1: 'If Drip',
+  q15_2: 'If Sprinkler',
+  q15_3: 'If Both',
   q16: '16. Have you taken Government subsidy for setting up Micro Irrigation?',
   q17: '17. Which year you submitted your application?',
   q18: '18. Month & Year of Installation',
@@ -48,6 +49,7 @@ const apiToHeaderMap = {
   // Pre MI Crop1
   q21_1: '21 Pre MI Crop 1',
   q21_7: 'Labour Cost',
+  q64: 'Spacing',
   q21_17: 'Nutrition Management Cost (Fertilizers)',
   q21_20: 'Plant Protection Cost (Pesticide & Weedicides)',
   q21_9: 'Land Preparation & Harvesting Cost',
@@ -59,6 +61,7 @@ const apiToHeaderMap = {
   // Pre-MI Crop 2
   q21_2: '21 Pre MI Crop 2',
   q21_8: 'Labour Cost',
+  q65: 'Spacing',
   q21_18: 'Nutrition Management Cost (Fertilizers)',
   q21_21: 'Plant Protection Cost (Pesticide & Weedicides)',
   q21_10: 'Land Preparation & Harvesting Cost',
@@ -97,10 +100,10 @@ const apiToHeaderMap = {
   q24_4: 'Crop 2 After MI ₹',
 
   q25: '25. Has the crop yield per acre increased after adopting the MI system?',
-  q25_1: 'Crop 1 Before MI ₹',
-  q25_2: 'Crop 1 After MI ₹',
-  q25_3: 'Crop 2 Before MI ₹',
-  q25_4: 'Crop 2 After MI ₹',
+  q25_1: 'Crop 1 Before MI (Q)',
+  q25_2: 'Crop 1 After MI (Q)',
+  q25_3: 'Crop 2 Before MI (Q)',
+  q25_4: 'Crop 2 After MI (Q)',
 
   q26: '26. Has your income per acre increased after adopting the MI system?',
   q26_1: 'Crop 1 Before MI ₹',
@@ -146,6 +149,7 @@ const apiToHeaderMap = {
 
   q50: '50. Has labour migration changed after starting MI facilities?',
   q51: '51. Did MI Adoption Create New Employment in Your Area?',
+  q66: 'If Yes, Details about new employment',
   q52: '52. Has the adoption of MI helped in women empowerment?',
   q53: '53. Has any member of your family been trained on MI Maintenance by company?',
   q54: '54. Have you observed any change in groundwater levels after MI adoption?',
@@ -161,13 +165,11 @@ const apiToHeaderMap = {
   q61: '61. Any Additional comments?',
   q62: '62. Latitude & Longitude',
   q63: '63. Farmer Photosy',
-  q64: '64.',
-  q65: '65.',
-  q66: '66.',
-  q67: '67.',
-  q68: '68.',
-  q69: '69.',
-  q70: '70.',
+
+  // q67: '67.',
+  // q68: '68.',
+  // q69: '69.',
+  // q70: '70.',
 };
 
 const AdminDownload = () => {
@@ -247,34 +249,11 @@ const AdminDownload = () => {
   const convertToCSV = (data) => {
     if (!data || data.length === 0) return '';
 
-    // Get all possible keys from the first item
-    const allKeys = [];
-    if (data.length > 0) {
-      // First get the metadata fields
-      const metaKeys = ['survey_id', 'surveyor_name', 'created_at', 'district', 'taluka', 'village'];
-      allKeys.push(...metaKeys);
+    // Get all keys in the exact order from apiToHeaderMap
+    const allKeys = Object.keys(apiToHeaderMap);
 
-      // Then get all q1-q56 fields
-      for (let i = 1; i <= 56; i++) {
-        allKeys.push(`q${i}`);
-
-        // Add sub-questions for specific questions
-        if (i === 15 || i === 17 || i === 23 || i === 37 || i === 38 || i === 39 || i === 40 || i === 41) {
-          const subKeys = Object.keys(data[0]).filter(k => k.startsWith(`q${i}_`));
-          allKeys.push(...subKeys);
-        }
-      }
-
-      // Finally add the photo field if it exists
-      if (data[0].q57) {
-        allKeys.push('q57');
-      }
-    }
-
-    // Create headers row
-    const headers = allKeys.map(key => {
-      return apiToHeaderMap[key] || key;
-    });
+    // Create headers row using the mapped headers
+    const headers = allKeys.map(key => apiToHeaderMap[key]);
 
     // Process each row
     const csvRows = data.map(row => {
@@ -287,25 +266,27 @@ const AdminDownload = () => {
         }
 
         // Handle photo URL - fix the path
-        if (key === 'q57' && value) {
-          // Remove duplicate 'uploads' from path if it exists
+        if (key === 'q63' && value) {
           value = value.replace('/media/uploads/uploads/', '/media/uploads/');
           value = `https://tomhudson.pythonanywhere.com${value}`;
         }
 
-        // Escape commas and quotes
-        if (typeof value === 'string') {
-          value = value.replace(/"/g, '""');
-          if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-            value = `"${value}"`;
-          }
+        // Convert to string if not already
+        if (value !== null && value !== undefined) {
+          value = String(value);
+        } else {
+          value = '';
         }
 
-        return value;
+        // Escape quotes by doubling them
+        value = value.replace(/"/g, '""');
+
+        // Always wrap in quotes to handle commas, newlines, etc.
+        return `"${value}"`;
       }).join(',');
     });
 
-    return [headers.join(','), ...csvRows].join('\n');
+    return [headers.map(h => `"${h.replace(/"/g, '""')}"`).join(','), ...csvRows].join('\n');
   };
 
   const handleDownloadCSV = async () => {
@@ -409,7 +390,7 @@ const AdminDownload = () => {
                       if (key === 'created_at' && value) {
                         value = new Date(value).toLocaleString();
                       }
-                      if (key === 'q57' && value) {
+                      if (key === 'q63' && value) {
                         // Fix the URL path before displaying
                         const fixedUrl = value.replace('/media/uploads/uploads/', '/media/uploads/');
                         return (
