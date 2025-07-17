@@ -18,9 +18,9 @@ export default function QuestionsScreen() {
   const [errors, setErrors] = useState({});
   const [talukaOptions, setTalukaOptions] = useState([]);
 
-  // const requiredFields = ['surveyor_name', 'district', 'taluka', 'village', '1', '2', '3', '4', '6', '7', '8', '10',
-  //   '11', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '42', '43', '44', '46', '49', '52', '58', '59', '62', '63'];
-  const requiredFields = []
+  const requiredFields = ['surveyor_name', 'district', 'taluka', 'village', '1', '2', '3', '4', '6', '7', '8', '10',
+    '11', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '42', '43', '44', '46', '49', '52', '58', '59', '62', '63'];
+  // const requiredFields = []
 
   const districtTalukaMap = {
     'Chitradurga': ['Challekere', 'Hiriyur', 'Holalkere', 'Chitradurga', 'Hosadurga', 'Molakalmuru'],
@@ -347,6 +347,8 @@ export default function QuestionsScreen() {
     try {
       // Validate required fields
       const currentErrors = {};
+
+      
       for (const field of requiredFields) {
         const value = answers[field];
         if (!value || (typeof value === 'string' && value.trim() === '')) {

@@ -93,6 +93,7 @@ export default [
             ]
         }
     },
+    { id: 'h3', type: 'heading', text: 'Adoption & Usage of Micro-Irrigation (MI)' },
     {
         id: '15',
         type: 'question',
@@ -140,7 +141,6 @@ export default [
         question_type: 'dropdown',
         options: ['2019', '2020', '2021', '2022', '2023', '2024', '2025', 'None'],
     },
-    { id: 'h3', type: 'heading', text: 'Adoption & Usage of Micro-Irrigation (MI)' },
     {
         id: '18',
         type: 'question',
@@ -188,7 +188,8 @@ export default [
             'Plantation crop – Banana',
             'Plantation crop – Coconut',
             'Pulses - Red gram, Black gram, Green gram, Cowpea, Bengal gram',
-            'Vegetables'
+            'Vegetables',
+            'None'
         ],
     },
     {
@@ -550,7 +551,7 @@ export default [
         type: 'question',
         text: 'Did you face any problems while using the MI system? If yes, please explain.',
     },
-
+    
     {
         id: '43',
         type: 'question',
@@ -568,6 +569,7 @@ export default [
     { id: '45', type: 'question', text: 'MI Financial Details – Total cost of MI system installed (₹ per acre)' },
     { id: '46', type: 'question', text: 'How much amount you paid to Department or Agency for MI instalation (₹ per acre)' },
     { id: '47', type: 'question', text: 'Have you taken any loan from a financial institution for MI? If yes, from where and how much (₹)' },
+    { id: 'h4', type: 'heading', text: 'Socio economic impact' },
     {
         id: '48',
         type: 'question',
@@ -587,7 +589,7 @@ export default [
         type: 'question',
         text: 'Has labour migration changed after starting MI facilities?',
         question_type: 'dropdown',
-        options: ['Reduced migration Village to city', 'Increased migration Village to city', 'No change'],
+        options: ['Reduced migration From Village to city', 'Increased migration From Village to city', 'No change'],
     },
     {
         id: '51',
@@ -697,11 +699,11 @@ export default [
         text: 'Location (Latitude/Longitude)',
         question_type: 'location',
     },
-    { id: 'h7', type: 'heading', text: 'Farmer or Area Photo' },
+    { id: 'h7', type: 'heading', text: 'Farmer Photo' },
     {
         id: '63',
         type: 'question',
-        text: 'Farmer or location Photo',
+        text: 'Farmer Photo',
         question_type: 'photo'
     }
 ];
