@@ -74,7 +74,7 @@ export default [
     {
         id: '14',
         type: 'question',
-        text: 'What is Borewell water Depth (feet) before & after MI',
+        text: 'What is Borewell water Depth (feet)',
         question_type: 'radio',
         options: ['Yes', 'No'],
         subQuestions: {
@@ -217,7 +217,7 @@ export default [
     {
         id: '23',
         type: 'question',
-        text: 'Has the nutrition management cost per acre reduced after MI system use?',
+        text: 'Has the Fertilizer cost per acre reduced after MI system use?',
         question_type: 'radio',
         options: ['Yes', 'No'],
         subQuestions: {
@@ -239,7 +239,7 @@ export default [
     {
         id: '24',
         type: 'question',
-        text: 'Has the plant protection cost per acre reduced after MI system use?',
+        text: 'Has the plant pesticide & weedicide cost per acre reduced after MI system use?',
         question_type: 'radio',
         options: ['Yes', 'No'],
         subQuestions: {
@@ -523,7 +523,7 @@ export default [
     {
         id: '38',
         type: 'question',
-        text: 'Have you received any communication on MI System Warranty?',
+        text: 'Did you get any training or booklet on MI operation and maintenance? If yes, please give details',
         question_type: 'radio',
         options: ['Yes', 'No'],
     },
@@ -551,7 +551,6 @@ export default [
         type: 'question',
         text: 'Did you face any problems while using the MI system? If yes, please explain.',
     },
-    
     {
         id: '43',
         type: 'question',
@@ -580,14 +579,14 @@ export default [
     {
         id: '49',
         type: 'question',
-        text: 'As there has been an improvement in lifestyle, what type of assets have you gained as a result?',
+        text: 'What type of assets have you gained as a result?',
         question_type: 'multi-select',
         options: ['Household items', 'Livestock', 'Infrastructure', 'Education support', 'Agricultural quipment', 'Transport vehicle', 'Other(Specify)']
     },
     {
         id: '50',
         type: 'question',
-        text: 'Has labour migration changed after starting MI facilities?',
+        text: 'Has MI adoption in your village impacted labour?',
         question_type: 'dropdown',
         options: ['Reduced migration From Village to city', 'Increased migration From Village to city', 'No change'],
     },
@@ -611,7 +610,7 @@ export default [
     {
         id: '52',
         type: 'question',
-        text: 'Has the adoption of MI helped in women empowerment?',
+        text: 'Has MI adoption helped women?',
         question_type: 'radio',
         options: ['Yes', 'No', 'Other(Specify)'],
         subQuestionsByValue: {

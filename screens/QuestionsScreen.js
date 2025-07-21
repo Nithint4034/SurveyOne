@@ -19,7 +19,7 @@ export default function QuestionsScreen() {
   const [talukaOptions, setTalukaOptions] = useState([]);
 
   const requiredFields = ['surveyor_name', 'district', 'taluka', 'village', '1', '2', '3', '4', '6', '7', '8', '10',
-    '11', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '42', '43', '44', '46', '49', '52', '58', '59', '62', '63'];
+    '11', '13', '14', '15', '16', '17', '18', '19', '20', '22', '23', '24', '25', '26', '42', '43', '44', '46', '49', '52', '58', '59', '62', '63'];
   // const requiredFields = []
 
   const districtTalukaMap = {
@@ -879,16 +879,16 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Spacing</Text>
+          <Text style={styles.subLabel}>Spacing 1 Eg:-(1.2*0.6)</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter Spacing"
             value={answers['21_spacing1'] || ''}
             onChangeText={(text) => handleAnswerChange('21_spacing1', text)}
-            keyboardType="numeric"
+            // keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Nutrition Management (Fertilizers) (₹)</Text>
+          <Text style={styles.subLabel}> Fertilizer Cost</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter amount"
@@ -897,7 +897,7 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Plant Protection (Pesticide & Weedicides) (₹)</Text>
+          <Text style={styles.subLabel}>Pesticide & Weedicides Cost</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter amount"
@@ -906,7 +906,7 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Land Preparation & Harvesting (₹)</Text>
+          <Text style={styles.subLabel}>Land Preparation & Harvesting Cost</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter amount"
@@ -933,7 +933,7 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Hours per Irrigation per Acre</Text>
+          <Text style={styles.subLabel}>Hours for irrigating one acre of crop</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter hours"
@@ -976,16 +976,16 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Spacing</Text>
+          <Text style={styles.subLabel}>Spacing Eg:-(1.2*0.6)</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter Spacing"
             value={answers['21_spacing2'] || ''}
             onChangeText={(text) => handleAnswerChange('21_spacing2', text)}
-            keyboardType="numeric"
+            // keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Nutrition Management (Fertilizers) (₹)</Text>
+          <Text style={styles.subLabel}> Fertilizer Cost</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter amount"
@@ -994,7 +994,7 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Plant Protection (Pesticide & Weedicides) (₹)</Text>
+          <Text style={styles.subLabel}>Pesticide & Weedicides Cost</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter amount"
@@ -1003,7 +1003,7 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Land Preparation & Harvesting (₹)</Text>
+          <Text style={styles.subLabel}>Land Preparation & Harvesting Cost</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter amount"
@@ -1030,7 +1030,7 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Hours per Irrigation per Acre</Text>
+          <Text style={styles.subLabel}>Hours for irrigating one acre of crop</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter hours"
@@ -1051,7 +1051,7 @@ export default function QuestionsScreen() {
           {/* MI Crop Section */}
           <Text style={styles.sectionHeading}>MI Crops</Text>
 
-          <Text style={styles.subLabel}>Crop1 (Primary crop taken MI)</Text>
+          <Text style={styles.subLabel}>Crop1 (Primary crop taken MI) Deactivate Drop down and give option to write</Text>
           <View style={styles.pickerWrapper}>
             <Picker
               selectedValue={answers['21_mi_crop1'] || ''}
@@ -1074,16 +1074,16 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Spacing1</Text>
+          <Text style={styles.subLabel}>Spacing 1 Eg:-(1.2*0.6)</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter Spacing"
             value={answers['21_space1'] || ''}
             onChangeText={(text) => handleAnswerChange('21_space1', text)}
-            keyboardType="numeric"
+            // keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Crop2</Text>
+          <Text style={styles.subLabel}>Crop2 Deactivate Drop down and give option to write</Text>
           <View style={styles.pickerWrapper}>
             <Picker
               selectedValue={answers['21_mi_crop2'] || ''}
@@ -1106,13 +1106,13 @@ export default function QuestionsScreen() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Spacing2</Text>
+          <Text style={styles.subLabel}>Spacing 2 Eg:-(1.2*0.6)</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter Spacing"
             value={answers['21_space2'] || ''}
             onChangeText={(text) => handleAnswerChange('21_space2', text)}
-            keyboardType="numeric"
+            // keyboardType="numeric"
           />
 
           <Text style={styles.subLabel}>Other Crop</Text>
@@ -1131,7 +1131,7 @@ export default function QuestionsScreen() {
             onChangeText={(text) => handleAnswerChange('21_other_area', text)}
             keyboardType="numeric"
           />
-          <Text style={styles.subLabel}>Spacing Other</Text>
+          <Text style={styles.subLabel}>Spacing Other Eg:-(1.2*0.6)</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter Spacing"
