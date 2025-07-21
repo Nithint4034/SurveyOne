@@ -36,6 +36,7 @@ const apiToHeaderMap = {
   q12: '12. Non-Irrigated Land (in acres. Gunta)',
   q13: '13. Source of Irrigation (tick applicable)',
   q14: '14. What is Borewell water Depth (feet)',
+  q14_1: 'Borewell water Depth (feet) is',
   q15: '15. Have you adopted micro irrigation? (Tick the appropriate option)',
   q15_1: 'If Drip',
   q15_2: 'If Sprinkler',
@@ -71,10 +72,10 @@ const apiToHeaderMap = {
   q21_23: 'Pump Capacity',
 
   // MI Crops
-  q21_13: 'Crop1 (Primary crop taken under MI) Deactivate Drop down and give option to write',
+  q21_13: 'Crop1 (Primary crop taken under MI) ',
   q21_11: 'Area1 (Acres, Gunta)',
   q21_24: 'Spacing Eg:-(1.2*0.6)',
-  q21_14: 'Crop2 Deactivate Drop down and give option to write',
+  q21_14: 'Crop2 ',
   q21_12: 'Area2 (Acres, Gunta)',
   q21_25: 'Spacing Eg:-(1.2*0.6)',
   q21_16: 'Other Crop',

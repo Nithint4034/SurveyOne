@@ -81,19 +81,10 @@ export default function QuestionsScreen() {
       meta[key] = answers[key] ?? null;
     }
 
-    if (answers['14'] === 'Yes') {
-      meta['q14'] = 'Yes';
-      meta['q14_1'] = answers['14a'] || null;
-      meta['q14_2'] = answers['14b'] || null;
-    } else if (answers['14'] === 'No') {
-      meta['q14'] = 'No';
-      meta['q14_1'] = null;
-      meta['q14_2'] = null;
-    } else {
-      meta['q14'] = null;
-      meta['q14_1'] = null;
-      meta['q14_2'] = null;
-    }
+    // Handle question 14
+    meta['q14'] = answers['14'] || null;
+    meta['q14_1'] = answers['14a'] || null;
+    meta['q14_2'] = null;
 
     // Handle questions 22-26 (before/after values)
     const cropComparisonQuestions = ['22', '23', '24', '25', '26'];
@@ -123,8 +114,8 @@ export default function QuestionsScreen() {
       'q21_income2': 'q21_6',
       'q21_labour_cost1': 'q21_7',
       'q21_labour_cost2': 'q21_8',
-      '21_spacing1':'q64',
-      '21_spacing2':'q65',
+      '21_spacing1': 'q64',
+      '21_spacing2': 'q65',
       'q21_land_prep1': 'q21_9',
       'q21_land_prep2': 'q21_10',
       'q21_area1': 'q21_11',
@@ -348,7 +339,7 @@ export default function QuestionsScreen() {
       // Validate required fields
       const currentErrors = {};
 
-      
+
       for (const field of requiredFields) {
         const value = answers[field];
         if (!value || (typeof value === 'string' && value.trim() === '')) {
@@ -540,11 +531,11 @@ export default function QuestionsScreen() {
         })
       );
 
-      console.log('Final payload:', cleanPayload);
+      // console.log('Final payload:', cleanPayload);
 
       // Submit the data
       const response = await submitSurveyData(cleanPayload);
-      console.log('Submission response:', response);
+      // console.log('Submission response:', response);
 
       // Reset form after successful submission
       const username = await AsyncStorage.getItem('username');
@@ -638,25 +629,13 @@ export default function QuestionsScreen() {
       return (
         <View style={styles.subQuestionContainer}>
           <View style={styles.inputPairContainer}>
-            <Text style={styles.questionText}>Before MI (feet):</Text>
+            <Text style={styles.questionText}>Depth (feet):</Text>
             <TextInput
               style={styles.numberInput}
               keyboardType="numeric"
               placeholder="Enter depth"
               value={answers['14a'] || ''}
               onChangeText={(text) => handleAnswerChange('14a', text)}
-
-            />
-          </View>
-          <View style={styles.inputPairContainer}>
-            <Text style={styles.questionText}>After MI (feet):</Text>
-            <TextInput
-              style={styles.numberInput}
-              keyboardType="numeric"
-              placeholder="Enter depth"
-              value={answers['14b'] || ''}
-              onChangeText={(text) => handleAnswerChange('14b', text)}
-
             />
           </View>
         </View>
@@ -854,20 +833,17 @@ export default function QuestionsScreen() {
             {requiredFields.includes(item.id) && <Text style={styles.redStar}> *</Text>}
           </Text>
 
+
           {/* Pre MI Crop 1 Section */}
           <Text style={styles.sectionHeading}>Pre MI Crop 1</Text>
-          <Text style={styles.subLabel}>Crop Type</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={answers['21_crop1'] || ''}
-              onValueChange={(value) => handleAnswerChange('21_crop1', value)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select crop..." value="" />
-              {item.options?.map(option => (
-                <Picker.Item key={option} label={option} value={option} />
-              ))}
-            </Picker>
+          <View style={styles.inputContainer}>
+            <Text style={styles.subLabel}>Crop Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter crop name"
+              value={answers['21_crop1'] || ''}
+              onChangeText={(text) => handleAnswerChange('21_crop1', text)}
+            />
           </View>
 
           <Text style={styles.subLabel}>Labour Cost (₹)</Text>
@@ -885,7 +861,7 @@ export default function QuestionsScreen() {
             placeholder="Enter Spacing"
             value={answers['21_spacing1'] || ''}
             onChangeText={(text) => handleAnswerChange('21_spacing1', text)}
-            // keyboardType="numeric"
+          // keyboardType="numeric"
           />
 
           <Text style={styles.subLabel}> Fertilizer Cost</Text>
@@ -953,18 +929,14 @@ export default function QuestionsScreen() {
 
           {/* Pre MI Crop 2 Section */}
           <Text style={[styles.sectionHeading, { marginTop: 20 }]}>Pre MI Crop 2</Text>
-          <Text style={styles.subLabel}>Crop Type</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={answers['21_crop2'] || ''}
-              onValueChange={(value) => handleAnswerChange('21_crop2', value)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select crop..." value="" />
-              {item.options?.map(option => (
-                <Picker.Item key={option} label={option} value={option} />
-              ))}
-            </Picker>
+          <View style={styles.inputContainer}>
+            <Text style={styles.subLabel}>Crop Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter crop name"
+              value={answers['21_crop2'] || ''}
+              onChangeText={(text) => handleAnswerChange('21_crop2', text)}
+            />
           </View>
 
           <Text style={styles.subLabel}>Labour Cost (₹)</Text>
@@ -982,7 +954,7 @@ export default function QuestionsScreen() {
             placeholder="Enter Spacing"
             value={answers['21_spacing2'] || ''}
             onChangeText={(text) => handleAnswerChange('21_spacing2', text)}
-            // keyboardType="numeric"
+          // keyboardType="numeric"
           />
 
           <Text style={styles.subLabel}> Fertilizer Cost</Text>
@@ -1050,22 +1022,17 @@ export default function QuestionsScreen() {
 
           {/* MI Crop Section */}
           <Text style={styles.sectionHeading}>MI Crops</Text>
-
-          <Text style={styles.subLabel}>Crop1 (Primary crop taken MI) Deactivate Drop down and give option to write</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={answers['21_mi_crop1'] || ''}
-              onValueChange={(value) => handleAnswerChange('21_mi_crop1', value)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select crop..." value="" />
-              {item.options?.map(option => (
-                <Picker.Item key={option} label={option} value={option} />
-              ))}
-            </Picker>
+          <View style={styles.inputContainer}>
+            <Text style={styles.subLabel}>Crop 1 (Primary crop taken MI)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter crop name"
+              value={answers['21_mi_crop1'] || ''}
+              onChangeText={(text) => handleAnswerChange('21_mi_crop1', text)}
+            />
           </View>
 
-          <Text style={styles.subLabel}>Area1 (Acres, Gunta)</Text>
+          <Text style={styles.subLabel}>Area 1 (Acres, Gunta)</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter area"
@@ -1080,24 +1047,20 @@ export default function QuestionsScreen() {
             placeholder="Enter Spacing"
             value={answers['21_space1'] || ''}
             onChangeText={(text) => handleAnswerChange('21_space1', text)}
-            // keyboardType="numeric"
+          // keyboardType="numeric"
           />
 
-          <Text style={styles.subLabel}>Crop2 Deactivate Drop down and give option to write</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={answers['21_mi_crop2'] || ''}
-              onValueChange={(value) => handleAnswerChange('21_mi_crop2', value)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select crop..." value="" />
-              {item.options?.map(option => (
-                <Picker.Item key={option} label={option} value={option} />
-              ))}
-            </Picker>
+          <View style={styles.inputContainer}>
+            <Text style={styles.subLabel}>Crop 2</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter crop name"
+              value={answers['21_mi_crop2'] || ''}
+              onChangeText={(text) => handleAnswerChange('21_mi_crop2', text)}
+            />
           </View>
 
-          <Text style={styles.subLabel}>Area2 (Acres, Gunta)</Text>
+          <Text style={styles.subLabel}>Area 2 (Acres, Gunta)</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter area"
@@ -1112,7 +1075,7 @@ export default function QuestionsScreen() {
             placeholder="Enter Spacing"
             value={answers['21_space2'] || ''}
             onChangeText={(text) => handleAnswerChange('21_space2', text)}
-            // keyboardType="numeric"
+          // keyboardType="numeric"
           />
 
           <Text style={styles.subLabel}>Other Crop</Text>

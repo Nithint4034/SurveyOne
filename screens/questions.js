@@ -82,12 +82,7 @@ export default [
             questions: [
                 {
                     id: '14a',
-                    text: 'Before MI in feet',
-                    question_type: 'text'
-                },
-                {
-                    id: '14b',
-                    text: 'After MI in feet',
+                    text: 'feet',
                     question_type: 'text'
                 }
             ]
@@ -165,33 +160,34 @@ export default [
             'None']
     },
     { id: '20', type: 'question', text: 'Has water saving from MI helped you to expand your irrigated land? If yes, how much in acres' },
-    {
-        id: '21',
-        type: 'question',
-        text: 'Which Crops were you growing before setting up MI.',
-        question_type: 'radio',
-        options: [
-            'Cereals - Maize',
-            'Cereals - Wheat',
-            'Cereals - Rice',
-            'Flowers - Rose',
-            'Flowers - Chrysanthemum',
-            'Flowers - Jasmine',
-            'Flowers - Marigold',
-            'Fruits',
-            'Millets - Bajra',
-            'Millets - Jowar',
-            'Millets - Ragi',
-            'Mulberry',
-            'Oilseeds (Soybean, Sunflower, Groundnut, Sesamum)',
-            'Plantation crop – Arecanut',
-            'Plantation crop – Banana',
-            'Plantation crop – Coconut',
-            'Pulses - Red gram, Black gram, Green gram, Cowpea, Bengal gram',
-            'Vegetables',
-            'None'
-        ],
-    },
+    // {
+    //     id: '21',
+    //     type: 'question',
+    //     text: 'Which Crops were you growing before setting up MI.',
+    //     question_type: 'radio',
+    //     options: [
+    //         'Cereals - Maize',
+    //         'Cereals - Wheat',
+    //         'Cereals - Rice',
+    //         'Flowers - Rose',
+    //         'Flowers - Chrysanthemum',
+    //         'Flowers - Jasmine',
+    //         'Flowers - Marigold',
+    //         'Fruits',
+    //         'Millets - Bajra',
+    //         'Millets - Jowar',
+    //         'Millets - Ragi',
+    //         'Mulberry',
+    //         'Oilseeds (Soybean, Sunflower, Groundnut, Sesamum)',
+    //         'Plantation crop – Arecanut',
+    //         'Plantation crop – Banana',
+    //         'Plantation crop – Coconut',
+    //         'Pulses - Red gram, Black gram, Green gram, Cowpea, Bengal gram',
+    //         'Vegetables',
+    //         'None'
+    //     ],
+    // },
+        { id: '21', type: 'question', text: 'Which Crops were you growing before setting up MI.' },
     {
         id: '22',
         type: 'question',
