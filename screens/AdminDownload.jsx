@@ -131,7 +131,7 @@ const apiToHeaderMap = {
 
   q36: '36. What was the mode of MI subsidy disbursement?',
   q36_1: '36.1.',
-
+ 
   q37: '37. Did you get any training or booklet on MI operation and maintenance? If yes, please give details',
   q38: '38. Have you received any communication on MI System Warranty?',
   q39: '39. Has the MI company provided any service after installation?',

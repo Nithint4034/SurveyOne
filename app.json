@@ -2,7 +2,7 @@
   "expo": {
     "name": "PMKSY Survey",
     "slug": "SurveyOne",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon1.png",
     "userInterfaceStyle": "light",

@@ -519,7 +519,7 @@ export default [
     {
         id: '38',
         type: 'question',
-        text: 'Did you get any training or booklet on MI operation and maintenance? If yes, please give details',
+        text: 'Have you received any communication on MI System Warranty?',
         question_type: 'radio',
         options: ['Yes', 'No'],
     },
